@@ -1,26 +1,28 @@
 
-var Command = require('../lib/command/constructor');
-    Command.setRoot('gulp');
+var util = require('../lib/utils');
 
-var runtime = {
-  _name : 'gulp',
-  set : function(name, handle){
+var runtime = require('../lib/runtime').Runtime('gulp');
 
-    return (new Command(this._name, true)).set(name, handle);
-  },
-  get : function(/* arguments */){
+console.log('---------------------')
+runtime.set('hello', function hello(argv, args, next){
 
-    var cmd = (new Command(this._name));
-    return cmd.get.apply(cmd, [].slice.call(arguments))
-  }
-}
+  console.log('\n Hello! \n');
 
-runtime.set('first', function(){
+}).set('world', function world(){
 
-}).get().set('second', function(){
+  console.log('\n Hello! \n consumed : ', 'world');
+})
+console.log('---------------------')
 
-}).set('third', function(){
 
-}).set('fourth', function(){});
 
-module.exports = Command;
+runtime.set('something', function something(argv, args, next){
+  console.log('---------------------')
+  console.log('\n Something! \n');
+  console.log('---------------------')
+}).set('else', function(){
+
+  console.log('---------------------')
+  console.log('\n Something! \n consumed : ', 'else');
+  console.log('---------------------')
+})
