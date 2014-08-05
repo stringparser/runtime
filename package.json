@@ -13,12 +13,10 @@
     "test" : "make test"
   },
   "keywords": [
+    "cli",
     "stdin",
-    "spin",
-    "off",
     "runtime",
-    "readline",
-    "cli"
+    "readline"
   ],
   "dependencies": {
     "minimist": "~0.2.0",
