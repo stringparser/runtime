@@ -20,9 +20,6 @@ runtime.set('hello', function hello(argv, args, next){
   console.log('---------------------')
 })
 
-
-
-
 runtime.set('something', function something(argv, args, next){
   console.log('---------------------')
   console.log('\n Something! \n');
@@ -32,4 +29,10 @@ runtime.set('something', function something(argv, args, next){
   console.log('---------------------')
   console.log('\n Something! \n consumed : ', 'else');
   console.log('---------------------')
+})
+
+runtime.handle(function rootHandle(){
+  console.log('something is wrooong')
+}).completion(['one', 'two', 'three']).completion(function(){
+  return 1
 })
