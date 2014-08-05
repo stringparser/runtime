@@ -1,7 +1,7 @@
 {
   "name": "spin-off",
   "version": "0.0.10",
-  "description": "runtime manager",
+  "description": "runtime cli for your node application",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   },
   "main": "./lib/runtime",
   "scripts": {
-    "start": "gulp",
+    "pool": "./pool",
     "test" : "make test"
   },
   "keywords": [
@@ -17,7 +17,8 @@
     "spin",
     "off",
     "runtime",
-    "readline"
+    "readline",
+    "cli"
   ],
   "dependencies": {
     "minimist": "~0.2.0",
