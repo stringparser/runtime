@@ -32,7 +32,7 @@ runtime.set('something', function something(argv, args, next){
 })
 
 runtime.handle(function rootHandle(){
-  console.log('something is wrooong')
+  console.log('root handlerrr')
 }).completion(['one', 'two', 'three']).completion(function(){
-  return 1
+  return [1,2,3]
 })
