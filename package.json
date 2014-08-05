@@ -1,0 +1,30 @@
+{
+  "name": "spin-off",
+  "version": "0.0.10",
+  "description": "runtime manager",
+  "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stringparser/spin-off"
+  },
+  "main": "./lib/runtime",
+  "scripts": {
+    "start": "gulp",
+    "test" : "make test"
+  },
+  "keywords": [
+    "stdin",
+    "spin",
+    "off",
+    "runtime",
+    "readline"
+  ],
+  "dependencies": {
+    "minimist": "~0.2.0",
+    "utils-merge": "~1.0.0"
+  },
+  "devDependencies": {
+    "should": "~4.0.4"
+  },
+  "license": "MIT"
+}
