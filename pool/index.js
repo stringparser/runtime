@@ -14,6 +14,10 @@ runtime.set('hello', function hello(argv, args, next){
   console.log('---------------------')
   console.log('\n Hello! \n consumed : ', 'world');
   console.log('---------------------')
+}).handle(function overrridenWorld(){
+  console.log('---------------------')
+  console.log('\n Hello! \n consumed : ', 'overrridenWorld');
+  console.log('---------------------')
 })
 
 
