@@ -4,7 +4,7 @@ var util = require('../lib/utils');
 var runtime = require('../lib/runtime').Runtime('gulp');
 
 
-runtime.set('hello', function hello(argv, args, next){
+/*runtime.set('hello', function hello(argv, args, next){
 
   console.log('---------------------')
   console.log('\n Hello! \n');
@@ -35,4 +35,8 @@ runtime.handle(function rootHandle(){
   console.log('root handlerrr')
 }).completion(['one', 'two', 'three']).completion(function(){
   return [1,2,3]
+})*/
+
+runtime.set(['-v', '--version'], function(){
+  console.log('version!')
 })
