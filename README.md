@@ -4,7 +4,7 @@
 
 This project is a spin-off of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
 
-Its aim is to provide a runtime cli for your node application where you can use custom commands. But locally instead of globally. That is no `npm -g` for your cli.
+Its aim is to provide a runtime cli for your node application where you can use custom commands. But locally instead of globally. That is: no `npm -g` for your cli.
 
 There is no common ground here, because what it does is associate a `command(s)` to a `function` so you can do pretty much whatever you want with it.
 
