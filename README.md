@@ -46,7 +46,7 @@ Start dancing!
 > gulp
 ```
 
-Missing some better docs, I know. For now you can look at the original [project](https://github.com/stringparser/gulp-runtime/docs).
+Missing some better docs, I know. For now you can look at the [original project documentaion](https://github.com/stringparser/gulp-runtime/docs).
 
 ## TODO
 - [X] Support standard shell behavior (Ctrl+L, Ctrl+C, history, etc.).
