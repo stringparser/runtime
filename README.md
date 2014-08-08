@@ -1,4 +1,4 @@
-## Its runtime![<img alt="progressed.io" src="http://progressed.io/bar/29" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
+## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/29" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 <b>Implementation status: young</b>
 
