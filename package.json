@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
@@ -22,6 +22,7 @@
     "custom"
   ],
   "dependencies": {
+    "callsite": "^1.0.0",
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
   },
