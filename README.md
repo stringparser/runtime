@@ -26,7 +26,7 @@ At runtime, when you want to see the prompt, press `enter`.
  > gulp
 ```
 
-De prompt by it self does nothing, but if you wrote a custom command
+The prompt by it self does nothing, but if you wrote a custom command
 
 ```js
 runtime.set('yeeeha', function(){
