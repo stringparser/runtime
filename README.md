@@ -32,10 +32,6 @@ The prompt by it self does nothing, but if you wrote a custom command
 runtime.set('yeeeha', function(){
 
   console.log('Start dancing!')
-  gulp.start('default', function(){
-    runtime.prompt();
-  });
-
 });
 ```
 
