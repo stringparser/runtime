@@ -37,6 +37,3 @@ runtime.handle(function rootHandle(){
   return [1,2,3]
 })*/
 
-runtime.set(['-v', '--version'], function(){
-  console.log('version!')
-})

@@ -1,11 +1,11 @@
 {
-  "name": "spin-off",
-  "version": "0.0.11",
-  "description": "runtime cli for your node application",
+  "name": "runtime",
+  "version": "0.0.0",
+  "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stringparser/spin-off"
+    "url": "https://github.com/stringparser/runtime"
   },
   "main": "./lib/runtime",
   "scripts": {
@@ -14,9 +14,12 @@
   },
   "keywords": [
     "cli",
+    "repl",
     "stdin",
     "runtime",
-    "readline"
+    "readline",
+    "command",
+    "custom"
   ],
   "dependencies": {
     "minimist": "~0.2.0",
