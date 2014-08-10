@@ -10,7 +10,7 @@
   "main": "./lib/runtime",
   "scripts": {
     "pool": "./pool",
-    "test" : "make test"
+    "test": "make test"
   },
   "keywords": [
     "cli",
@@ -22,8 +22,8 @@
     "custom"
   ],
   "dependencies": {
-    "chalk" : "^0.5.1",
     "callsite": "^1.0.0",
+    "chalk": "^0.5.1",
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
   },
