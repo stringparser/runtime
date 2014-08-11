@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "runtime": "^0.1.13",
+    "runtime": "0.1.15",
     "should": "^4.0.4"
   }
 }

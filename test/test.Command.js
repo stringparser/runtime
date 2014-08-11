@@ -7,9 +7,13 @@ describe('runtime.command', function(){
 
     it('runtime({ nested : false }) should unest', function(){
 
-      runtime({ nested : false }).set('first', function(){
-        return ['first!']
-      })
+      runtime({ nested : false })
+        .set('first', function(){
+          return ['first!']
+        })
+        .set('second', function(){
+
+        })
 
     })
   })
