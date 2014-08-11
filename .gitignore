@@ -1,6 +1,5 @@
 node_modules
 test/node_modules
-test/package.json
 test/starter
 gulpfile.js
 npm-debug.log

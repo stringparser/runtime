@@ -1,5 +1,6 @@
 {
-  "devDependencies": {
+  "dependencies": {
+    "runtime": "^0.1.13",
     "should": "^4.0.4"
   }
 }

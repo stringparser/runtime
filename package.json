@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/stringparser/runtime"
   },
   "scripts": {
-    "start" : "export DEV_ENV=gulp-runtime && gulp",
+    "start": "export DEV_ENV=gulp-runtime && gulp",
     "test": "make test"
   },
   "keywords": [
@@ -26,9 +26,6 @@
     "chalk": "^0.5.1",
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
-  },
-  "devDependencies": {
-    "should": "~4.0.4"
   },
   "license": "MIT"
 }
