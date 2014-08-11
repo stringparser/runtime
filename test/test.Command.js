@@ -1,5 +1,5 @@
 
-var runtime = require('../lib/runtime');
+var runtime = new require('runtime').createInterface('testCommand');
 
 describe('runtime.command', function(){
 
