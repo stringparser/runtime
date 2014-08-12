@@ -215,3 +215,5 @@ describe('Runtime.Command', function(){
   })
 
 })
+
+process.stdin.end();
