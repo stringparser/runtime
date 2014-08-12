@@ -1,5 +1,5 @@
 
-var assert = require('better-assert');
+var assert = require('assert');
 var testName = 'test.command';
 
 var runtime = (
