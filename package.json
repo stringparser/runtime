@@ -18,7 +18,8 @@
     "runtime",
     "readline",
     "command",
-    "custom"
+    "custom",
+    "local"
   ],
   "dependencies": {
     "better-assert": "^1.0.1",
