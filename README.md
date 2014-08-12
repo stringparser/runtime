@@ -1,4 +1,4 @@
-## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io) [<img alt="Build Status" src="https://travis-ci.org/stringparser/runtime.svg?branch=master" align="left"/>](https://travis-ci.org/stringparser/runtime)
+## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io) [<img alt="Build Status" src="https://travis-ci.org/stringparser/runtime.svg?branch=master" align="center"/>](https://travis-ci.org/stringparser/runtime)
 
 > Trying to use `gulp` at runtime and end up here.
 
