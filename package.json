@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
