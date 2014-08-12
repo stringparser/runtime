@@ -27,5 +27,9 @@
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^1.21.4",
+    "should": "^4.0.4"
+  }
 }

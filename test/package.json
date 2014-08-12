@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "runtime": "0.1.17",
-    "should": "^4.0.4"
-  }
-}
