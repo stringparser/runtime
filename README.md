@@ -1,12 +1,12 @@
-## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/29" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
+## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 [![Build Status](https://travis-ci.org/stringparser/runtime.svg?branch=master)](https://travis-ci.org/stringparser/runtime)
 
-<b>Implementation status: young</b>
+<b>Implementation status: young, using Bigfoot diapers</b>
 
 This project is a spin-off of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
 
-Its aim is to provide a runtime cli for your node application where you can use custom commands. But locally instead of globally. That is: no `npm -g` for your cli.
+Its aim is to provide a runtime cli for your node application where you can use custom commands. But locally or globally. That is: no `npm -g` for your cli *if you want*.
 
 There is no common ground here, because what it does is associate a `command(s)` to a `function` so you can do pretty much whatever you want with it.
 
