@@ -2,17 +2,19 @@
 
 [![Build Status](https://travis-ci.org/stringparser/runtime.svg?branch=master)](https://travis-ci.org/stringparser/runtime)
 
+> Trying to use [`gulp`](https://github.com/gulpjs/gulp) at runtime and end up here.
+
 <b>Implementation status: young, using Bigfoot diapers</b>
 
-This project is a spin-off of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
+This project is the parent of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
 
-Its aim is to provide a runtime cli for your node application where you can use custom commands. But locally or globally. That is: no `npm -g` for your cli *if you want*.
+Its aim is to provide a `runtime cli` for your node application where you can use custom commands. But locally or globally. That is: no `npm -g` for your cli *if you want*.
+
+On the repo above I'm doing that for [`gulp`](https://github.com/gulpjs/gulp) so go check it out.
 
 There is no common ground here, because what it does is associate a `command(s)` to a `function` so you can do pretty much whatever you want with it.
 
-I was trying to use `gulp` at runtime and end up here.
-
-## Use case: with gulp
+## Use case: with [gulp](https://github.com/gulpjs/gulp)
 
 ```js
  // Your favourite gulpfile.js
