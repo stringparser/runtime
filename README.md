@@ -1,5 +1,7 @@
 ## Its runtime[<img alt="progressed.io" src="http://progressed.io/bar/29" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
+[![Build Status](https://travis-ci.org/stringparser/runtime.svg?branch=master)](https://travis-ci.org/stringparser/runtime)
+
 <b>Implementation status: young</b>
 
 This project is a spin-off of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
