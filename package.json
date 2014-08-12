@@ -21,6 +21,7 @@
     "custom"
   ],
   "dependencies": {
+    "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
     "chalk": "^0.5.1",
     "minimist": "~0.2.0",
