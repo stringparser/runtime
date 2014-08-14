@@ -24,11 +24,13 @@
   "dependencies": {
     "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
+    "herro": "0.0.5",
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
   },
   "license": "MIT",
   "devDependencies": {
+    "herro": "0.0.5",
     "mocha": "^1.21.4",
     "should": "^4.0.4"
   }
