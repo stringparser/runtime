@@ -30,7 +30,6 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "herro": "0.0.5",
     "mocha": "^1.21.4",
     "should": "^4.0.4"
   }
