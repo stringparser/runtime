@@ -1,5 +1,8 @@
 
+require('herro');
+
 var assert = require('assert');
+
 var testName = 'test.command';
 
 var runtime = (
@@ -131,7 +134,6 @@ describe('Runtime.Command', function(){
     })
 
     describe('- Not supported arguments', function(){
-
 
     })
 
