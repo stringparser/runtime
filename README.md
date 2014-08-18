@@ -5,7 +5,7 @@
 [<img alt="build" src="http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square" align="right"/>](https://travis-ci.org/stringparser/runtime/builds)
 
 ## Its runtime
-> I was trying to use `gulp` at runtime and end up here. [<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
+> I was trying to use `gulp` at runtime and end up here. [<img alt="progressed.io" src="http://progressed.io/bar/40" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 <b>Implementation status: young, using Bigfoot diapers</b>
 
