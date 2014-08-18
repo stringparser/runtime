@@ -7,6 +7,10 @@
 ## Its runtime
 > I was trying to use `gulp` at runtime and end up here. [<img alt="progressed.io" src="http://progressed.io/bar/40" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
+```
+npm install runtime --save
+```
+
 <b>Implementation status: young, using Bigfoot diapers</b>
 
 This project is the parent of [gulp-runtime](https://github.com/stringparser/gulp-runtime).
