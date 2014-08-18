@@ -4,9 +4,8 @@
 [<img alt="NPM version" src="http://img.shields.io/npm/v/runtime.svg?style=flat-square" align="right"/>](http://www.npmjs.org/package/runtime)
 [<img alt="build" src="http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square" align="right"/>](https://travis-ci.org/stringparser/runtime/builds)
 
-## Its runtime [<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
-
-> Trying to use `gulp` at runtime and end up here.
+## Its runtime
+> I was trying to use `gulp` at runtime and end up here. [<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 <b>Implementation status: young, using Bigfoot diapers</b>
 
