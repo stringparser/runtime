@@ -1,5 +1,5 @@
 
-var herro = require('herro');
+require('herro');
 
 var assert = require('assert');
 

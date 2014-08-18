@@ -1,4 +1,10 @@
-## Its runtime [<img alt="Build Status" src="https://travis-ci.org/stringparser/runtime.svg?branch=master" align="center"/>](https://travis-ci.org/stringparser/runtime) [<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
+#
+
+[<img alt="npm downloads" src="http://img.shields.io/npm/dm/runtime.svg?style=flat-square" align="right"/>](http://img.shields.io/npm/dm/runtime.svg)
+[<img alt="NPM version" src="http://img.shields.io/npm/v/runtime.svg?style=flat-square" align="right"/>](http://www.npmjs.org/package/runtime)
+[<img alt="build" src="http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square" align="right"/>](https://travis-ci.org/stringparser/runtime/builds)
+
+## Its runtime [<img alt="progressed.io" src="http://progressed.io/bar/35" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 > Trying to use `gulp` at runtime and end up here.
 
@@ -60,4 +66,4 @@ Missing some better docs, I know. For now you can look at the [original project 
 
 ## License
 
-MIT
+[<img alt="LICENSE" src="http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square"/>](http://opensource.org/licenses/MIT)
