@@ -20,7 +20,7 @@ runtime({ nested : true })
   .set('4-nest', function(){ return this.get('4-nest'); });
 
 runtime
-  .set(['1-alias', '2-alias', '3-alias', '4-alias'], function(){ return this.get('1-alias'); });
+  .set(['1-alias', '2-alias', '3-alias', '4-alias'], function(){ return this });
 
 var root = runtime.get();
 var child = root.children;
@@ -111,31 +111,27 @@ describe('Runtime.Command', function(){
   //
   describe('#get', function(){
 
-    it('runtime.get()._depth === 0?', function(){
+    it('#get()._depth === 0?', function(){
       assert( runtime.get()._depth === 0 );
-    })
+    });
 
-    it('runtime.get( "1-nest", "2-nest", "3-nest")._depth === 3?', function(){
+    it('#get("1-nest", "2-nest", "3-nest")._depth === 3?', function(){
       assert( runtime.get("1-nest","2-nest", "3-nest")._depth === 3 );
-    })
+    });
 
-    it('runtime.get(["1-nest", "2-nest", "3-nest"])._depth === 3?', function(){
+    it('#get(["1-nest", "2-nest", "3-nest"])._depth === 3?', function(){
       assert( runtime.get(["1-nest","2-nest", "3-nest"])._depth === 3 );
-    })
+    });
 
     describe('- Aliases', function(){
-      it('runtime.get("1-alias")._name === runtime.get("2-alias")._name?', function(){
+      it('#get("1-alias")._name === #get("2-alias")._name?', function(){
         assert(
           runtime.get("1-alias")._name === runtime.get("2-alias")._name
         );
-      })
-    })
+      });
+    });
 
-    describe('- Not supported arguments', function(){
-
-    })
-
-  })
+  });
 
   //
   // runtime#get
@@ -144,13 +140,13 @@ describe('Runtime.Command', function(){
 
     it('!runtime.get().handle', function(){
       assert( !runtime.get().handle );
-    })
+    });
 
     it('runtime.get("1").handle()._name === runtime.get("1")._name', function(){
       assert( runtime.get("1").handle()._name === runtime.get("1")._name );
-    })
+    });
 
-  })
+  });
 
   describe('#completion', function(){
 
@@ -163,7 +159,7 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
       it('string', function(){
 
@@ -172,7 +168,7 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
       it('array has any non-string content', function(){
 
@@ -181,7 +177,7 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
       it('object', function(){
 
@@ -190,7 +186,7 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
       it('function not returning array', function(){
 
@@ -199,7 +195,7 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
       it('function returning array with any non-string content', function(){
 
@@ -208,12 +204,11 @@ describe('Runtime.Command', function(){
         catch(e) { err = e; }
         assert( err instanceof Error );
 
-      })
+      });
 
-    })
+    });
 
-  })
-
-})
+  });
+});
 
 process.stdin.end();
