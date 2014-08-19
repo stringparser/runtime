@@ -1,4 +1,4 @@
-require('gulp-runtime');
+
 var assert = require('assert');
 
 var testName = 'test.command';
