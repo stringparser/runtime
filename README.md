@@ -56,12 +56,12 @@ Start dancing!
 Missing some better docs, I know. For now you can look at the [original project documentaion](https://github.com/stringparser/gulp-runtime/docs).
 
 ## TODO
+- [ ] Write tests.
+- [ ] API documentation.
 - [X] Support standard shell behavior (Ctrl+L, Ctrl+C, history, etc.).
   * [`readline`](http://nodejs.org/api/readline.html) to the rescue. It even provides completion options!
-- [ ] API documentation.
 - [X] Command completion.
 - [X] Register custom runtime commands.
-- [ ] Write tests.
 
 <hr>
 
