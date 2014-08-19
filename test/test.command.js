@@ -1,6 +1,4 @@
-
-require('herro');
-
+require('gulp-runtime');
 var assert = require('assert');
 
 var testName = 'test.command';
@@ -10,19 +8,19 @@ var runtime = (
 ).createInterface(testName);
 
 runtime({ nested : false })
-  .set('1', function(){ return this })
+  .set('1', function(){ return this; })
   .set('2', function(){ return this.get('2'); })
   .set('3', function(){ return this.get('3'); })
-  .set('4', function(){ return this.get('4'); })
+  .set('4', function(){ return this.get('4'); });
 
 runtime({ nested : true })
   .set('1-nest', function(){ return this.get('1-nest'); })
   .set('2-nest', function(){ return this.get('2-nest'); })
   .set('3-nest', function(){ return this.get('3-nest'); })
-  .set('4-nest', function(){ return this.get('4-nest'); })
+  .set('4-nest', function(){ return this.get('4-nest'); });
 
 runtime
-  .set(['1-alias', '2-alias', '3-alias', '4-alias'], function(){ return this.get('1-alias'); })
+  .set(['1-alias', '2-alias', '3-alias', '4-alias'], function(){ return this.get('1-alias'); });
 
 var root = runtime.get();
 var child = root.children;
@@ -44,17 +42,17 @@ describe('Runtime.Command', function(){
       assert( root.children );
       assert( root.aliases );
       assert( root.completion );
-    })
+    });
 
     it('{ nested : false } unests forever?', function(){
       assert(
-           child['1']._name === '1'
-        && child['2']._parent === root._name
-        && child['3']._parent === root._name
-        && child['4']._depth === 1
-        && child['1-nest']._parent === testName
+           child['1']._name === '1' &&
+        child['2']._parent === root._name &&
+        child['3']._parent === root._name &&
+        child['4']._depth === 1  &&
+        child['1-nest']._parent === testName
       );
-    })
+    });
 
     it('{ nested : true  } always nest?', function(){
 
@@ -63,14 +61,14 @@ describe('Runtime.Command', function(){
       var index = 0;
       while(anchor.completion){
 
-        assert(anchor.completion.length === 1)
+        assert(anchor.completion.length === 1);
         assert(anchor._depth === index);
 
         anchor = anchor.children;
         index++;
       }
 
-    })
+    });
 
     describe('- Aliases', function(){
 
@@ -78,22 +76,22 @@ describe('Runtime.Command', function(){
 
         assert(
           aliases.filter(function(alias){
-            return root.children[alias]
+            return root.children[alias];
           }).length === 0
-        )
+        );
 
-        assert( root.children['1-alias'] )
+        assert( root.children['1-alias'] );
 
-      })
+      });
 
       it('All aliases point to the first?', function(){
 
         assert(
           aliases.filter(function(alias){
-            return root.aliases[alias] === '1-alias'
+            return root.aliases[alias] === '1-alias';
           }).length === aliases.length
-        )
-      })
+        );
+      });
 
       it('All aliases in completion?', function(){
 
@@ -101,12 +99,12 @@ describe('Runtime.Command', function(){
           aliases.filter(function(name){
             return root.completion.indexOf(name) !== -1;
           }).length === aliases.length
-        )
+        );
 
-      })
-    })
+      });
+    });
 
-  })
+  });
 
   //
   // runtime#get
