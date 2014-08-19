@@ -120,6 +120,7 @@ describe('Runtime.Command', function(){
     });
 
     it('#get(["1-nest", "2-nest", "3-nest"])._depth === 3?', function(){
+      
       assert( runtime.get(["1-nest","2-nest", "3-nest"])._depth === 3 );
     });
 
