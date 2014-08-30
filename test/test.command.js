@@ -3,9 +3,7 @@ var assert = require('assert');
 
 var testName = 'test.command';
 
-var runtime = (
-  new require('../lib/runtime')
-).createInterface(testName);
+var runtime = (new require('../lib/runtime')).create(testName);
 
 runtime({ nested : false })
   .set('1', function(){ return this; })
@@ -120,7 +118,7 @@ describe('Runtime.Command', function(){
     });
 
     it('#get(["1-nest", "2-nest", "3-nest"])._depth === 3?', function(){
-      
+
       assert( runtime.get(["1-nest","2-nest", "3-nest"])._depth === 3 );
     });
 
