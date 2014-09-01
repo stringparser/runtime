@@ -3,6 +3,8 @@ var assert = require('assert');
 
 module.exports = function(runtime, testName){
 
+  console.log(runtime.get())
+  console.log(runtime.get('1-nest', '2-nest', '3-nest'))
   it('#get()._depth === 0?', function(){
     assert( runtime.get()._depth === 0 );
   });
