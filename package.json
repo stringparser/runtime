@@ -8,7 +8,6 @@
     "url": "https://github.com/stringparser/runtime"
   },
   "scripts": {
-    "start": "export DEV_ENV=gulp-runtime && gulp",
     "test": "make test"
   },
   "keywords": [
