@@ -25,7 +25,7 @@ There is no common ground here, because what it does is associate a `command(s)`
 
 ```js
  // Your favourite gulpfile.js
- var runtime = new require('runtime').createInterface('gulp');
+ var runtime = new require('runtime').create('gulp');
 ```
 
 At runtime, when you want to see the prompt, press `enter`.
