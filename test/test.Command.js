@@ -14,19 +14,16 @@ test.forEach(function(testName, index){
   runtime[testName] = (new require('../lib/runtime')).create(testName);
 
   runtime[testName]
-    .set('1', function(){ return this; })
-    .set('2', function(){ return this.get('2'); })
-    .set('3', function(){ return this.get('3'); })
-    .set('4', function(){ return this.get('4'); });
+    .set('1', function one(){ })
+    .set('2', function two(){ })
+    .set('3', function three(){ });
 
   runtime[testName]
-    .set('1-nest', function(){ return this.get('1-nest'); })
-    .set('1-nest 2-nest', function(){ return this.get('2-nest'); })
-    .set('1-nest 2-nest 3-nest', function(){ return this.get('3-nest'); })
-    .set('1-nest 2-nest 3-nest 4-nest', function(){ return this.get('4-nest'); });
+    .set('1-nest', function oneNest(){ })
+    .set('1-nest 2-nest 3-nest', function threeNest(){ });
 
   runtime[testName]
-    .set(['1-alias', '2-alias', '3-alias', '4-alias'], function(){ return this; });
+    .set(['1-alias', '2-alias', '3-alias'], function oneAliased(){ return this; });
 
   describe('runtime.'+testName, function(){
 
@@ -43,6 +40,5 @@ test.forEach(function(testName, index){
   });
 
   if( index === len-1 ){
-    process.stdin.end();
   }
 });
