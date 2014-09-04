@@ -6,6 +6,7 @@ test:
 		--require should \
 		--timeout 5000 \
 		--growl \
+		--watch
 		$(TESTS)
 
 .PHONY: test
