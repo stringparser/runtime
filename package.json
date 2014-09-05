@@ -23,9 +23,9 @@
   "dependencies": {
     "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
+    "findit": "^2.0.0",
     "herro": "^0.1.12",
     "minimist": "~0.2.0",
-    "source": "0.0.3",
     "utils-merge": "~1.0.0"
   },
   "license": "MIT",
