@@ -19,11 +19,11 @@ test.forEach(function(testName, index){
     .set('3', function three(){ });
 
   runtime[testName]
-    .set('1-nest', function oneNest(){ })
+    .set('1-nest')
     .set('1-nest 2-nest 3-nest', function threeNest(){ });
 
   runtime[testName]
-    .set(['1-alias', '2-alias', '3-alias'], function oneAliased(){ return this; });
+    .set('1-alias', { alias : ['2-alias', '3-alias'] }, function oneAliased(){ return this; });
 
   describe('runtime.'+testName, function(){
 

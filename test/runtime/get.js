@@ -9,16 +9,16 @@ module.exports = function(runtime, testName){
       .should.have.property('_depth').and.be.exactly(0);
   });
 
-  it('[1-nest, 2-nest] && "1-nest, 2-nest" depth === 2', function(){
+  it('[1-nest, 2-nest] && "1-nest 2-nest" depth === 2', function(){
 
-    runtime.get("1-nest","2-nest")._depth
+    runtime.get("1-nest 2-nest")._depth
         .should.be.exactly(2);
     runtime.get(["1-nest","2-nest"])._depth
         .should.be.exactly(2);
   });
 
-  it('[1-nest, 2-nest, 3-nest] & "1-nest, 2-nest, 3-nest" depth === 3', function(){
-      runtime.get("1-nest","2-nest", "3-nest")._depth
+  it('[1-nest, 2-nest, 3-nest] & "1-nest 2-nest 3-nest" depth === 3', function(){
+      runtime.get("1-nest 2-nest 3-nest")._depth
         .should.be.exactly(3);
 
       runtime.get(["1-nest","2-nest", "3-nest"])._depth
@@ -31,9 +31,9 @@ module.exports = function(runtime, testName){
 
     it('Only 1-alias exists', function(){
 
-      anchor.children['1-alias'].should.be.ok;
-      (anchor.children['2-alias'] === void 0 ).should.be.true;
-      (anchor.children['3-alias'] === void 0 ).should.be.true;
+      anchor.child['1-alias'].should.be.ok;
+      (anchor.child['2-alias'] === void 0 ).should.be.true;
+      (anchor.child['3-alias'] === void 0 ).should.be.true;
     });
 
     it('All are in completion `array`', function(){
@@ -57,7 +57,7 @@ module.exports = function(runtime, testName){
 
     it('All are registered on aliases but "1-alias"', function(){
 
-      var aliases = runtime.get().aliases;
+      var aliases = runtime.get().alias;
 
       aliases.should.have.property('2-alias', '1-alias');
       aliases.should.have.property('3-alias', '1-alias');
