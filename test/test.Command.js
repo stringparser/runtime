@@ -39,6 +39,4 @@ test.forEach(function(testName, index){
 
   });
 
-  if( index === len-1 ){
-  }
 });
