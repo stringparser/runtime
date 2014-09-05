@@ -1,7 +1,5 @@
 
 
-var assert = require('assert');
-
 module.exports = function(runtime, testName){
 
   var rootNode = runtime.get();

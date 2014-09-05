@@ -24,7 +24,7 @@
     "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
     "findit": "^2.0.0",
-    "herro": "^0.1.12",
+    "herro": "^0.1.38",
     "minimist": "~0.2.0",
     "utils-merge": "~1.0.0"
   },
