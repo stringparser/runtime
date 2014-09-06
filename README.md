@@ -53,7 +53,7 @@ Start dancing!
 > gulp
 ```
 
-Missing some better docs, I know. For now you can look at the [original project documentaion](https://github.com/stringparser/gulp-runtime/docs).
+Missing some better docs, I know. For now you can look at the [original project documentaion](hhttps://github.com/stringparser/gulp-runtime/tree/master/docs).
 
 ## TODO
 - [ ] Write tests.
