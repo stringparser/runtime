@@ -4,14 +4,12 @@ module.exports = function(runtime, testName){
 
   var rootNode = runtime.get();
 
-  it('root has _name and props [child, completion, alias]', function(){
+  it('root has _name and props [children, completion, aliases]', function(){
 
-    rootNode.should.be.an.Object
-      .and.have.property('_name')
-      .and.be.exactly(testName);
-
+    rootNode.should.be.an.Object;
+    rootNode.should.have.property('_name', testName);
     rootNode.should.have.properties([
-        'child', 'alias', 'completion'
+        'children', 'aliases', 'completion'
       ]);
 
   });
@@ -41,11 +39,11 @@ module.exports = function(runtime, testName){
     runtime.get('1-nest 2-nest').should.not
       .have.property('handle');
 
-    runtime.get('1-nest 2-nest 3-nest').handle.should.be
-      .a.Function.and
-      .have.property('name', 'threeNest');
 
-    runtime.get({ last : 'handle' }).should.have
+    runtime.get('1-nest 2-nest 3-nest').handle.should.be
+      .a.Function.with.property('name', 'threeNest');
+
+    runtime.get('1-nest 2-nest 3-nest').handle.should.have
       .property('name', 'threeNest');
   });
 
@@ -53,7 +51,7 @@ module.exports = function(runtime, testName){
 
     runtime.get().completion.should.be
       .an.Array.and
-      .containDeep(['1-nest'])
+      .containDeep(['1-nest']);
 
     runtime.get().completion.should.not
       .containDeep(['2-nest'])
@@ -63,8 +61,8 @@ module.exports = function(runtime, testName){
 
   it('Completion has children and aliases', function(){
 
-    var children = Object.keys(runtime.get().child);
-     var aliases = Object.keys(runtime.get().alias);
+    var children = Object.keys(runtime.get().children);
+     var aliases = Object.keys(runtime.get().aliases);
 
     runtime.get().completion.should.be
       .an.Array

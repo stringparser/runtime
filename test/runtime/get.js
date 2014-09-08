@@ -29,9 +29,9 @@ module.exports = function(runtime, testName){
 
     it('Only 1-alias exists', function(){
 
-      anchor.child['1-alias'].should.be.ok;
-      (anchor.child['2-alias'] === void 0 ).should.be.true;
-      (anchor.child['3-alias'] === void 0 ).should.be.true;
+      anchor.children['1-alias'].should.be.ok;
+      (anchor.children['2-alias'] === void 0 ).should.be.true;
+      (anchor.children['3-alias'] === void 0 ).should.be.true;
     });
 
     it('All are in completion `array`', function(){
@@ -55,7 +55,7 @@ module.exports = function(runtime, testName){
 
     it('All are registered on aliases but "1-alias"', function(){
 
-      var aliases = runtime.get().alias;
+      var aliases = runtime.get().aliases;
 
       aliases.should.have.property('2-alias', '1-alias');
       aliases.should.have.property('3-alias', '1-alias');
