@@ -23,9 +23,17 @@ test.forEach(function(testName, index){
     .set('1-nest 2-nest 3-nest', function threeNest(){ });
 
   runtime[testName]
+    .set('--flag1', function(){});
+
+  runtime[testName]
+    .set('command --flag2', function(){});
+
+  runtime[testName]
     .set(['1-alias', '2-alias', '3-alias'],
       function oneAliased(){ return this; }
     );
+
+  console.log(runtime.get())
 
   describe('runtime.'+testName, function(){
 
