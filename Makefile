@@ -8,4 +8,7 @@ test:
 		--growl \
 		$(TESTS)
 
+gulp:
+	gulp --gulpfile ./node_modules/gulp-runtime/gulpfile.js
+
 .PHONY: test
