@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
@@ -23,6 +23,7 @@
   "dependencies": {
     "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
+    "debug": "^2.0.0",
     "findit": "^2.0.0",
     "herro": "^0.1.38",
     "minimist": "~0.2.0",
@@ -31,7 +32,6 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "debug": "^2.0.0",
     "mocha": "^1.21.4",
     "should": "^4.0.4"
   }
