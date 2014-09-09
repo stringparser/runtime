@@ -14,6 +14,9 @@ test.forEach(function(testName, index){
   runtime[testName] = (new require('../lib/runtime')).create(testName);
 
   runtime[testName]
+    .set(function rootNodeHandle(){});
+
+  runtime[testName]
     .set('1', function one(){ })
     .set('2', function two(){ })
     .set('3', function three(){ });
@@ -23,17 +26,15 @@ test.forEach(function(testName, index){
     .set('1-nest 2-nest 3-nest', function threeNest(){ });
 
   runtime[testName]
-    .set('--flag1', function(){});
+    .set('--flag', function rootNodeFlag(){});
 
   runtime[testName]
-    .set('command --flag2', function(){});
+    .set('1-nest --flag', function oneNestFlag(){});
 
   runtime[testName]
-    .set(['1-alias', '2-alias', '3-alias'],
+    .set(['1-alias', '2-alias --flag', '3-alias'],
       function oneAliased(){ return this; }
     );
-
-  console.log(runtime.get())
 
   describe('runtime.'+testName, function(){
 

@@ -9,7 +9,7 @@ module.exports = function(runtime, testName){
     rootNode.should.be.an.Object;
     rootNode.should.have.property('_name', testName);
     rootNode.should.have.properties([
-        'children', 'aliases', 'completion'
+        'children', 'completion'
       ]);
 
   });
@@ -59,17 +59,21 @@ module.exports = function(runtime, testName){
       .containDeep(['3-nest']);
   });
 
-  it('Completion has children and aliases', function(){
+  it('Completion has children all children', function(){
 
-    var children = Object.keys(runtime.get().children);
-     var aliases = Object.keys(runtime.get().aliases);
-
-    runtime.get().completion.should.be
-      .an.Array
-      .and
+    runtime.get().completion.should
       .containDeep(
-        children.concat(aliases)
+        Object.keys(runtime.get().children)
       );
+
+    runtime.get().completion
+      .should
+      .have
+      .lengthOf(Object.keys(runtime.get().children).length).exactly;
+
+    runtime.get()
+
+
   });
 
 };
