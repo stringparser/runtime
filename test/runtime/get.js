@@ -25,22 +25,26 @@ module.exports = function(runtime, testName){
 
   describe('- Aliases', function(){
 
-    var anchor = runtime.get();
-
     it('Only 1-alias exists', function(){
 
-      runtime.get().children['1-alias'].should.be.ok;
-      (runtime.get().children['2-alias'] === void 0).should.be.true;
-      (runtime.get().children['3-alias'] === void 0).should.be.true;
+
+      runtime.get()
+        .children['1-alias'].should.be.ok;
+
+      (runtime.get()
+        .children['2-alias'] === void 0).should.be.true;
+
+      (runtime.get()
+        .children['3-alias'] === void 0).should.be.true;
     });
 
     it('All are in completion `array`', function(){
 
-      runtime.get('1-alias').completion
-      .should
-      .containDeep(['2-alias','3-alias']);
-
-
+      runtime.get().completion
+        .should
+        .containDeep(
+          ['1-alias', '2-alias --flag','3-alias']
+        );
     });
 
     it('All point to the 1st registered', function(){
@@ -54,11 +58,14 @@ module.exports = function(runtime, testName){
 
     it('All are registered on aliases but "1-alias"', function(){
 
-      var aliases = runtime.get('1-alias').aliases;
+      runtime.get().aliases
+        .should.have.property('2-alias --flag', '1-alias');
 
-      aliases.should.have.property('2-alias', '1-alias --flag');
-      aliases.should.have.property('3-alias', '1-alias --flag');
-      aliases.should.not.have.property('1-alias');
+      runtime.get().aliases
+        .should.have.property('3-alias', '1-alias');
+
+      runtime.get().aliases
+        .should.not.have.property('1-alias');
 
     });
 

@@ -2,13 +2,13 @@
 
 module.exports = function(runtime, testName){
 
-  var rootNode = runtime.get();
-
   it('root has _name and props [children, completion, aliases]', function(){
 
-    rootNode.should.be.an.Object;
-    rootNode.should.have.property('_name', testName);
-    rootNode.should.have.properties([
+    runtime.get().should
+      .have.property('_name', testName);
+
+    runtime.get().should
+      .have.properties([
         'children', 'completion'
       ]);
 
@@ -59,7 +59,7 @@ module.exports = function(runtime, testName){
       .containDeep(['3-nest']);
   });
 
-  it('Completion has children all children', function(){
+  it('Completion has children and aliases', function(){
 
     runtime.get().completion.should
       .containDeep(
@@ -68,11 +68,10 @@ module.exports = function(runtime, testName){
 
     runtime.get().completion
       .should
-      .have
-      .lengthOf(Object.keys(runtime.get().children).length).exactly;
-
-    runtime.get()
-
+      .have.lengthOf(
+        Object.keys(runtime.get().children).length +
+        Object.keys(runtime.get().aliases).length
+      ).exactly;
 
   });
 
