@@ -11,4 +11,4 @@ test:
 gulp:
 	gulp --gulpfile ./node_modules/gulp-runtime/gulpfile.js
 
-.PHONY: test
+.PHONY: test, gulp
