@@ -1,4 +1,3 @@
-#
 
 [<img alt="npm downloads" src="http://img.shields.io/npm/dm/runtime.svg?style=flat-square" align="right"/>](http://img.shields.io/npm/dm/runtime.svg)
 [<img alt="NPM version" src="http://img.shields.io/npm/v/runtime.svg?style=flat-square" align="right"/>](http://www.npmjs.org/package/runtime)
