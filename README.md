@@ -6,7 +6,7 @@
 ## its runtime!
 > The project is parent of [gulp-runtime](https://github.com/stringparser/gulp-runtime). [<img alt="progressed.io" src="http://progressed.io/bar/40" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
-#### implementation state: young, using **bigfoot** diapers
+- **implementation state: young, using **bigfoot** diapers**
 
 The aim of the project is to provide an easy and unopinionated container to develop `runtime interfaces`. That being a `CLI` or something completely different (`http.Server`, `readline.Interface`, `etc`). There should be an entry event for that "runtime" and the idea is just to hook pre-defined `commands` to that "runtime".
 
