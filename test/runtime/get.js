@@ -1,7 +1,6 @@
 
 module.exports = function(runtime, testName){
 
-
   it('[] depth === 0', function(){
     runtime.get()
       .should.have.property('_depth').and.be.exactly(0);
