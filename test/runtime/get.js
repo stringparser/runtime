@@ -26,7 +26,6 @@ module.exports = function(runtime, testName){
 
     it('Only 1-alias exists', function(){
 
-
       runtime.get()
         .children['1-alias'].should.be.ok;
 
@@ -42,7 +41,7 @@ module.exports = function(runtime, testName){
       runtime.get().completion
         .should
         .containDeep(
-          ['1-alias', '2-alias --flag','3-alias']
+          ['1-alias', '2-alias --flag', '3-alias']
         );
     });
 
