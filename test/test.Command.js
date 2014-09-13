@@ -11,7 +11,7 @@ test.forEach(function(testName, index){
    * Each test gets its separate instance
    */
 
-  runtime[testName] = (new require('../lib/runtime')).create(testName);
+  runtime[testName] = (new require('../.')).create(testName);
 
   runtime[testName]
     .set(function rootNodeHandle(){});
