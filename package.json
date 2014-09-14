@@ -8,7 +8,8 @@
     "url": "https://github.com/stringparser/runtime"
   },
   "scripts": {
-    "test": "make test"
+    "lint": "jshint lib index.js --reporter node_modules/jshint-stylish/stylish.js --exclude node_modules",
+    "test": "npm run-script lint && make test"
   },
   "keywords": [
     "cli",
@@ -21,7 +22,6 @@
     "local"
   ],
   "dependencies": {
-    "better-assert": "^1.0.1",
     "callsite": "^1.0.0",
     "debug": "^2.0.0",
     "findit": "^2.0.0",
@@ -32,6 +32,8 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "jshint": "^2.5.5",
+    "jshint-stylish": "^0.4.0",
     "mocha": "^1.21.4",
     "should": "^4.0.4"
   }
