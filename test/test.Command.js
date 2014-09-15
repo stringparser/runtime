@@ -1,9 +1,8 @@
+'use strict';
 
-var test = ['Command'];
-var len = test.length;
 var runtime = {};
 
-test.forEach(function(testName, index){
+;['Command'].forEach(function(testName){
 
   /*
    * Sample instance
@@ -38,11 +37,12 @@ test.forEach(function(testName, index){
 
   describe('runtime.'+testName, function(){
 
-    var testFiles = require('fs').readdirSync('./test/runtime').sort(function(a,b){
+    var fs = require('fs');
+    var testFiles = fs.readdirSync('./test/runtime').sort(function(a,b){
       return a.length - b.length;
     });
 
-    testFiles.forEach(function(testFile, index){
+    testFiles.forEach(function(testFile){
       describe('#'+testFile.match(/\w+/), function(){
         require('./runtime/'+testFile)(runtime[testName], testName);
       });
