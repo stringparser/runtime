@@ -27,7 +27,8 @@
     "findit": "^2.0.0",
     "herro": "^0.1.41",
     "minimist": "~0.2.0",
-    "utils-type": "^0.1.28"
+    "utils-type": "^0.1.28",
+    "which": "^1.0.5"
   },
   "license": "MIT",
   "devDependencies": {
