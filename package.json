@@ -26,9 +26,9 @@
     "debug": "^2.0.0",
     "findit": "^2.0.0",
     "herro": "^0.1.48",
-    "minimist": "~0.2.0",
+    "minimist": "^0.2.0",
     "utils-merge": "^1.0.0",
-    "utils-type": "^0.1.28",
+    "utils-type": "^0.1.32",
     "which": "^1.0.5"
   },
   "license": "MIT",
