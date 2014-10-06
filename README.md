@@ -7,13 +7,13 @@
 > The project is parent of [gulp-runtime](https://github.com/stringparser/gulp-runtime). [<img alt="progressed.io" src="http://progressed.io/bar/40" align="right"/>](https://github.com/fehmicansaglam/progressed.io)
 
 <br>
-**implementation state**: young, using <i>Bigfoot</i> diapers
+**implementation state**: young, using *Bigfoot* diapers
 
 The aim of the project is to provide an easy and unopinionated container to develop `runtime interfaces`. That being a `CLI` or something completely different (`http.Server`, `readline.Interface`, `etc`). There should be an entry event for that "runtime" and the idea is just to hook pre-defined `commands` to that "runtime".
 
 This way, one would define a custom `command`, which associates that to a `function` via the `runtime interface`. The `interface` should provide a flexible way to `set` and `get` commands and give a hook to parse `command` properties thus maintain the housekeeping for that case.
 
-Only one usecase will be built-in by default, a runtime CLI. For this case, command line `completion` of file paths,  *custom commands* and support for *command aliasing* should be given.
+Only one use-case will be built-in by default, a runtime CLI. For this case, command line `completion` of file paths,  *custom commands* and support for *command aliasing* should be given.
 
 After that, you can do pretty much whatever you want with it.
 
@@ -27,7 +27,7 @@ npm install runtime
 
 ## use case: with [gulp](https://github.com/gulpjs/gulp)
 
-```js
+```javascript
  // Your favourite gulpfile.js
  var runtime = new require('runtime').create('gulp');
 ```
