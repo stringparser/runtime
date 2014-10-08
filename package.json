@@ -22,7 +22,7 @@
     "local"
   ],
   "dependencies": {
-    "callers-path": "^0.9.6",
+    "callers-path": "^0.9.7",
     "debug": "^2.0.0",
     "findit": "^2.0.0",
     "herro": "^0.1.48",
