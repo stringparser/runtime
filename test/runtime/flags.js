@@ -1,35 +1,38 @@
+'use strict';
 
-module.exports = function(runtime, testName){
+var should = require('should');
+
+module.exports = function(runtime){
 
   var rootNode = runtime.get();
   it('rootNode has flag as a child', function(){
-    rootNode.children['--flag'].should.be.ok;
+    should(rootNode.children['--flag'])
+      .be.an.Object;
   });
 
   it('rootNode flag has handle', function(){
 
-    rootNode.children['--flag'].handle.should.be
-      .with.property('name', 'rootNodeFlag');
+    rootNode.children['--flag'].handle
+      .should.have.property('name', 'rootNodeFlag');
   });
 
   it('rootNode flag is in completion', function(){
 
-    rootNode.completion.should.containDeep(
-      ['--flag']
-    );
+    rootNode.completion.should
+      .containDeep(['--flag']);
 
   });
 
   it('1-nest has a flag as a child', function(){
 
-    runtime.get('1-nest').children.should.have
-      .property('--flag').and.be.ok;
+    should(runtime.get('1-nest').children['--flag'])
+      .should.be.an.Object;
   });
 
   it('1-nest flag has a handle', function(){
 
     runtime.get('1-nest --flag').should.have
       .property('handle').with.property('name', 'oneNestFlag');
-  })
+  });
 
 };

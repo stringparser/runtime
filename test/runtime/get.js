@@ -1,39 +1,38 @@
+'use strict';
+
+var should = require('should');
 
 module.exports = function(runtime, testName){
 
   it('[] depth === 0', function(){
     runtime.get()
-      .should.have.property('_depth').and.be.exactly(0);
+      .should.have.property('_depth')
+      .and.be.exactly(0);
   });
 
   it('[1-nest, 2-nest] && "1-nest 2-nest" depth === 2', function(){
 
-    runtime.get("1-nest 2-nest")._depth
+    runtime.get('1-nest 2-nest')._depth
         .should.be.exactly(2);
-    runtime.get(["1-nest","2-nest"])._depth
+    runtime.get(['1-nest','2-nest'])._depth
         .should.be.exactly(2);
   });
 
   it('[1-nest, 2-nest, 3-nest] & "1-nest 2-nest 3-nest" depth === 3', function(){
-      runtime.get("1-nest 2-nest 3-nest")._depth
+      runtime.get('1-nest 2-nest 3-nest')._depth
         .should.be.exactly(3);
 
-      runtime.get(["1-nest","2-nest", "3-nest"])._depth
+      runtime.get(['1-nest','2-nest', '3-nest'])._depth
         .should.be.exactly(3);
   });
 
   describe('- Aliases', function(){
 
     it('Only 1-alias exists', function(){
-
-      runtime.get()
-        .children['1-alias'].should.be.ok;
-
-      (runtime.get()
-        .children['2-alias'] === void 0).should.be.true;
-
-      (runtime.get()
-        .children['3-alias'] === void 0).should.be.true;
+      var rootNode = runtime.get();
+      should.exists(rootNode.children['1-alias']);
+      should.not.exists(rootNode.children['2-alias']);
+      should.not.exists(rootNode.children['3-alias']);
     });
 
     it('All are in completion `array`', function(){

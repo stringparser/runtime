@@ -1,4 +1,7 @@
 
+'use strict';
+
+var should = require('should');
 
 module.exports = function(runtime, testName){
 
@@ -16,8 +19,8 @@ module.exports = function(runtime, testName){
 
   it('No function is needed to set a command', function(){
 
-    runtime.set('hello world').get('hello world')
-      .should.be.and.Object;
+    should.exists(runtime.set('hello world').get('hello world'))
+
   });
 
 
@@ -33,18 +36,20 @@ module.exports = function(runtime, testName){
 
   it('handle is added only to the last command', function(){
 
-    runtime.get('1-nest').should.not
-    .have.property('handle');
-
-    runtime.get('1-nest 2-nest').should.not
+    should(runtime.get('1-nest'))
+      .be.an.Object
+      .and.not
       .have.property('handle');
 
+    should(runtime.get('1-nest 2-nest'))
+      .be.an.Object
+      .and.not
+      .have.property('handle');
 
-    runtime.get('1-nest 2-nest 3-nest').handle.should.be
-      .a.Function.with.property('name', 'threeNest');
-
-    runtime.get('1-nest 2-nest 3-nest').handle.should.have
-      .property('name', 'threeNest');
+    should(runtime.get('1-nest 2-nest 3-nest'))
+      .be.an.Object
+      .and
+      .have.property('handle');
   });
 
   it('Completion is on the parent node', function(){

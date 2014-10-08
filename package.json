@@ -9,7 +9,7 @@
   },
   "scripts": {
     "lint": "jshint lib index.js --reporter node_modules/jshint-stylish/stylish.js --exclude node_modules",
-    "test": "npm run-script lint && make test"
+    "test": "npm run-script lint && mocha test/main.js --require should"
   },
   "keywords": [
     "cli",
@@ -28,7 +28,8 @@
     "herro": "^0.1.48",
     "lodash.merge": "^2.4.1",
     "minimist": "^0.2.0",
-    "utils-type": "^0.1.32",
+    "utils-debug": "^0.5.16",
+    "utils-type": "^0.1.36",
     "which": "^1.0.5"
   },
   "license": "MIT",
