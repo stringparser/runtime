@@ -22,7 +22,6 @@
     "local"
   ],
   "dependencies": {
-    "callers-path": "^0.9.9",
     "debug": "^2.0.0",
     "findit": "^2.0.0",
     "herro": "^0.1.48",
@@ -30,6 +29,7 @@
     "minimist": "^0.2.0",
     "utils-debug": "^0.5.18",
     "utils-type": "^0.5.2",
+    "v8-callsites": "^1.0.35",
     "which": "^1.0.5"
   },
   "license": "MIT",
