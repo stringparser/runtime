@@ -22,14 +22,14 @@
     "local"
   ],
   "dependencies": {
-    "callers-path": "^0.9.7",
+    "callers-path": "^0.9.9",
     "debug": "^2.0.0",
     "findit": "^2.0.0",
     "herro": "^0.1.48",
     "lodash.merge": "^2.4.1",
     "minimist": "^0.2.0",
-    "utils-debug": "^0.5.17",
-    "utils-type": "^0.1.38",
+    "utils-debug": "^0.5.18",
+    "utils-type": "^0.5.2",
     "which": "^1.0.5"
   },
   "license": "MIT",
