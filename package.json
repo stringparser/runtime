@@ -27,7 +27,7 @@
     "herro": "^0.1.48",
     "lodash.merge": "^2.4.1",
     "minimist": "^0.2.0",
-    "utils-debug": "^0.5.20",
+    "utils-debug": "^0.5.21",
     "utils-merge": "^1.0.0",
     "utils-type": "^0.5.2",
     "v8-callsites": "^1.0.35",
