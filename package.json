@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "callers-path": "^0.9.9",
+    "camelcase": "^1.0.1",
     "findit": "^2.0.0",
     "herro": "^0.1.48",
     "minimist": "^0.2.0",
