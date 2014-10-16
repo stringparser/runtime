@@ -15,6 +15,4 @@ describe(packageName, function(){
       require('./'+file)(pack, util);
     });
   });
-
-  // wipe
 });
