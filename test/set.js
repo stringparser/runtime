@@ -3,11 +3,9 @@
 var should = require('should');
 
 module.exports = function(pack, util){
-
   should.exists(util);
-
   var testName = 'testSet';
-  var runtime = pack.set(testName);
+  var runtime = pack.create(testName);
 
   function rootHandle(){}
 

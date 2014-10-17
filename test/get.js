@@ -5,7 +5,7 @@ var should = require('should');
 module.exports = function(pack, util){
 
   should.exists(util);
-  var runtime = pack.set('testGet');
+  var runtime = pack.create('testGet');
 
     function one(){}
     function two(){}

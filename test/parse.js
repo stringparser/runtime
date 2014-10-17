@@ -4,8 +4,8 @@ var should = require('should');
 
 module.exports = function(pack, util){
 
-  var runtime = pack.set('testParse');
-
+  should.exists(util);
+  var runtime = pack.create('testParse');
 
   it('should give a hook for to configure properties', function(){
 
