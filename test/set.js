@@ -7,7 +7,7 @@ module.exports = function(pack, util){
   should.exists(util);
 
   var testName = 'testSet';
-  var runtime = pack.create(testName);
+  var runtime = pack.set(testName);
 
   function rootHandle(){}
 
