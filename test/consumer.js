@@ -7,37 +7,33 @@ module.exports = function(pack, util){
   var runtime = pack.create('consumer');
 
   runtime.set('foo', function(argv, args, next){
-    argv.push('foo was runned');
-    next(argv, args);
+    argv.push('fooWasRunned');
+    next(argv);
   });
   runtime.set('--flag', function(argv, args, next){
-    argv.push('--flag was runned');
+    argv.push('--flagWasRunned');
     next(argv, args);
   });
 
   it('rootNode should dispatch if no command exists', function(done){
-    var index = 0;
     var line = 'notRegisteredCommand --flag';
     var parsed = runtime.parser(line);
-    runtime.set(function(argv, args, next){
+    runtime.set(function(argv, args){
       args.should.be.eql(parsed);
-      if( ++index === 2 ){
-        argv.should.be.eql(line.split(/[ ]+/));
-        return done();
-      }
-      if( !next(argv, args) ){ done(); }
+      done();
     });
     runtime.input.write(line+'\n');
   });
 
-  it('should run from lexed and parsed a registered fn', function(done){
-    var line = 'foo 3 bar 4 -x 3 -y 4 -abc --beep=10';
+  it('should run registered functions', function(done){
+    var line = 'foo';
     var lexed = runtime.lexer(line);
     var parsed = runtime.parser(line);
-    runtime.set(function(argv, args, next){
-      argv.should.be.eql(lexed.slice(1).concat('foo was runned'));
+    runtime.set(function(argv, args){
+      argv.should
+        .be.eql(lexed.slice(1).concat('fooWasRunned'));
       args.should.be.eql(parsed);
-      if( !next(argv, args) ){ done(); }
+      done();
     });
     runtime.input.write(line+'\n');
   });
@@ -47,9 +43,13 @@ module.exports = function(pack, util){
     var lexed = runtime.lexer(line);
     var parsed = runtime.parser(line);
     runtime.set(function(argv, args, next){
-      argv.should.be.eql(lexed.slice(1).concat('--flag was runned'));
+      argv.should.be.eql(
+        lexed.slice(1).concat('--flagWasRunned')
+      );
       args.should.be.eql(parsed);
-      if( !next(argv, args) ){ done(); }
+      var more = next();
+      console.log('done?', more);
+      if( !more ){ done(); }
     });
     runtime.input.write(line+'\n');
   });
@@ -58,12 +58,11 @@ module.exports = function(pack, util){
     var line = 'foo --flag';
     var index = 0;
     var called = [
-      ['foo was runned', '--flag was runned']
+      ['fooWasRunned', '--flagWasRunned']
     ];
     runtime.set(function(argv, args, next){
       argv.should.be.eql(called[index]);
-      index++;
-      if( !next(argv, args) ){ done(); }
+      if( !next() ){ done(); }
     });
     runtime.input.write(line+'\n');
   });
