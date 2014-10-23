@@ -7,11 +7,15 @@ module.exports = function(pack, util){
   var runtime = pack.create('consumer');
 
   runtime.set('foo', function(argv, args, next){
-    argv.push('fooWasRunned');
+    argv.push('--flag', 'fooWasRunned');
     next(argv);
   });
   runtime.set('--flag', function(argv, args, next){
-    argv.push('--flagWasRunned');
+    if(argv.indexOf('fooWasRunned') < 0 ){
+      argv.push('flagWasRunned');
+    } else {
+      argv.push('flagWasRunnedAfterFoo');
+    }
     next(argv, args);
   });
 
@@ -27,11 +31,9 @@ module.exports = function(pack, util){
 
   it('should run registered functions', function(done){
     var line = 'foo';
-    var lexed = runtime.lexer(line);
-    var parsed = runtime.parser(line);
+    var parsed = runtime.parser('fooWasRunned flagWasRunnedAfterFoo');
     runtime.set(function(argv, args){
-      argv.should
-        .be.eql(lexed.slice(1).concat('fooWasRunned'));
+      argv.should.be.eql(parsed._);
       args.should.be.eql(parsed);
       done();
     });
@@ -39,17 +41,12 @@ module.exports = function(pack, util){
   });
 
   it('should run flags', function(done){
-    var line = '--flag 3 -y 4';
-    var lexed = runtime.lexer(line);
-    var parsed = runtime.parser(line);
+    var line = '--flag';
+    var parsed = runtime.parser('flagWasRunned');
     runtime.set(function(argv, args, next){
-      argv.should.be.eql(
-        lexed.slice(1).concat('--flagWasRunned')
-      );
+      argv.should.be.eql(parsed._);
       args.should.be.eql(parsed);
-      var more = next();
-      console.log('done?', more);
-      if( !more ){ done(); }
+      if( !next() ){ done(); }
     });
     runtime.input.write(line+'\n');
   });
@@ -58,7 +55,7 @@ module.exports = function(pack, util){
     var line = 'foo --flag';
     var index = 0;
     var called = [
-      ['fooWasRunned', '--flagWasRunned']
+      ['fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo']
     ];
     runtime.set(function(argv, args, next){
       argv.should.be.eql(called[index]);
