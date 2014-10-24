@@ -28,6 +28,7 @@
     "minimist": "^0.2.0",
     "requirem": "^0.7.5",
     "through2": "^0.6.3",
+    "user-home": "^1.1.0",
     "utils-debug": "^0.5.22",
     "utils-type": "^0.8.10",
     "v8-callsites": "^1.1.0",
