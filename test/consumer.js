@@ -56,6 +56,8 @@ module.exports = function(pack, util){
     var run = ['flagWasRunned'];
     runtime.set(function(argv, args, next){
       if( !next() && args.flag ){
+        delete args.hrtime;
+        delete args.time;
         argv.should.be.eql(run);
         args.should.be.eql({ _ : [], flag : true });
         done();
