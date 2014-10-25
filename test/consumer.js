@@ -16,14 +16,20 @@ module.exports = function(pack, util){
     } else {
       argv.push('flagWasRunnedAfterFoo');
     }
-    next(argv, args);
+    next();
   });
 
   it('rootNode should dispatch if no command exists', function(done){
     var line = 'notRegisteredCommand --flag';
-    var parsed = runtime.parser(line);
+    var run = line.split(/[ ]+/);
     runtime.set(function(argv, args){
-      args.should.be.eql(parsed);
+      delete args.hrtime;
+      delete args.time;
+      argv.should.be.eql(run);
+      args.should.be.eql({
+           _ : run.slice(0,1),
+        flag : true
+      });
       done();
     });
     runtime.input.write(line+'\n');
@@ -31,35 +37,52 @@ module.exports = function(pack, util){
 
   it('should run registered functions', function(done){
     var line = 'foo';
-    var parsed = runtime.parser('fooWasRunned flagWasRunnedAfterFoo');
-    runtime.set(function(argv, args){
-      argv.should.be.eql(parsed._);
-      args.should.be.eql(parsed);
-      done();
+    runtime.set(function(argv, args, next){
+      delete args.hrtime;
+      delete args.time;
+      if( !next() && args.flag ){
+        delete args.hrtime;
+        var run = ['fooWasRunned', 'flagWasRunnedAfterFoo'];
+        argv.should.be.eql(run);
+        args.should.be.eql({ _ : [], flag : 'fooWasRunned' });
+        done();
+      }
     });
     runtime.input.write(line+'\n');
   });
 
   it('should run flags', function(done){
     var line = '--flag';
-    var parsed = runtime.parser('flagWasRunned');
+    var run = ['flagWasRunned'];
     runtime.set(function(argv, args, next){
-      argv.should.be.eql(parsed._);
-      args.should.be.eql(parsed);
-      if( !next() ){ done(); }
+      if( !next() && args.flag ){
+        delete args.hrtime;
+        delete args.time;
+        argv.should.be.eql(run);
+        args.should.be.eql({ _ : [], flag : true });
+        done();
+      }
     });
     runtime.input.write(line+'\n');
   });
 
   it('should run the registered functions if exists', function(done){
     var line = 'foo --flag';
-    var index = 0;
-    var called = [
-      ['fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo']
+    var run = [
+     'fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo'
     ];
     runtime.set(function(argv, args, next){
-      argv.should.be.eql(called[index]);
-      if( !next() ){ done(); }
+      delete args.hrtime;
+      delete args.time;
+      if( args.flag === 'fooWasRunned' ){
+        argv.should.be.eql(run);
+        args.should.be.eql({ _ : [], flag : 'fooWasRunned' });
+      }
+      if( !next() && args.flag === true ){
+        argv.should.be.eql(run);
+        args.should.be.eql({ _ : ['foo'], flag : true });
+        done();
+      }
     });
     runtime.input.write(line+'\n');
   });

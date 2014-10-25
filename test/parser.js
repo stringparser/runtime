@@ -9,8 +9,9 @@ module.exports = function(pack, util){
   it('should parse arguments with minimist', function(){
     var parsed = runtime.parser('hello world --beep=boop');
     parsed.should.be.eql({
-         _ : ['hello', 'world'],
-      beep : 'boop'
+           _ : ['hello', 'world'],
+        beep : 'boop',
+      hrtime : parsed.hrtime
     });
   });
   it('should parse argv and camelcase them', function(){
@@ -19,6 +20,7 @@ module.exports = function(pack, util){
       .be.eql({
                _ : [],
           fooBar : 'value1',
+          hrtime : parsed.hrtime,
         someFlag : 'value2'
       });
   });
