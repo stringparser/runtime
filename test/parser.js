@@ -10,8 +10,7 @@ module.exports = function(pack, util){
     var parsed = runtime.parser('hello world --beep=boop');
     parsed.should.be.eql({
            _ : ['hello', 'world'],
-        beep : 'boop',
-      hrtime : parsed.hrtime
+        beep : 'boop'
     });
   });
   it('should parse argv and camelcase them', function(){
@@ -20,7 +19,6 @@ module.exports = function(pack, util){
       .be.eql({
                _ : [],
           fooBar : 'value1',
-          hrtime : parsed.hrtime,
         someFlag : 'value2'
       });
   });

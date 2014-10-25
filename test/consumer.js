@@ -6,17 +6,15 @@ module.exports = function(pack, util){
   should.exists(util);
   var runtime = pack.create('consumer');
 
-  runtime.set('foo', function(argv, args, next){
+  runtime.set('foo', function(argv){
     argv.push('--flag', 'fooWasRunned');
-    next(argv);
   });
-  runtime.set('--flag', function(argv, args, next){
+  runtime.set('--flag', function(argv){
     if(argv.indexOf('fooWasRunned') < 0 ){
       argv.push('flagWasRunned');
     } else {
       argv.push('flagWasRunnedAfterFoo');
     }
-    next();
   });
 
   it('rootNode should dispatch if no command exists', function(done){
@@ -40,11 +38,10 @@ module.exports = function(pack, util){
     runtime.set(function(argv, args, next){
       delete args.hrtime;
       delete args.time;
-      if( !next() && args.flag ){
-        delete args.hrtime;
+      if( !next() ){
         var run = ['fooWasRunned', 'flagWasRunnedAfterFoo'];
         argv.should.be.eql(run);
-        args.should.be.eql({ _ : [], flag : 'fooWasRunned' });
+        args.should.be.eql({ _ : ['foo'] });
         done();
       }
     });
@@ -76,7 +73,7 @@ module.exports = function(pack, util){
       delete args.time;
       if( !next() ){
         argv.should.be.eql(run);
-        args.should.be.eql({ _ : [], flag : 'fooWasRunned' });
+        args.should.be.eql({ _ : ['foo'], flag : true });
         done();
       }
     });
