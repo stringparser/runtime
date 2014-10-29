@@ -32,7 +32,7 @@
     "utils-debug": "^0.5.22",
     "utils-type": "^0.8.10",
     "v8-callsites": "^1.1.0",
-    "whech": "^0.5.14",
+    "whech": "^0.5.15",
     "semver": "^3.0.1"
   },
   "license": "MIT",
