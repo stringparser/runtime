@@ -124,6 +124,9 @@ runtime.set('createServer', function(argv, args, next){
 // so it will end up in the `rootHandle` set previously
 runtime.emit('next', 'start');
 ```
+As you can see there was no necessity to create any layer to dispatch, resolve not found commands or anything. All we are doing here is associate functions with object keys and be able to find those accordingly via their name.
+
+Look at the [runtime API](api.md) to get more insight on how this works.
 
 ## install
 
