@@ -9,7 +9,7 @@
 
 The aim of the project is to provide an easy and non opinionated container to develop `runtime interfaces`. That being a `CLI`, `REPL`, `router` or something completely different.
 
-On the [gulp-runtime repo](https://github.com/stringparser/gulp-runtime) I'm working on that `cli` feature for `gulp` so go check it out.
+On the [gulp-runtime repo](https://github.com/stringparser/gulp-runtime) I'm working on that `cli` use-case for `gulp` so go check it out.
 
 #### contents of readme
 
@@ -132,8 +132,12 @@ npm install runtime
 ```
 
 ## TODO
- - [ ] Review the command constructor
+
+ - [ ] More, better documentation
+
 <hr>
+
+## stats
 
 [![NPM](https://nodei.co/npm/runtime.png?downloads=true)](https://nodei.co/npm/runtime/)
 
