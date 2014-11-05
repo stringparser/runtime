@@ -21,8 +21,6 @@ module.exports = function(pack, util){
     var line = 'notRegisteredCommand --flag';
     var run = line.split(/[ ]+/);
     runtime.set(function(argv, args){
-      delete args.hrtime;
-      delete args.time;
       argv.should.be.eql(run);
       args.should.be.eql({
            _ : run.slice(0,1),
@@ -36,8 +34,6 @@ module.exports = function(pack, util){
   it('should run registered functions', function(done){
     var line = 'foo';
     runtime.set(function(argv, args, next){
-      delete args.hrtime;
-      delete args.time;
       if( !next() ){
         var run = ['fooWasRunned', 'flagWasRunnedAfterFoo'];
         argv.should.be.eql(run);
@@ -53,8 +49,6 @@ module.exports = function(pack, util){
     var run = ['flagWasRunned'];
     runtime.set(function(argv, args, next){
       if( !next() && args.flag ){
-        delete args.hrtime;
-        delete args.time;
         argv.should.be.eql(run);
         args.should.be.eql({ _ : [], flag : true });
         done();
@@ -69,8 +63,6 @@ module.exports = function(pack, util){
      'fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo'
     ];
     runtime.set(function(argv, args, next){
-      delete args.hrtime;
-      delete args.time;
       if( !next() ){
         argv.should.be.eql(run);
         args.should.be.eql({ _ : ['foo'], flag : true });

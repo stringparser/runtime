@@ -22,17 +22,13 @@
     "local"
   ],
   "dependencies": {
-    "camelcase": "^1.0.1",
     "herro": "^0.1.48",
     "minimist": "^0.2.0",
     "pretty-hrtime": "^0.2.2",
     "requirem": "^0.7.5",
-    "semver": "^3.0.1",
     "through2": "^0.6.3",
-    "user-home": "^1.1.0",
     "utils-debug": "^0.5.22",
     "utils-type": "^0.8.10",
-    "v8-callsites": "^1.1.0",
     "whech": "^0.5.24"
   },
   "license": "MIT",
