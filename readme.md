@@ -14,9 +14,11 @@ On the [gulp-runtime repo](https://github.com/stringparser/gulp-runtime) I'm wor
 #### contents of readme
 
 - [making a dumb logger](#making-a-dumb-http-logger)
-- [documentation](#documentation)
 - [install](#install)
 
+## documentation
+
+  For more information about the api see [the docs](docs).
 
 ## using this with [gulp](https://github.com/gulpjs/gulp)
 
