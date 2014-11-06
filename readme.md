@@ -11,14 +11,17 @@ The aim of the project is to provide an easy and non opinionated container to de
 
 On the [gulp-runtime repo](https://github.com/stringparser/gulp-runtime) I'm working on that `cli` use-case for `gulp` so go check it out.
 
-#### contents of readme
+## install
 
-- [making a dumb logger](#making-a-dumb-http-logger)
-- [install](#install)
+```bash
+npm install --save runtime
+```
+For more information about the api see [the docs](docs)
 
-## documentation
+## Usage
 
-  For more information about the api see [the docs](docs).
+- [with gulp](#using-this-with-gulp)
+- [http logger](#making-a-dumb-http-logger)
 
 ## using this with [gulp](https://github.com/gulpjs/gulp)
 
@@ -55,7 +58,7 @@ Start dancing!
  >
 ```
 
-Go to the [gulp-runtime](https://github.com/stringparser/gulp-runtime) repo if you don't want to use this from scratch.
+Go to the [gulp-runtime](https://github.com/stringparser/gulp-runtime) repo if you don't want to use this from scratch. That package implements the gulp CLI as a REPL, makes possible to run gulpfiles with gulp locally and another crazy stuff.
 
 ## making a dumb http logger
 
@@ -127,12 +130,6 @@ runtime.emit('next', 'start');
 As you can see there was no necessity to create any layer to dispatch, resolve not found commands or anything. All we are doing here is associate functions with object keys and be able to find those accordingly via their name.
 
 Look at the [runtime API](api.md) to get more insight on how this works.
-
-## install
-
-```
-npm install runtime
-```
 
 ## TODO
 
