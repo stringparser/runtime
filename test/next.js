@@ -4,7 +4,7 @@ var should = require('should');
 
 module.exports = function(pack, util){
   should.exists(util);
-  var runtime = pack.create('consumer');
+  var runtime = pack.create('next');
 
   runtime.set('foo', function(){
     this.argv.push('--flag', 'fooWasRunned');
@@ -21,6 +21,7 @@ module.exports = function(pack, util){
     var line = 'notRegisteredCommand --flag';
     var run = line.split(/[ ]+/);
     runtime.set(function(){
+      console.log('ctx', this);
       this.argv.should.be.eql(run);
       this.args.should.be.eql({
            _ : run.slice(0,1),
