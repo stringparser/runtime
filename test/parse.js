@@ -9,7 +9,7 @@ module.exports = function(pack, util){
 
   it('should give a hook for to configure properties', function(){
 
-    runtime.parse('myProp', function(node, opts, stems){
+    runtime.parse('myProp', function(node, stems){
       var last = stems.slice(-1)[0];
       node.children[last].myProp = stems;
     });
@@ -26,9 +26,9 @@ module.exports = function(pack, util){
 
     var handler = runtime.config('parse').handle;
 
-    runtime.parse('handle', function(node, opts, stems){
+    runtime.parse('handle', function(node, stems){
       var last = stems.slice(-1)[0];
-      var second = stems.slice(1,2);
+      var second = stems.slice(1,2)[0];
       node.children[last].handle = function(){
         return second;
       };
@@ -37,19 +37,21 @@ module.exports = function(pack, util){
     runtime.set('hey yall you', function willNotWork(){});
 
     runtime.get('hey yall you').handle()
-      .should.be.eql(['yall']);
+      .should.be.eql('yall');
 
     runtime.set('mmmmm bierrr', function willNotWork(){});
 
     runtime.get('mmmmm bierrr').handle()
-      .should.be.eql(['bierrr']);
+      .should.be.eql('bierrr');
 
-    // leave it as it was for next tests
-    runtime.parse('handle', handler);
     runtime.set('hello there you jonki', function(){
       return 'allright';
     });
+
     runtime.get('hello there you jonki').handle()
-      .should.be.eql('allright');
+      .should.be.eql('there');
+
+    // leave it as it was for next tests
+    runtime.parse('handle', handler);
   });
 };

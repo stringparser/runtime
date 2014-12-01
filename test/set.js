@@ -16,7 +16,7 @@ module.exports = function(pack, util){
     .set({ rootCustomProp : 'rootCustomProp' });
 
   runtime
-    .set({ completion : ['completion', 'built', 'in', 'parser'] });
+    .set({ completion : ['built', 'in', 'completion', 'parser'] });
 
   runtime
     .set('1', function one(){})
@@ -32,9 +32,9 @@ module.exports = function(pack, util){
     .set(['1-alias', '2-alias', '3-alias'], function aliases(){});
 
   var rootNode = runtime.get();
-
   describe('rootNode', function(){
 
+    console.log(rootNode);
     it('should be Object', function(){
       should(rootNode.constructor.name).be.eql('Object');
     });
@@ -57,6 +57,7 @@ module.exports = function(pack, util){
     });
 
     it('should have the registered handle', function(){
+
       rootNode.handle.should
         .be.a.Function
         .and.be.eql(rootHandle);

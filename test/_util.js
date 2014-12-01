@@ -7,7 +7,7 @@ module.exports = {
   testSuite : function(){
     var testSuite = fs.readdirSync(__dirname);
     // in case there is priority
-    var testFirst = [];
+    var testFirst = ['set'];
 
     // use it also to omit _main & _util files
     testFirst.concat('_main.js', '_util.js').forEach(function(file){
