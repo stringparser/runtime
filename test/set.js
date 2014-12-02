@@ -34,7 +34,6 @@ module.exports = function(pack, util){
   var rootNode = runtime.get();
   describe('rootNode', function(){
 
-    console.log(rootNode);
     it('should be Object', function(){
       should(rootNode.constructor.name).be.eql('Object');
     });

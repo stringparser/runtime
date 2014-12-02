@@ -21,13 +21,14 @@ module.exports = function(pack, util){
     var line = 'notRegisteredCommand --flag';
     var run = line.split(/[ ]+/);
     runtime.set(function(){
-      console.log('ctx', this);
-      this.argv.should.be.eql(run);
-      this.args.should.be.eql({
-           _ : run.slice(0,1),
-        flag : true
-      });
-      done();
+      if( this.done ){
+        this.argv.should.be.eql(run.concat('flagWasRunned'));
+        this.params.should.be.eql({
+             _ : run.slice(0,1),
+          flag : true
+        });
+        done();
+      }
     });
     runtime.next(line);
   });
@@ -35,10 +36,10 @@ module.exports = function(pack, util){
   it('should run registered functions', function(done){
     var line = 'foo';
     runtime.set(function(){
-      if( this.cmd.done ){
-        var run = ['fooWasRunned', 'flagWasRunnedAfterFoo'];
+      if( this.done ){
+        var run = ['foo', '--flag', 'fooWasRunned', 'flagWasRunnedAfterFoo'];
         this.argv.should.be.eql(run);
-        this.args.should.be.eql({ _ : ['foo'] });
+        this.params.should.be.eql({ _ : ['foo'] });
         done();
       }
     });
@@ -47,11 +48,11 @@ module.exports = function(pack, util){
 
   it('should run flags', function(done){
     var line = '--flag';
-    var run = ['flagWasRunned'];
+    var run = [ '--flag', 'flagWasRunned'];
     runtime.set(function(){
-      if( this.cmd.done && this.args.flag ){
+      if( this.done ){
         this.argv.should.be.eql(run);
-        this.args.should.be.eql({ _ : [], flag : true });
+        this.params.should.be.eql({ _ : [], flag : true });
         done();
       }
     });
@@ -61,12 +62,13 @@ module.exports = function(pack, util){
   it('should run the registered functions if exists', function(done){
     var line = 'foo --flag';
     var run = [
+     'foo', '--flag', '--flag',
      'fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo'
     ];
     runtime.set(function(){
-      if( this.cmd.done ){
+      if( this.done ){
         this.argv.should.be.eql(run);
-        this.args.should.be.eql({ _ : ['foo'], flag : true });
+        this.params.should.be.eql({ _ : ['foo'], flag : true });
         done();
       }
     });
