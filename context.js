@@ -1,6 +1,6 @@
 'use strict';
 
-var runtime = require('./.').create('context', {
+var runtime = require('./.').create('context').repl({
      input : process.stdin,
     output : process.stdout,
     completion : null
@@ -8,7 +8,7 @@ var runtime = require('./.').create('context', {
 
 runtime.set(function rootNode(err, next){
   console.log(next);
-  this.mode = 'parllel';
+  this.mode = 'parallel';
   if(next.done){ runtime.prompt(); }
 });
 
@@ -31,14 +31,13 @@ runtime.set('parallel', function parallel(err, next){
 var series = ['one', 'two', 'three'];
 series.forEach(function(name){
   runtime.set(name, function(err, next){
-    var scope = next.clone(true);
-    var rtime = Math.random()*1000;
+    var scope = next.clone();
+    var rtime = Math.random()*10;
     var pending = next.argv.slice(next.index+1).join(', ');
     console.log('`%s` in <%s> with `%s`',
       name, this.mode || 'parallel', pending);
     setTimeout(function(){
       console.log('`%s` done after %s (%s)', name, scope.time(), rtime);
-      console.log(scope);
       console.log();
       next();
     }, rtime);
