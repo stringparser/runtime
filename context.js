@@ -12,7 +12,7 @@ runtime.set(function rootNode(err, next){
 });
 
 runtime.set('series', function series(err, next){
-  next.wait = true;
+  next.async = true;
   this.mode = 'series';
   console.log('\nStarting <%s> with %s',
     this.mode, next.argv.slice(next.index));
@@ -20,7 +20,7 @@ runtime.set('series', function series(err, next){
 });
 
 runtime.set('parallel', function parallel(err, next){
-  next.wait = false;
+  next.async = false;
   this.mode = 'parallel';
   console.log('\nStarting <%s> with %s',
     this.mode, next.argv.slice(next.index));
