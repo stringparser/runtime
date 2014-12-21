@@ -7,7 +7,6 @@ var runtime = require('./.').create('context').repl({
   });
 
 runtime.set(function rootNode(err, next){
-  console.log(next);
   this.mode = 'parallel';
   if(next.done){ runtime.prompt(); }
 });
@@ -28,21 +27,20 @@ runtime.set('parallel', function parallel(err, next){
   next();
 });
 
-var series = ['one', 'two', 'three'];
-series.forEach(function(name){
-  runtime.set(name, function(err, next){
-    var scope = next.clone();
-    var rtime = Math.random()*10;
-    var pending = next.argv.slice(next.index+1).join(', ');
-    console.log('`%s` in <%s> with `%s`',
-      name, this.mode || 'parallel', pending);
-    setTimeout(function(){
-      console.log('`%s` done after %s (%s)', name, scope.time(), rtime);
-      console.log();
-      next();
-    }, rtime);
-  });
+runtime.set(':name(\\w+)', function(err, next){
+  var ctx = next.clone();
+  var par = ctx.cmd.params;
+  var rtime = Math.random()*1000;
+  var pending = next.argv.slice(next.index+1).join(', ');
+  console.log('`%s` in <%s> with `%s`', par.name,
+    this.mode || 'parallel', pending);
+  setTimeout(function(){
+    console.log('`%s` done after %s (%s)', par.name, ctx.time(), rtime);
+    console.log();
+    next();
+  }, rtime);
 });
+
 
 runtime.set('get page.data /url', function(next){
   console.log(next);
