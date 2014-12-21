@@ -25,6 +25,7 @@
     "camelcase": "^1.0.1",
     "herro": "^0.1.48",
     "lodash.clone": "^2.4.1",
+    "manifold": "^1.0.0",
     "minimist": "^0.2.0",
     "pretty-hrtime": "^0.2.2",
     "requirem": "^0.7.5",
