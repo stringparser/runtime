@@ -6,12 +6,12 @@ var runtime = require('./.').create('context').repl({
     completion : null
   });
 
-runtime.set(function rootNode(err, next){
+runtime.set(function rootNode(next){
   this.mode = 'parallel';
   if(next.done){ runtime.prompt(); }
 });
 
-runtime.set('series', function series(err, next){
+runtime.set('series', function series(next){
   next.async = true;
   this.mode = 'series';
   console.log('\nStarting <%s> with %s',
@@ -19,7 +19,7 @@ runtime.set('series', function series(err, next){
   next();
 });
 
-runtime.set('parallel', function parallel(err, next){
+runtime.set('parallel', function parallel(next){
   next.async = false;
   this.mode = 'parallel';
   console.log('\nStarting <%s> with %s',
@@ -27,9 +27,11 @@ runtime.set('parallel', function parallel(err, next){
   next();
 });
 
-runtime.set(':name(\\w+)', function(err, next){
+runtime.set(':name(\\w+)', function(next){
+  console.log('from %s', next.argv[next.index-1]);
+  console.log(arguments);
   var ctx = next.clone();
-  var par = ctx.cmd.params;
+  var par = ctx.params;
   var rtime = Math.random()*1000;
   var pending = next.argv.slice(next.index+1).join(', ');
   console.log('`%s` in <%s> with `%s`', par.name,
