@@ -32,6 +32,7 @@
     "through2": "^0.6.3",
     "utils-debug": "^0.5.22",
     "utils-type": "^0.8.10",
+    "uuid": "^2.0.1",
     "whech": "^0.5.24"
   },
   "license": "MIT",

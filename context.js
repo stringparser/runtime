@@ -28,17 +28,12 @@ runtime.set('parallel', function parallel(next){
 });
 
 runtime.set(':name(\\w+)', function(next){
-  console.log('from %s', next.argv[next.index-1]);
-  console.log(arguments);
+  console.log('from "%s"', next.argv[next.index-1]);
   var ctx = next.clone();
-  var par = ctx.params;
   var rtime = Math.random()*1000;
-  var pending = next.argv.slice(next.index+1).join(', ');
-  console.log('`%s` in <%s> with `%s`', par.name,
-    this.mode || 'parallel', pending);
   setTimeout(function(){
-    console.log('`%s` done after %s (%s)', par.name, ctx.time(), rtime);
-    console.log();
+    console.log('`%s` done after %s (%s)', ctx.params.name, ctx.time(), rtime);
+    console.log(ctx); console.log(next);
     next();
   }, rtime);
 });
