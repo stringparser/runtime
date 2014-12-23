@@ -12,28 +12,21 @@ runtime.set(function rootNode(next){
 });
 
 runtime.set('series', function series(next){
-  next.async = true;
-  this.mode = 'series';
-  console.log('\nStarting <%s> with %s',
-    this.mode, next.argv.slice(next.index));
-  next();
+  console.log('\nStarting <%s> in series', next.argv.slice(next.index));
+  next.series = true; next();
 });
 
 runtime.set('parallel', function parallel(next){
-  next.async = false;
-  this.mode = 'parallel';
-  console.log('\nStarting <%s> with %s',
-    this.mode, next.argv.slice(next.index));
-  next();
+  console.log('\nStarting <%s> in parallel', next.argv.slice(next.index));
+  next.series = false; next();
 });
 
 runtime.set(':name(\\w+)', function(next){
-  console.log('from "%s"', next.argv[next.index-1]);
   var ctx = next.clone();
+  var name = next.params.name;
   var rtime = Math.random()*1000;
   setTimeout(function(){
-    console.log('`%s` done after %s (%s)', ctx.params.name, ctx.time(), rtime);
-    console.log(ctx); console.log(next);
+    console.log('`%s` done after %s (%s)', name, ctx.time(), rtime);
     next();
   }, rtime);
 });
