@@ -17,27 +17,28 @@ app.set('#report', function(next){
 });
 
 app.set('series', function series(next){
-  console.log('\nStarting <%s> in series', next.argv.slice(next.index).join(', '));
+  var pending = next.argv.slice(next.index).join(', ');
+  console.log('\nStarting <%s> in series', pending);
   next.wait = true; next();
-  if(next.done){ next.time(next.argv.slice(0, next.index-next.done).join(' ')); return console.log(next); }
   next.argv.push('series');
 });
 
 app.set('parallel', function parallel(next){
   next.wait = false;
-  console.log('\nStarting <%s> in parallel', next.argv.slice(next.index).join(', '));
+  var pending = next.argv.slice(next.index).join(', ');
+  console.log('\nStarting <%s> in parallel', pending);
   next.argv.push('parallel');
   next();
 });
 
 app.set(':name(\\w+)', function(next){
-  var self = this;
   var name = this.params.name;
-  process.nextTick(function(){
-    console.log('`%s` done after %s', name, next.time(self.path));
+  var rtime = Math.random()*100;
+  setTimeout(function(){
+    console.log('`%s` done after (%s ms)', name, Math.floor(rtime));
     console.log(next);
     next();
-  });
+  }, rtime);
 });
 
 console.log(argv);
