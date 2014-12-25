@@ -75,7 +75,7 @@ function Runtime(name, opt){
 util.inherits(Runtime, Manifold);
 
 //
-// ## Runtime.next
+// ## Runtime.repl
 // > dispatch next command line (CL) to run
 //
 // Each CL creates a new context and a next callback
@@ -133,7 +133,7 @@ Runtime.prototype.repl = function(o){
 //
 // Each CL creates a new context and a next callback
 //
-// returns this.next(ctx, args, next)
+// returns `next`;
 //
 
 Runtime.prototype.next = function(/* arguments */){
