@@ -138,12 +138,12 @@ Runtime.prototype.repl = function(o){
 
 Runtime.prototype.next = function(/* arguments */){
   var self = this;
-  arguments[arguments.length++] = next;
-  var args = util.args(arguments, 1);
-  var errorHandle = this.get('error').handle;
 
   var ctx = this.get(arguments[0]);
   ctx.handle = ctx.handle || self.get().handle;
+  arguments[arguments.length++] = next;
+  var args = util.args(arguments, 1);
+  var errorHandle = this.get('error').handle;
 
   function next(stem){
     /*jshint validthis:true */
