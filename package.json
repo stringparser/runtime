@@ -22,9 +22,11 @@
     "local"
   ],
   "dependencies": {
-    "manifold": "^1.0.0",
-    "pretty-hrtime": "^0.2.2",
-    "utils-type": "^0.8.10"
+    "lodash.clone": "^2.x.x",
+    "lodash.merge": "^2.x.x",
+    "manifold": "^1.x.x",
+    "pretty-hrtime": "^0.2.x",
+    "utils-type": "^0.8.x"
   },
   "license": "MIT",
   "devDependencies": {
