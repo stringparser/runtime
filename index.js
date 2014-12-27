@@ -3,49 +3,34 @@
 var util = require('./util');
 var Manifold = require('manifold');
 
-// var debug = util.debug(__filename);
+//
+// ## module.exports
+//
+// - get: obtain a Runtime instance from cache
+// - create: instantiate a Runtime instance and cache it
+//
+// returns this.next(ctx, args, next)
+//
 
 exports = module.exports = {
-  get : get,
-  create : create,
-  Runtime : Runtime
+  get: get,
+  create: create,
+  Runtime: Runtime
 };
 
-//
-// ## Runtime.next
-// > dispatch next command line (CL) to run
-//
-// Each CL creates a new context and a next callback
-//
-// returns this.next(ctx, args, next)
-//
+function get(name){
+  return get.cache[name];
+}
+get.cache = { };
 
-var warehouse = { };
-function create(name, config){
+function create(name, opt){
   name = util.type(name).string || '#root';
-  return (warehouse[name] = new Runtime(name, config));
+  return (get.cache[name] = new Runtime(name, opt));
 }
 
 //
-// ## Runtime.next
-// > dispatch next command line (CL) to run
-//
-// Each CL creates a new context and a next callback
-//
-// returns this.next(ctx, args, next)
-//
-
-function get(name, opts){
-  return warehouse[name] || create(name, opts);
-}
-
-//
-// ## Runtime.next
-// > dispatch next command line (CL) to run
-//
-// Each CL creates a new context and a next callback
-//
-// returns this.next(ctx, args, next)
+// ## Runtime
+// > constructor
 //
 
 function Runtime(name, opt){
@@ -59,35 +44,44 @@ function Runtime(name, opt){
   opt.name = opt.name || name;
 
   Manifold.call(this, opt);
-  if(opt.input){ this.repl(opt); }
+
+  function app(stems, opt){
+    if(opt){ return app.set(stems, opt); }
+    else   { return app.get(stems, opt); }
+  }
+  util.merge(app, this);
+
+  var doREPL = util.type(opt.input || opt.output).match(/stream/);
+  if(doREPL){ app.repl(opt); }
 
   // default handlers
   //
-  this.set(function rootNode(){
-  throw new Error(
-    'runtime.get() needs a function to dispatch\n' +
-    'try this `runtime.set(function)`\n');
+  app.set(function rootNode(){
+    throw new Error(
+      'runtime.get() needs a function to dispatch\n' +
+      'try this `runtime.set(function)`\n');
   });
 
   // default errorHandle
-  this.set('error', function errorNode(err){ throw err; });
+  app.set('error', function errorNode(err){ throw err; });
+
+  return app;
 }
 util.inherits(Runtime, Manifold);
 
 //
 // ## Runtime.repl
-// > dispatch next command line (CL) to run
+// > REPL powered by the readline module
 //
-// Each CL creates a new context and a next callback
-//
-// returns this.next(ctx, args, next)
 //
 
 Runtime.prototype.repl = function(o){
 
   if(this.input){ return this; }
 
+  // this was the very beginning of it all :D
   var readline = require('readline');
+
   util.merge(this, readline.createInterface({
     input: util.type(o.input).match(/stream/) || util.through.obj(),
     output: util.type(o.output).match(/stream/) || util.through.obj(),
@@ -95,7 +89,6 @@ Runtime.prototype.repl = function(o){
     completer: util.type(o.completer).function || util.completer,
   }));
 
-  // this was the very beginning :)
   this.on('line', this.next());
   if(!this.terminal){ return this; }
 
