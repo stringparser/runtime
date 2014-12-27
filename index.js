@@ -23,56 +23,67 @@ function get(name){
 }
 get.cache = { };
 
-function create(name, opt){
+function create(name, opts){
   name = util.type(name).string || '#root';
-  return (get.cache[name] = new Runtime(name, opt));
+  return (get.cache[name] = new Runtime(name, opts));
 }
 
-//
-// ## Runtime
+// ## Runtime([name, opts])
 // > constructor
 //
+// arguments
+//  - name: type `string`, name for the runtime
+//  - opts
 
-function Runtime(name, opt){
+// return
+//
+
+function Runtime(name, opts){
 
   if( !(this instanceof Runtime) ){
-    return new Runtime(name, opt);
+    return new Runtime(name, opts);
   }
 
   // currywurst
-  opt = util.type(opt || name).plainObject || { };
-  opt.name = opt.name || name;
+  //
+  opts = util.type(opts || name).plainObject || { };
+  opts.name = opts.name || name;
 
-  Manifold.call(this, opt);
+  Manifold.call(this, opts);
 
   function app(stems, opt){
-    if(opt){ return app.set(stems, opt); }
-    else   { return app.get(stems, opt); }
+    if(opt || typeof stems !== 'string'){
+      return app.set(stems, opt); 
+    }
+    return app.get(stems, opt);
   }
   util.merge(app, this);
 
-  var doREPL = util.type(opt.input || opt.output).match(/stream/);
-  if(doREPL){ app.repl(opt); }
+  var doREPL = util.type(opts.input || opts.output).match(/stream/);
+  if(doREPL){ app.repl(opts); }
 
   // default handlers
   //
-  app.set(function rootNode(){
+  app(function rootNode(){
     throw new Error(
       'runtime.get() needs a function to dispatch\n' +
       'try this `runtime.set(function)`\n');
   });
 
   // default errorHandle
-  app.set('error', function errorNode(err){ throw err; });
+  //
+  app('error', function errorNode(err){ throw err; });
 
   return app;
 }
 util.inherits(Runtime, Manifold);
 
-//
-// ## Runtime.repl
+// ## Runtime.repl([opt])
 // > REPL powered by the readline module
 //
+// arguments
+//
+// return
 //
 
 Runtime.prototype.repl = function(o){
@@ -120,13 +131,12 @@ Runtime.prototype.repl = function(o){
   return this;
 };
 
+// ## Runtime.next(/* arguments */)
+// > dispatch next command
 //
-// ## Runtime.next
-// > dispatch next command line (CL) to run
+// arguments
 //
-// Each CL creates a new context and a next callback
-//
-// returns `next`;
+// return
 //
 
 Runtime.prototype.next = function(/* arguments */){
