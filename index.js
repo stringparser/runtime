@@ -153,7 +153,7 @@ Runtime.prototype.next = function(/* arguments */){
       next.time(path); // done
       scope = this || ctx;
       next.done = Boolean(!ctx.depth || !next.argv[next.index]);
-      return loop.apply(scope, arguments);
+      loop.apply(scope, arguments);
     };
   }
 
@@ -178,6 +178,7 @@ Runtime.prototype.next = function(/* arguments */){
     if(typeof stem === 'string'){ return self.next.apply(self, arguments); }
     if(this instanceof Error){
       errorHandle.apply(self, [this].concat(util.args(arguments)));
+      return next(ctx);
     }
 
     // swap args
@@ -190,9 +191,9 @@ Runtime.prototype.next = function(/* arguments */){
     try {
       ctx.handle.apply(this, args);
     } catch(error){ errorHandle.apply(scope, [error].concat(args)); }
-    
+
     if(ctx.handle.length < args.length){ loop(); }
-    return next;
+    return next(next);
   }
 
   // simple
