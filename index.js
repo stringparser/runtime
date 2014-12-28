@@ -53,7 +53,7 @@ function Runtime(name, opts){
 
   function app(stems, opt){
     if(opt || typeof stems !== 'string'){
-      return app.set(stems, opt); 
+      return app.set(stems, opt);
     }
     return app.get(stems, opt);
   }
@@ -100,7 +100,7 @@ Runtime.prototype.repl = function(o){
     completer: util.type(o.completer).function || util.completer,
   }));
 
-  this.on('line', this.next());
+  this.on('line', this.next);
   if(!this.terminal){ return this; }
 
   // the default prompt
@@ -142,48 +142,46 @@ Runtime.prototype.repl = function(o){
 Runtime.prototype.next = function(/* arguments */){
   var self = this;
 
-  var ctx = this.get(arguments[0]);
-  ctx.handle = ctx.handle || self.get().handle;
-  arguments[arguments.length++] = next;
+  arguments[arguments.length++] = follow;
   var args = util.args(arguments, 1);
   var errorHandle = this.get('error').handle;
 
-  function next(stem){
-    /*jshint validthis:true */
+  var ctx = this.get(arguments[0]);
+  ctx.handle = ctx.handle || self.get().handle;
 
-    if(util.type(stem).string){
-      return self.next.apply(self, arguments)();
-    }
+  function follow(ctx){
+    var path = ctx.path;
+    return function(){
+      follow.time(path);
+      return next.apply(self, arguments);
+    };
+  }
+
+  function next(stem){
+    /* jshint validthis:true */
+    if(!ctx.depth || !next.argv[next.index]){ return follow; }
+    var type = util.type(stem);
+    if(type.string){ return self.next.apply(self, arguments); }
+    if(type.error){ errorHandle.apply(self, arguments); }
 
     // swap args
     if(arguments.length){
-      arguments[arguments.length++] = next;
+      arguments[arguments.length++] = follow;
       args = util.args(arguments);
     }
 
     // refresh
-    var path = ctx.path;
     var cmd = self.get(next.argv.slice(next.index), ctx);
     if(!cmd.handle){ cmd.handle = self.get().handle; }
-    if(next.index > 1){ next.time(path); }
     next.index += (ctx.depth || 1); next.time(ctx.path);
 
-    if(next.done){
-      next.done++; console.log('next.done %s times', next.done); return next;
-    } else if(!ctx.depth || !next.argv[next.index]){
-      next.done = 1;
-      try { ctx.handle.apply(util.merge({}, ctx), args); }
-      catch(error){ errorHandle.apply(ctx, [error].concat(args)); }
-      return next;
-    }
-
-    try { cmd.handle.apply(util.merge({}, ctx), args); }
-    catch(error){ errorHandle.apply(ctx, [error].concat(args)); }
-
-    return next;
+    try {
+      ctx.handle.apply(ctx, args.concat(follow));
+    } catch(error){ errorHandle.apply(ctx, [error].concat(args)); }
+    return follow;
   }
 
-  util.merge(next, {
+  util.merge(follow, {
     _id: Object.create(null),
     argv: this.boil('#context.argv')(arguments[0]),
     index: 0,
@@ -197,5 +195,5 @@ Runtime.prototype.next = function(/* arguments */){
   });
 
   // simple
-  return next;
+  return next();
 };
