@@ -141,61 +141,59 @@ Runtime.prototype.repl = function(o){
 //
 
 Runtime.prototype.next = function(/* arguments */){
-  var self = this, scope = this;
-  var ctx = this.get(arguments[0]);
-  arguments[arguments.length++] = next;
+  var self = this, first =  { };
+  var ctx = this.get(arguments[0], first);
+  var args = util.args(arguments, 1);
+  var errorHandle = this.get('error').handle;
 
-  function next(ctx){
-    next.time(ctx.path); // start
-    var path = ctx.path;
-    return function done(/* arguments */){
+  function loop(stem){
+    /* jshint validthis:true */
+    if(loop.end){ loop.time(first.path); console.log(loop); return next; }
+    if(arguments.length){ args = util.args(arguments); }
+    if(stem instanceof Error){
+      errorHandle.apply(self, [stem].concat(args));
+      return next();
+    }
+
+    ctx.handle = self.get(loop.argv.slice(loop.index), ctx).handle;
+    if(!ctx.handle){ ctx.handle = self.get().handle; }
+    loop.index += (ctx.depth || 1);
+
+    next.path = loop.path = ctx.path;
+    next.depth = ctx.depth;
+    function next(){
       /* jshint validthis:true */
-      next.time(path); // done
-      scope = this || ctx;
-      next.done = Boolean(!ctx.depth || !next.argv[next.index]);
-      loop.apply(scope, arguments);
-    };
+      if(ctx.index-next.depth){ var time = loop.time(next.path);
+        console.log('[next] >%s< in', next.path, time);
+      }
+      var that = this || ctx;
+      util.nextTick(function(){
+        loop.apply(that, arguments);
+      });
+      loop.end = Boolean(!ctx.depth || !next.argv[next.index]);
+      return next;
+    }
+    util.merge(next, loop);
+
+    loop.time(next.path);
+    try { ctx.handle.apply(this, args.concat(next)); }
+    catch(error){ errorHandle.apply(ctx, [error].concat(args, next)); }
+    return next;
   }
 
-  util.merge(next, {
-   index: 0,
-     _id: Object.create(null),
+  util.merge(loop, {
+    index: 0,
+    _id: Object.create(null),
     argv: this.boil('#context.argv')(arguments[0]),
     time: function getTime(name){
+      this.path = name;
       var time = this._id[name];
       if(typeof time === 'string'){ return time; }
       if(time === void 0){ this._id[name] = process.hrtime(); }
       else { this._id[name] = util.prettyTime(process.hrtime(time)); }
-        return this._id[name] || this._id;
+      return this._id[name] || this._id;
     }
   });
 
-  var _args_ = util.args(arguments, 1);
-  var errorHandle = this.get('error').handle;
-  function loop(stem){
-    /* jshint validthis:true */
-    if(next.done){ return next; }
-    if(typeof stem === 'string'){ return self.next.apply(self, arguments); }
-    if(this instanceof Error){
-      errorHandle.apply(self, [this].concat(util.args(arguments)));
-      return next(ctx);
-    }
-
-    // swap args
-    if(arguments.length){ args = util.args(arguments); }
-    var cmd = self.get(next.argv.slice(next.index), ctx);
-    if(!cmd.handle){ cmd.handle = self.get().handle; }
-    next.index += (ctx.depth || 1);
-
-    var args = _args_.concat(next(ctx));
-    try {
-      ctx.handle.apply(this, args);
-    } catch(error){ errorHandle.apply(scope, [error].concat(args)); }
-
-    if(ctx.handle.length < args.length){ loop(); }
-    return next(next);
-  }
-
-  // simple
-  return loop();
+  return loop.apply(ctx, args);
 };
