@@ -142,8 +142,11 @@ Runtime.prototype.repl = function(o){
 
 Runtime.prototype.next = function(/* arguments */){
   var self = this, first =  { };
+  var len = arguments.length - 1;
   var args = util.args(arguments, 1);
   var ctx = this.get(arguments[0], first);
+
+  ctx.handle = ctx.handle || self.get().handle;
   var errorHandle = this.get('error '+ctx.path).handle;
 
   function loop(){
@@ -152,33 +155,34 @@ Runtime.prototype.next = function(/* arguments */){
       var that = this || ctx;
       if(stem instanceof Error){
         return errorHandle.apply(that, arguments);
-      } else if(arguments.length){ args = util.args(arguments); }
+      } else if(arguments.length){
+        args = util.args(arguments);
+        len = args.length;
+      }
 
       util.nextTick(function(){
         loop.wait = next.wait;
-        loop.done = Boolean(!ctx.depth || !loop.argv[loop.index]);
-        var time = next.time();
-        console.log('[time] >%s< in', next.found, time);
-        loop.apply(that, arguments);
+        loop.done = Boolean(!next.depth || !loop.argv[loop.index]);
+        console.log('[time] >%s< in', next.found, next.time());
+        if(!loop.done){ loop.apply(that, arguments); }
+        else { console.log(loop); }
       });
 
       return next;
     }
     util.merge(next, loop);
 
-    if(loop.done){ next.time(); console.log(loop); return next; }
-
-    ctx.handle = self.get(next.argv.slice(loop.index), next).handle;
-    ctx.handle = ctx.handle || self.get().handle;
-    next.index = loop.index += (next.depth || 1);
+    var argv = next.argv.slice(loop.index);
+    next.handle = self.get(argv, next).handle || ctx.handle;
+    loop.index += (next.depth || 1);
 
     try {
-      next.result = ctx.handle.apply(this, args.concat(next));
+      next.time();
+      next.handle.apply(this, args.concat(next));
     } catch(error){ errorHandle.apply(ctx, [error].concat(args, next)); }
 
-    if(next.wait === true){ next.time(); return next; }
-    if(ctx.handle.length > args.length + 1){ return next(); }
-
+    if(next.wait){ return next; } hrtime[next.path] = null;
+    if(next.handle.length > len){ return next(); }
     return next();
   }
 
@@ -188,17 +192,18 @@ Runtime.prototype.next = function(/* arguments */){
     hrtime: hrtime,
     argv: this.boil('#context.argv')(arguments[0]),
     time: function getTime(){
-      if(this.done && !hrtime[this.path]){ return ; }
-      var time = (hrtime[this.path] || Object.create(null));
+      if(this.done && !hrtime[this.path]){ console.log(loop); return ; }
+      var path = this.path;
+      var time = (hrtime[path] || Object.create(null));
       if(typeof time.done === 'string'){ return time.done; }
       if(time.start === void 0){
-        return (hrtime[this.path] = {start: process.hrtime()});
+        return (hrtime[path] = {start: process.hrtime()});
       }
-      time = hrtime[this.path].end = process.hrtime(time.start);
-      time = hrtime[this.path].done = util.prettyTime(time);
+      time = hrtime[path].end = process.hrtime(time.start);
+      time = hrtime[path].done = util.prettyTime(time);
       return time;
     }
   });
 
-  return loop.apply(ctx, args);
+  return loop.apply(ctx);
 };
