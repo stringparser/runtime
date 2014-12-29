@@ -24,7 +24,7 @@
   "dependencies": {
     "lodash.clone": "2.x.x",
     "manifold": "1.x.x",
-    "next-tick": "^0.2.2",
+    "next-tick": "^0.2.x",
     "pretty-hrtime": "0.2.x",
     "utils-merge": "^1.0.0",
     "utils-type": "0.8.x"

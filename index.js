@@ -173,26 +173,30 @@ Runtime.prototype.next = function(/* arguments */){
     next.index = loop.index += (next.depth || 1);
 
     try {
-      ctx.handle.apply(this, args.concat(next));
-    } catch(err){ errorHandle.apply(ctx, [err].concat(args, next)); }
+      next.result = ctx.handle.apply(this, args.concat(next));
+    } catch(error){ errorHandle.apply(ctx, [error].concat(args, next)); }
 
     if(next.wait === true){ next.time(); return next; }
-    if(ctx.handle)
+    if(ctx.handle.length > args.length + 1){ return next(); }
+
     return next();
   }
 
+  var hrtime = Object.create(null);
   util.merge(loop, {
     index: 0,
-    hrtime: Object.create(null),
+    hrtime: hrtime,
     argv: this.boil('#context.argv')(arguments[0]),
     time: function getTime(){
-      var hrtime = this.hrtime;
       if(this.done && !hrtime[this.path]){ return ; }
-      var time = hrtime[this.path];
-      if(typeof time === 'string'){ return time; }
-      if(time === void 0){ time = process.hrtime(); }
-      else { time = util.prettyTime(process.hrtime(time)); }
-      return (hrtime[this.path] = time);
+      var time = (hrtime[this.path] || Object.create(null));
+      if(typeof time.done === 'string'){ return time.done; }
+      if(time.start === void 0){
+        return (hrtime[this.path] = {start: process.hrtime()});
+      }
+      time = hrtime[this.path].end = process.hrtime(time.start);
+      time = hrtime[this.path].done = util.prettyTime(time);
+      return time;
     }
   });
 
