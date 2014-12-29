@@ -25,7 +25,7 @@ app.set('parallel', function parallel(next){
 app.set(':name(\\w+)', function(next){
   var rtime = Math.random()*100;
   setTimeout(function(){
-    console.log('[done] >%s< in %s', next.found, rtime);
+    console.log('[real] >%s< in %s', next.found, rtime);
     next();
   }, rtime);
 });

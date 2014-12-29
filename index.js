@@ -163,37 +163,38 @@ Runtime.prototype.next = function(/* arguments */){
       util.nextTick(function(){
         loop.wait = next.wait;
         loop.done = Boolean(!next.depth || !loop.argv[loop.index]);
-        console.log('[time] >%s< in', next.found, next.time());
+        var time = next.time();
+        console.log('[%s] >%s< in',
+        typeof time === 'string' ? 'done' : 'wait', next.found, time);
         if(!loop.done){ loop.apply(that, arguments); }
-        else { console.log(loop); }
+        else { console.log(next); }
       });
 
       return next;
     }
     util.merge(next, loop);
 
-    var argv = next.argv.slice(loop.index);
-    next.handle = self.get(argv, next).handle || ctx.handle;
+    next.handle = self.get(next.argv.slice(loop.index), next).handle;
     loop.index += (next.depth || 1);
 
     try {
-      next.time();
+      next.time(); if(!next.handle){ next.handle = ctx.handle; }
       next.handle.apply(this, args.concat(next));
     } catch(error){ errorHandle.apply(ctx, [error].concat(args, next)); }
 
-    if(next.wait){ return next; } hrtime[next.path] = null;
+    if(next.wait === true){ return next; }
+    next.hrtime[next.path] = null;
     if(next.handle.length > len){ return next(); }
     return next();
   }
 
-  var hrtime = Object.create(null);
   util.merge(loop, {
     index: 0,
-    hrtime: hrtime,
+    hrtime: Object.create(null),
     argv: this.boil('#context.argv')(arguments[0]),
     time: function getTime(){
-      if(this.done && !hrtime[this.path]){ console.log(loop); return ; }
       var path = this.path;
+      var hrtime = this.hrtime;
       var time = (hrtime[path] || Object.create(null));
       if(typeof time.done === 'string'){ return time.done; }
       if(time.start === void 0){
