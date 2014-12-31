@@ -165,9 +165,9 @@ Runtime.prototype.next = function(/* arguments */){
         loop.done = Boolean(!next.depth || !loop.argv[loop.index]);
         var time = next.time();
         console.log('[%s] >%s< in',
-        typeof time === 'string' ? 'done' : 'wait', next.found, time);
-        if(!loop.done){ loop.apply(that, arguments); }
-        else { console.log(next); }
+          util.type(time).string ? 'done' : 'wait', next.found, time);
+        if(loop.done){ next.done = true; return next; }
+        return loop.apply(that, arguments);
       });
 
       return next;
@@ -190,8 +190,9 @@ Runtime.prototype.next = function(/* arguments */){
 
   util.merge(loop, {
     index: 0,
-    hrtime: Object.create(null),
     argv: this.boil('#context.argv')(arguments[0]),
+    depth: 0,
+    hrtime: Object.create(null),
     time: function getTime(){
       var path = this.path;
       var hrtime = this.hrtime;
