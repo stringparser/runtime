@@ -70,9 +70,16 @@ function Runtime(name, opts){
       'try this `runtime.set(function)`\n');
   });
 
-  // default errorHandle
+  // default the reporter
   //
-  app('error', function errorNode(err){ throw err; });
+
+  app('#report', function reportNode(err, args, next){
+    if(err){ throw err; }
+    var time = next.hrtime[next.path];
+    console.log('[%s] >%s< in', time.done ? 'done' : 'wait',
+      next.found, time.done || time);
+    if(next.done){ return console.log(next); }
+  });
 
   return app;
 }
@@ -141,52 +148,6 @@ Runtime.prototype.repl = function(o){
 //
 
 Runtime.prototype.next = function(/* arguments */){
-  var self = this, first =  { };
-  var len = arguments.length - 1;
-  var args = util.args(arguments, 1);
-  var ctx = this.get(arguments[0], first);
-
-  ctx.handle = ctx.handle || self.get().handle;
-  var errorHandle = this.get('error '+ctx.path).handle;
-
-  function loop(){
-    /* jshint validthis:true */
-    function next(stem){
-      var that = this || ctx;
-      if(stem instanceof Error){
-        return errorHandle.apply(that, arguments);
-      } else if(arguments.length){
-        args = util.args(arguments);
-        len = args.length;
-      }
-
-      util.nextTick(function(){
-        loop.wait = next.wait;
-        loop.done = Boolean(!next.depth || !loop.argv[loop.index]);
-        var time = next.time();
-        console.log('[%s] >%s< in',
-          util.type(time).string ? 'done' : 'wait', next.found, time);
-        if(loop.done){ next.done = true; return next; }
-        return loop.apply(that, arguments);
-      });
-
-      return next;
-    }
-    util.merge(next, loop);
-
-    next.handle = self.get(next.argv.slice(loop.index), next).handle;
-    loop.index += (next.depth || 1);
-
-    try {
-      next.time(); if(!next.handle){ next.handle = ctx.handle; }
-      next.handle.apply(this, args.concat(next));
-    } catch(error){ errorHandle.apply(ctx, [error].concat(args, next)); }
-
-    if(next.wait === true){ return next; }
-    next.hrtime[next.path] = null;
-    if(next.handle.length > len){ return next(); }
-    return next();
-  }
 
   util.merge(loop, {
     index: 0,
@@ -194,18 +155,64 @@ Runtime.prototype.next = function(/* arguments */){
     depth: 0,
     hrtime: Object.create(null),
     time: function getTime(){
-      var path = this.path;
-      var hrtime = this.hrtime;
-      var time = (hrtime[path] || Object.create(null));
+      var time = (this.hrtime[this.path] || '');
       if(typeof time.done === 'string'){ return time.done; }
-      if(time.start === void 0){
-        return (hrtime[path] = {start: process.hrtime()});
-      }
-      time = hrtime[path].end = process.hrtime(time.start);
-      time = hrtime[path].done = util.prettyTime(time);
+      if(time.start){
+        time.done = util.prettyTime(process.hrtime(time.start));
+      } else { time = {start: process.hrtime()}; }
+      this.hrtime[this.path] = time;
       return time;
     }
   });
+
+  var self = this;
+  var ctx = this.get(arguments[0]);
+  var args = util.args(arguments, 1);
+  var reporter = this.get('#report ' + ctx.path).handle;
+
+  ctx.handle = ctx.handle || this.get().handle;
+
+  function loop(){
+    /* jshint validthis:true */
+    function next(err){
+      next.time();
+      ctx = this || ctx;
+      if(arguments.length){
+        args = util.args(arguments);
+        if(err){
+          reporter.apply(ctx, args.concat(next));
+          if(next.done){ return next; }
+        }
+      }
+
+      util.nextTick(function(){
+        loop.wait = next.wait; // wait can propagate
+        next.done = !next.depth || !next.argv[loop.index];
+        reporter.call(ctx, null, args, next);
+        if(next.done){ return next; }
+        loop.apply(ctx, args);
+      });
+
+      return next;
+    }
+    util.merge(next, loop);
+
+    var handle = self.get(next.argv.slice(loop.index), next).handle;
+    if(!handle){ handle = ctx.handle; }
+    next.index = loop.index += (next.depth || 1);
+
+    try {
+      next.time();
+      handle.apply(this, args.concat(next));
+    } catch(error){
+      reporter.apply(ctx, [error].concat(args, next));
+      if(next.done){ return next; }
+    }
+
+    if(next.wait === true){ return next; }
+    next.hrtime[next.path] = null; // invalidate time for parallel
+    return next();
+  }
 
   return loop.apply(ctx);
 };
