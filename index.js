@@ -73,9 +73,10 @@ function Runtime(name, opts){
   // default the reporter
   //
 
-  app('#report', function reportNode(err, args, next){
+  app('#report', function reportNode(err, next){
+    if(next.found[1].source){ console.log(next); }
     if(err){ throw err; }
-    console.log('[%s] >%s< in', next.done ? 'done' : 'wait',
+    console.log('[%s] >%s< in', next.time ? 'done' : 'start',
       next.found, next.time);
     if(next.done){ console.log(next); }
   });
@@ -83,6 +84,69 @@ function Runtime(name, opts){
   return app;
 }
 util.inherits(Runtime, Manifold);
+
+// ## Runtime.next(/* arguments */)
+// > dispatch next command
+//
+// arguments
+//
+// return
+//
+
+Runtime.prototype.next = function(/* arguments */){
+
+  var self = this;
+  var args = util.args(arguments);
+  var ctx = this.get(args.shift());
+  var reporter = this.get('#report ' + ctx.path).handle;
+  ctx.handle = ctx.handle || this.get().handle;
+
+  function loop(){
+    /* jshint validthis:true */
+    function next(err, reload){
+
+      ctx = this || ctx;
+      if(reload){ args = util.args(arguments, 1); }
+
+      util.nextTick(function(){
+        if(typeof next.time === 'string'){ }
+        else if(next.wait || next.mark){
+          next.time = next.mark || next.time;
+          next.time = util.prettyTime(process.hrtime(next.time));
+        } else { next.time = null; next.mark = process.hrtime(); }
+
+        loop.wait = next.wait; // so wait propagates
+        next.done = !next.depth || !next.argv[loop.index+1];
+        reporter.call(ctx, err, next);
+        if(next.done){ return next; }
+        loop();
+      });
+
+      return next;
+    }
+    util.merge(next, loop);
+    next.args = args.concat(next);
+
+    next.handle = self.get(next.argv.slice(loop.index), next).handle;
+    if(!next.handle){ next.handle = ctx.handle; }
+    loop.index += (next.depth || 1);
+
+    try {
+      next.time = process.hrtime();
+      next.handle.apply(ctx, next.args);
+    } catch(error){ next(error); }
+
+    if(next.wait){ return next; }
+    return next();
+  }
+
+  util.merge(loop, {
+    argv: this.boil('#next.argv')(arguments[0]),
+    index: 0
+  });
+
+  return loop();
+};
 
 // ## Runtime.repl([opt])
 // > REPL powered by the readline module
@@ -136,65 +200,4 @@ Runtime.prototype.repl = function(o){
   };
 
   return this;
-};
-
-// ## Runtime.next(/* arguments */)
-// > dispatch next command
-//
-// arguments
-//
-// return
-//
-
-Runtime.prototype.next = function(/* arguments */){
-
-  var self = this;
-  var ctx = this.get(arguments[0]);
-  var args = util.args(arguments, 1);
-  var reporter = this.get('#report ' + ctx.path).handle;
-
-  ctx.handle = ctx.handle || this.get().handle;
-
-  function loop(){
-    /* jshint validthis:true */
-    function next(err, reload){
-      if(typeof next.time === 'string'){ }
-      else if(next.done || next.wait || next.wait !== loop.wait){
-        next.time = util.prettyTime(process.hrtime(next.time));
-      }
-
-      if(reload){ args = util.args(arguments, 1); }
-
-      ctx = this || ctx;
-      util.nextTick(function(){
-        loop.wait = next.wait; // so wait can propagate
-        next.done = !next.depth || !next.argv[loop.index];
-        reporter.call(ctx, err, args, next);
-        if(next.done){ return next; }
-        loop.apply(ctx, args);
-      });
-
-      return next;
-    }
-    util.merge(next, loop);
-
-    var handle = self.get(next.argv.slice(loop.index), next).handle;
-    if(handle === void 0){ handle = ctx.handle; }
-    loop.index += (next.depth || 1);
-
-    try {
-      next.time = process.hrtime();
-      handle.apply(this, args.concat(next));
-    } catch(error){ next.call(this, error, args, next); }
-
-    if(next.wait){ return next; }
-    return next();
-  }
-
-  util.merge(loop, {
-    argv: this.boil('#context.argv')(arguments[0]),
-    index: 0
-  });
-
-  return loop.apply(ctx);
 };

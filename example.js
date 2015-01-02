@@ -22,8 +22,16 @@ app.set('parallel', function parallel(next){
   next.wait = false; next();
 });
 
-app.set(':name(\\w+)', function(next){
-  var rtime = Math.random()*10;
+app.set(':name([a-z]+)', function(next){
+  var rtime = Math.random()*100;
+  setTimeout(function(){
+    next();
+    console.log('[real] >%s< in %s', next.found, rtime);
+  }, rtime);
+});
+
+app.set(':task(\\d+)', function(next){
+  var rtime = Math.random()*100;
   setTimeout(function(){
     next();
     console.log('[real] >%s< in %s', next.found, rtime);
