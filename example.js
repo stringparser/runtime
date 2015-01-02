@@ -23,7 +23,7 @@ app.set('parallel', function parallel(next){
 });
 
 app.set(':name(\\w+)', function(next){
-  var rtime = Math.random()*1000;
+  var rtime = Math.random()*10;
   setTimeout(function(){
     next();
     console.log('[real] >%s< in %s', next.found, rtime);

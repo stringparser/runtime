@@ -77,6 +77,7 @@ function Runtime(name, opts){
     if(err){ throw err; }
     console.log('[%s] >%s< in', next.done ? 'done' : 'wait',
       next.found, next.time);
+    if(next.done){ console.log(next); }
   });
 
   return app;
@@ -156,26 +157,19 @@ Runtime.prototype.next = function(/* arguments */){
 
   function loop(){
     /* jshint validthis:true */
-    function next(err){
-
-      var mark = process.hrtime();
+    function next(err, reload){
       if(typeof next.time === 'string'){ }
-      else if(next.wait || next.done){
+      else if(next.done || next.wait || next.wait !== loop.wait){
         next.time = util.prettyTime(process.hrtime(next.time));
-      } else { next.time = mark; }
-
-      ctx = this || ctx;
-      if(err){
-        args = util.args(arguments);
-        reporter.apply(ctx, args.concat(next));
-        if(next.done){ return next; }
-        args.shift();
       }
 
+      if(reload){ args = util.args(arguments, 1); }
+
+      ctx = this || ctx;
       util.nextTick(function(){
-        loop.wait = next.wait; // wait can propagate
-        next.done = !next.depth || !loop.argv[loop.index];
-        reporter.call(ctx, null, args, next);
+        loop.wait = next.wait; // so wait can propagate
+        next.done = !next.depth || !next.argv[loop.index];
+        reporter.call(ctx, err, args, next);
         if(next.done){ return next; }
         loop.apply(ctx, args);
       });
@@ -191,21 +185,15 @@ Runtime.prototype.next = function(/* arguments */){
     try {
       next.time = process.hrtime();
       handle.apply(this, args.concat(next));
-    } catch(error){
-      reporter.apply(ctx, [error].concat(args, next));
-      if(next.done){ return next; }
-    }
+    } catch(error){ next.call(this, error, args, next); }
 
-    if(!next.wait){ return next(); }
-
-    return next;
+    if(next.wait){ return next; }
+    return next();
   }
 
   util.merge(loop, {
-    index: 0,
     argv: this.boil('#context.argv')(arguments[0]),
-    depth: 0,
-    hrtime: { }
+    index: 0
   });
 
   return loop.apply(ctx);
