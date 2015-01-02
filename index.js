@@ -75,10 +75,8 @@ function Runtime(name, opts){
 
   app('#report', function reportNode(err, args, next){
     if(err){ throw err; }
-    var time = next.hrtime[next.path];
-    console.log('[%s] >%s< in', time.done ? 'done' : 'wait',
-      next.found, time.done || time);
-    if(next.done){ return console.log(next); }
+    console.log('[%s] >%s< in', next.done ? 'done' : 'wait',
+      next.found, next.time);
   });
 
   return app;
@@ -149,22 +147,6 @@ Runtime.prototype.repl = function(o){
 
 Runtime.prototype.next = function(/* arguments */){
 
-  util.merge(loop, {
-    index: 0,
-    argv: this.boil('#context.argv')(arguments[0]),
-    depth: 0,
-    hrtime: Object.create(null),
-    time: function getTime(){
-      var time = (this.hrtime[this.path] || '');
-      if(typeof time.done === 'string'){ return time.done; }
-      if(time.start){
-        time.done = util.prettyTime(process.hrtime(time.start));
-      } else { time = {start: process.hrtime()}; }
-      this.hrtime[this.path] = time;
-      return time;
-    }
-  });
-
   var self = this;
   var ctx = this.get(arguments[0]);
   var args = util.args(arguments, 1);
@@ -175,19 +157,24 @@ Runtime.prototype.next = function(/* arguments */){
   function loop(){
     /* jshint validthis:true */
     function next(err){
-      next.time();
+
+      var mark = process.hrtime();
+      if(typeof next.time === 'string'){ }
+      else if(next.wait || next.done){
+        next.time = util.prettyTime(process.hrtime(next.time));
+      } else { next.time = mark; }
+
       ctx = this || ctx;
-      if(arguments.length){
+      if(err){
         args = util.args(arguments);
-        if(err){
-          reporter.apply(ctx, args.concat(next));
-          if(next.done){ return next; }
-        }
+        reporter.apply(ctx, args.concat(next));
+        if(next.done){ return next; }
+        args.shift();
       }
 
       util.nextTick(function(){
         loop.wait = next.wait; // wait can propagate
-        next.done = !next.depth || !next.argv[loop.index];
+        next.done = !next.depth || !loop.argv[loop.index];
         reporter.call(ctx, null, args, next);
         if(next.done){ return next; }
         loop.apply(ctx, args);
@@ -198,21 +185,28 @@ Runtime.prototype.next = function(/* arguments */){
     util.merge(next, loop);
 
     var handle = self.get(next.argv.slice(loop.index), next).handle;
-    if(!handle){ handle = ctx.handle; }
-    next.index = loop.index += (next.depth || 1);
+    if(handle === void 0){ handle = ctx.handle; }
+    loop.index += (next.depth || 1);
 
     try {
-      next.time();
+      next.time = process.hrtime();
       handle.apply(this, args.concat(next));
     } catch(error){
       reporter.apply(ctx, [error].concat(args, next));
       if(next.done){ return next; }
     }
 
-    if(next.wait === true){ return next; }
-    next.hrtime[next.path] = null; // invalidate time for parallel
-    return next();
+    if(!next.wait){ return next(); }
+
+    return next;
   }
+
+  util.merge(loop, {
+    index: 0,
+    argv: this.boil('#context.argv')(arguments[0]),
+    depth: 0,
+    hrtime: { }
+  });
 
   return loop.apply(ctx);
 };
