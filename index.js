@@ -51,37 +51,21 @@ function Runtime(name, opts){
 
   Manifold.call(this, opts);
 
-  function app(stems, opt){
-    if(opt || typeof stems !== 'string'){
-      return app.set(stems, opt);
-    }
-    return app.get(stems, opt);
-  }
-  util.merge(app, this);
-
-  var doREPL = util.type(opts.input || opts.output).match(/stream/);
-  if(doREPL){ app.repl(opts); }
-
-  // default handlers
-  //
-  app(function rootNode(){
-    throw new Error(
-      'runtime.get() needs a function to dispatch\n' +
-      'try this `runtime.set(function)`\n');
+  // default handler
+  this.set(function rootNode(){
+    throw new Error('no function to dispatch from\n' +
+      'try this `runtime.set([Function])`\n');
   });
 
-  // default the reporter
-  //
-
-  app('#report', function reportNode(err, next){
-    if(next.found[1].source){ console.log(next); }
+  // default reporter (for errors and logging)
+  this.set('#report', function reportNode(err, next){
     if(err){ throw err; }
-    console.log('[%s] >%s< in', next.time ? 'done' : 'start',
-      next.found, next.time);
-    if(next.done){ console.log(next); }
+    var status = next.time ? 'done' : 'start';
+    console.log('[%s] >%s< in', status, next.found, next.time);
   });
 
-  return app;
+  // make repl
+  if(opts.input || opts.output){ this.repl(opts); }
 }
 util.inherits(Runtime, Manifold);
 
@@ -105,19 +89,19 @@ Runtime.prototype.next = function(/* arguments */){
     /* jshint validthis:true */
     function next(err, reload){
 
+      if(typeof next.time === 'string'){ }
+      else if(next.time){
+        next.time = util.prettyTime(process.hrtime(next.time));
+      }
+
       ctx = this || ctx;
       if(reload){ args = util.args(arguments, 1); }
 
       util.nextTick(function(){
-        if(typeof next.time === 'string'){ }
-        else if(next.wait || next.mark){
-          next.time = next.mark || next.time;
-          next.time = util.prettyTime(process.hrtime(next.time));
-        } else { next.time = null; next.mark = process.hrtime(); }
-
         loop.wait = next.wait; // so wait propagates
-        next.done = !next.depth || !next.argv[loop.index+1];
+        next.done = !next.depth || !next.argv[loop.index];
         reporter.call(ctx, err, next);
+        next.time = next.time || process.hrtime();
         if(next.done){ return next; }
         loop();
       });
@@ -136,7 +120,8 @@ Runtime.prototype.next = function(/* arguments */){
       next.handle.apply(ctx, next.args);
     } catch(error){ next(error); }
 
-    if(next.wait){ return next; }
+    if(next.wait === true){ return next; }
+    next.time = null;
     return next();
   }
 
