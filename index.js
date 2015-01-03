@@ -96,11 +96,11 @@ Runtime.prototype.next = function(/* arguments */){
 
       ctx = this || ctx;
       if(reload){ args = util.args(arguments, 1); }
+      loop.wait = next.wait; // so wait propagates
+      next.done = !next.depth || !next.argv[loop.index];
+      reporter.call(ctx, err, next);
 
       util.nextTick(function(){
-        loop.wait = next.wait; // so wait propagates
-        next.done = !next.depth || !next.argv[loop.index];
-        reporter.call(ctx, err, next);
         next.time = next.time || process.hrtime();
         if(next.done){ return next; }
         loop();

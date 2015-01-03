@@ -1,75 +1,80 @@
 'use strict';
+var should = require('should');
 
 module.exports = function(Runtime){
-  var runtime = Runtime.create('next');
+  should.exists(Runtime);
+  var app = Runtime.create('next');
 
-  runtime.set('foo', function(){
-    this.argv.push('--flag', 'fooWasRunned');
+  app.set('series', function(next){
+    next.wait = true;
+    var rtime = Math.random();
+    setTimeout(function(){ next(); }, rtime);
   });
 
-  runtime.set('--flag', function(){
-    if(this.argv.indexOf('fooWasRunned') < 0 ){
-      this.argv.push('flagWasRunned');
-    } else {
-      this.argv.push('flagWasRunnedAfterFoo');
-    }
+  app.set('parallel', function(next){
+    next.wait = false;
+    var rtime = Math.random();
+    setTimeout(function(){ next(); }, rtime);
   });
 
-  it('rootNode should dispatch if no command exists', function(done){
-    var line = 'notRegisteredCommand --flag';
-    var run = line.split(/[ ]+/);
-    runtime.set(function(){
-      if( this.done ){
-        this.argv.should.be.eql(run.concat('flagWasRunned'));
-        this.params.should.be.eql({
-             _ : run.slice(0,1),
-          flag : true
-        });
+  app.set(':handle', function(next){
+    var rtime = Math.random()*10;
+    setTimeout(function(){ next(); }, rtime);
+  });
+
+  it('should run in parallel by default', function(done){
+    var stack = [];
+    app.set('#report :handle', function(err, next){
+      if(err){ return done(err); }
+      if(next.time){ stack.push(next.found); }
+      if(stack.length === next.argv.length){
+        var test = stack.filter(function(item, index){
+          return Number(item) === index;
+        }).length;
+        test.should.not.be.eql(next.argv.length);
         done();
       }
     });
-    runtime.next(line);
+    app.next('0 1 2 3 5 6');
   });
 
-  it('should run registered functions', function(done){
-    var line = 'foo';
-    runtime.set(function(){
-      if( this.done ){
-        var run = ['foo', '--flag', 'fooWasRunned', 'flagWasRunnedAfterFoo'];
-        this.argv.should.be.eql(run);
-        this.params.should.be.eql({ _ : ['foo'] });
+  it('should run in series if so needed', function(done){
+    var stack = [];
+    app.set('#report :handle', function(err, next){
+      if(err){ return done(err); }
+      if(next.time){ stack.push(next.found); }
+      if(stack.length === next.argv.length){
+
+        stack.slice(1).filter(function(item, index){
+          return Number(item) === index;
+        }).should.have.property('length', 4);
+
         done();
       }
     });
-    runtime.next(line);
+
+    app.next('series 0 1 2 3');
   });
 
-  it('should run flags', function(done){
-    var line = '--flag';
-    var run = [ '--flag', 'flagWasRunned'];
-    runtime.set(function(){
-      if( this.done ){
-        this.argv.should.be.eql(run);
-        this.params.should.be.eql({ _ : [], flag : true });
+  it('should run in parallel and series', function(done){
+    var stack = [];
+    app.set('#report :handle', function(err, next){
+      if(err){ throw done(err); }
+      if(next.time){ stack.push(next.found); }
+      if(stack.length === next.argv.length){
+
+        stack.slice(1, 5).filter(function(item, index){
+          return Number(item) === index;
+        }).should.have.property('length', 4);
+
+
+        stack.slice(6).filter(function(item, index){
+          return Number(item) === index;
+        }).length.should.be.lessThan(4);
+
         done();
       }
     });
-    runtime.next(line);
-  });
-
-  it('should run the registered functions if exists', function(done){
-    var line = 'foo --flag';
-    var run = [
-     'foo', '--flag', '--flag',
-     'fooWasRunned', 'flagWasRunnedAfterFoo', 'flagWasRunnedAfterFoo'
-    ];
-    runtime.set(function(){
-      if( this.done ){
-        this.argv.should.be.eql(run);
-        this.params.should.be.eql({ _ : ['foo'], flag : true });
-        done();
-      }
-    });
-    runtime.next(line);
+    app.next('series 0 1 2 3 parallel 0 1 2 3');
   });
 };

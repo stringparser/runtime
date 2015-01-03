@@ -27,6 +27,7 @@
     "manifold": "1.x.x",
     "next-tick": "^0.2.x",
     "pretty-hrtime": "0.2.x",
+    "should": "^4.4.2",
     "through2": "^0.6.3",
     "utils-merge": "^1.0.0",
     "utils-type": "0.8.x"
