@@ -7,19 +7,16 @@ module.exports = function(Runtime){
 
   app.set('series', function(next){
     next.wait = true;
-    var rtime = Math.random();
-    setTimeout(function(){ next(); }, rtime);
+    setTimeout(function(){ next(); }, 1);
   });
 
   app.set('parallel', function(next){
     next.wait = false;
-    var rtime = Math.random();
-    setTimeout(function(){ next(); }, rtime);
+    setTimeout(function(){ next(); }, 2);
   });
 
   app.set(':handle', function(next){
-    var rtime = Math.random()*10;
-    setTimeout(function(){ next(); }, rtime);
+    setTimeout(function(){ next(); }, Math.random()*10);
   });
 
   it('should run in parallel by default', function(done){
@@ -28,14 +25,13 @@ module.exports = function(Runtime){
       if(err){ return done(err); }
       if(next.time){ stack.push(next.found); }
       if(stack.length === next.argv.length){
-        var test = stack.filter(function(item, index){
+        stack.filter(function(item, index){
           return Number(item) === index;
-        }).length;
-        test.should.not.be.eql(next.argv.length);
+        }).length.should.not.be.eql(next.argv.length);
         done();
       }
     });
-    app.next('0 1 2 3 5 6');
+    app.next('0 1 2 3 4 5 6');
   });
 
   it('should run in series if so needed', function(done){
@@ -46,9 +42,8 @@ module.exports = function(Runtime){
       if(stack.length === next.argv.length){
 
         stack.slice(1).filter(function(item, index){
-          return Number(item) === index;
-        }).should.have.property('length', 4);
-
+          return Number(item).should.be.eql(index);
+        });
         done();
       }
     });
@@ -63,10 +58,9 @@ module.exports = function(Runtime){
       if(next.time){ stack.push(next.found); }
       if(stack.length === next.argv.length){
 
-        stack.slice(1, 5).filter(function(item, index){
-          return Number(item) === index;
-        }).should.have.property('length', 4);
-
+        stack.slice(1, 3).filter(function(item, index){
+          return Number(item).should.be.eql(index);
+        });
 
         stack.slice(6).filter(function(item, index){
           return Number(item) === index;
@@ -75,6 +69,6 @@ module.exports = function(Runtime){
         done();
       }
     });
-    app.next('series 0 1 2 3 parallel 0 1 2 3');
+    app.next('series 0 1 parallel 0 1 2 3');
   });
 };
