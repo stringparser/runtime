@@ -61,6 +61,7 @@ function Runtime(name, opts){
   this.set('#report', function reportNode(err, next){
     if(err){ throw err; }
     var status = next.time ? 'done' : 'start';
+    console.log(next);
     console.log('[%s] >%s< in', status, next.found, next.time);
   });
 
@@ -79,7 +80,7 @@ util.inherits(Runtime, Manifold);
 
 Runtime.prototype.next = function(/* arguments */){
 
-  var self = this;
+  var self = this, pending;
   var args = util.args(arguments);
   var ctx = this.get(args.shift());
   var reporter = this.get('#report ' + ctx.path).handle;
@@ -89,20 +90,20 @@ Runtime.prototype.next = function(/* arguments */){
     /* jshint validthis:true */
     function next(err, reload){
 
-      if(typeof next.time === 'string'){ }
-      else if(next.time){
+      if(next.time && typeof next.time !== 'string'){
         next.time = util.prettyTime(process.hrtime(next.time));
+        next.done = pending = pending.replace(next.found, '').trim();
       }
 
       ctx = this || ctx;
       if(reload){ args = util.args(arguments, 1); }
       loop.wait = next.wait; // so wait propagates
-      next.done = !next.depth || !next.argv[loop.index];
       reporter.call(ctx, err, next);
 
       util.nextTick(function(){
+        loop.done = !next.depth || !loop.argv[loop.index];
         next.time = next.time || process.hrtime();
-        if(next.done){ return next; }
+        if(loop.done){ return next; }
         loop();
       });
 
@@ -125,9 +126,12 @@ Runtime.prototype.next = function(/* arguments */){
     return next();
   }
 
+  var argv = util.type(arguments[0]);
+  pending = argv = (argv.string || argv.array.join(' ') || '').replace(/[ ]+/, ' ');
   util.merge(loop, {
-    argv: this.boil('#next.argv')(arguments[0]),
-    index: 0
+    argv: argv.trim().split(/[ ]+/),
+    index: 0,
+    pending: argv.replace(/[ ]+/, ' ')
   });
 
   return loop();
