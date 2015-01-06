@@ -12,21 +12,21 @@ app.set(function rootNode(next){
 
 app.set('series', function series(next){
   var pending = next.argv.slice(next.index).join(', ');
-  console.log('\nStarting <%s> in series', pending);
   next.wait = true; next();
+  console.log('\nStarting <%s> in series', pending);
 });
 
 app.set('parallel', function parallel(next){
   var pending = next.argv.slice(next.index).join(', ');
-  console.log('\nStarting <%s> in parallel', pending);
   next.wait = false; next();
+  console.log('\nStarting <%s> in parallel', pending);
 });
 
 app.set(':name([a-z]+)', function(next){
   var rtime = Math.random()*100;
   setTimeout(function(){
-    next();
     console.log('[real] >%s< in %s', next.found, rtime);
+    next();
   }, rtime);
 });
 

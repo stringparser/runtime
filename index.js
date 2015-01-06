@@ -61,8 +61,12 @@ function Runtime(name, opts){
   this.set('#report', function reportNode(err, next){
     if(err){ throw err; }
     var status = next.time ? 'done' : 'start';
-    console.log(next);
-    console.log('[%s] >%s< in', status, next.found, next.time);
+    var time = next.time ? ('in ' + next.time) : '';
+    console.log('[%s] >%s<', status, next.found, time);
+    if(next.time){
+      console.log(' >pending: [%s]', next.done());
+    }
+    if(!next.done().length){ console.log(next); }
   });
 
   // make repl
@@ -80,59 +84,62 @@ util.inherits(Runtime, Manifold);
 
 Runtime.prototype.next = function(/* arguments */){
 
-  var self = this, pending;
-  var args = util.args(arguments);
-  var ctx = this.get(args.shift());
+  var self = this, ctx = { };
+  var args = util.args(arguments, 1).concat('next');
+  ctx.handle = this.get(arguments[0], ctx).handle || this.get().handle;
   var reporter = this.get('#report ' + ctx.path).handle;
-  ctx.handle = ctx.handle || this.get().handle;
+  var pending = ctx.path;
 
+  util.merge(loop, {
+    argv: pending.split(/[ ]+/),
+    index: 0,
+    wait: false,
+    done: function done(name){
+      if(!name){ return pending; }
+      return !pending.match(name);
+    }
+  });
+
+  ctx = self;
   function loop(){
     /* jshint validthis:true */
-    function next(err, reload){
-
+    function next(err){
       if(next.time && typeof next.time !== 'string'){
         next.time = util.prettyTime(process.hrtime(next.time));
-        next.done = pending = pending.replace(next.found, '').trim();
+        pending = pending.replace(next.found, '')
+          .replace(/[ ]{2,}/g, ' ').trim();
       }
 
       ctx = this || ctx;
-      if(reload){ args = util.args(arguments, 1); }
-      loop.wait = next.wait; // so wait propagates
+      if(err){
+        err = util.type(err).error || null;
+        args = util.args(arguments, err ? 1 : 0).concat(next);
+      }
       reporter.call(ctx, err, next);
 
-      util.nextTick(function(){
-        loop.done = !next.depth || !loop.argv[loop.index];
-        next.time = next.time || process.hrtime();
-        if(loop.done){ return next; }
-        loop();
-      });
-
-      return next;
+      loop.wait = next.wait; // so wait propagates
+      next.time = next.time || process.hrtime();
+      if(!next.depth || !loop.argv[loop.index]){ return next.result; }
+      loop();
+      return next.result;
     }
     util.merge(next, loop);
-    next.args = args.concat(next);
 
     next.handle = self.get(next.argv.slice(loop.index), next).handle;
     if(!next.handle){ next.handle = ctx.handle; }
-    loop.index += (next.depth || 1);
+    next.index = loop.index += (next.depth || 1);
+    args[args.length-1] = next;
 
     try {
       next.time = process.hrtime();
-      next.handle.apply(ctx, next.args);
+      next.result = next.handle.apply(ctx, args);
+      loop.index = next.index;
     } catch(error){ next(error); }
 
-    if(next.wait === true){ return next; }
+    if(next.wait){ return next.result; }
     next.time = null;
     return next();
   }
-
-  var argv = util.type(arguments[0]);
-  pending = argv = (argv.string || argv.array.join(' ') || '').replace(/[ ]+/, ' ');
-  util.merge(loop, {
-    argv: argv.trim().split(/[ ]+/),
-    index: 0,
-    pending: argv.replace(/[ ]+/, ' ')
-  });
 
   return loop();
 };
