@@ -1,4 +1,6 @@
 'use strict';
+
+var gulp = require('gulp');
 var argv = process.argv.slice(2);
 var app = require('./.').create('context').repl({
   input : process.stdin,
@@ -22,20 +24,11 @@ app.set('parallel', function parallel(next){
   console.log('\nStarting <%s> in parallel', pending);
 });
 
-app.set(':name([a-z]+)', function(next){
-  var rtime = Math.random()*100;
-  setTimeout(function(){
-    console.log('[real] >%s< in %s', next.found, rtime);
-    next();
-  }, rtime);
-});
-
-app.set(':task(\\d+)', function(next){
-  var rtime = Math.random()*100;
-  setTimeout(function(){
-    next();
-    console.log('[real] >%s< in %s', next.found, rtime);
-  }, rtime);
+app.set(':src :dest', function task(next){
+  var src = next.params.src;
+  var dest = next.params.dest;
+  return gulp.src(src)
+        .pipe(gulp.dest(dest));
 });
 
 console.log(argv);

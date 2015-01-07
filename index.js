@@ -63,10 +63,8 @@ function Runtime(name, opts){
     var status = next.time ? 'done' : 'start';
     var time = next.time ? ('in ' + next.time) : '';
     console.log('[%s] >%s<', status, next.found, time);
-    if(next.time){
-      console.log(' >pending: [%s]', next.done());
-    }
-    if(!next.done().length){ console.log(next); }
+    console.log(' >pending: [%s]', !next.done());
+    if(next.done()){ console.log(next); }
   });
 
   // make repl
@@ -85,23 +83,25 @@ util.inherits(Runtime, Manifold);
 Runtime.prototype.next = function(/* arguments */){
 
   var self = this, ctx = { };
+  var main = this.get(arguments[0], ctx);
   var args = util.args(arguments, 1).concat('next');
-  ctx.handle = this.get(arguments[0], ctx).handle || this.get().handle;
-  var reporter = this.get('#report ' + ctx.path).handle;
-  var pending = ctx.path;
+  var reporter = this.get('#report').handle;
 
-  util.merge(loop, {
+  var pending = ctx.path;
+  if(!main.handle){ main.handle = this.get().handle; }
+
+  util.merge(tick, {
     argv: pending.split(/[ ]+/),
     index: 0,
     wait: false,
     done: function done(name){
-      if(!name){ return pending; }
+      if(!name){ return !Boolean(pending); }
       return !pending.match(name);
     }
   });
 
   ctx = self;
-  function loop(){
+  function tick(){
     /* jshint validthis:true */
     function next(err){
       if(next.time && typeof next.time !== 'string'){
@@ -110,38 +110,40 @@ Runtime.prototype.next = function(/* arguments */){
           .replace(/[ ]{2,}/g, ' ').trim();
       }
 
-      ctx = this || ctx;
-      if(err){
-        err = util.type(err).error || null;
-        args = util.args(arguments, err ? 1 : 0).concat(next);
+      if(arguments.length > 1){
+        args = util.args(arguments, 1).concat(next);
       }
-      reporter.call(ctx, err, next);
 
-      loop.wait = next.wait; // so wait propagates
+      ctx = this || ctx;
+      tick.wait = next.wait; // so wait propagates
+      reporter.call(ctx, err, next);
       next.time = next.time || process.hrtime();
-      if(!next.depth || !loop.argv[loop.index]){ return next.result; }
-      loop();
+      if(!next.depth || !tick.argv[tick.index]){ return ; }
+      tick();
       return next.result;
     }
-    util.merge(next, loop);
+    util.merge(next, tick);
 
-    next.handle = self.get(next.argv.slice(loop.index), next).handle;
-    if(!next.handle){ next.handle = ctx.handle; }
-    next.index = loop.index += (next.depth || 1);
+    var cmd = next.argv.slice(tick.index);
+    next.handle = self.get(cmd, next).handle;
+    if(!next.handle){ next.handle = main.handle; }
+    next.index = tick.index += (next.depth || 1);
     args[args.length-1] = next;
 
-    try {
+    util.asyncDone(function(){
       next.time = process.hrtime();
       next.result = next.handle.apply(ctx, args);
-      loop.index = next.index;
-    } catch(error){ next(error); }
-
-    if(next.wait){ return next.result; }
-    next.time = null;
-    return next();
+      tick.index = next.index;
+      if(next.wait){ return next.result; }
+      next.time = null; next();
+      return next.result;
+    }, function(err){
+      if(err){ return next(err); }
+      next();
+    });
   }
 
-  return loop();
+  return tick();
 };
 
 // ## Runtime.repl([opt])
