@@ -85,7 +85,7 @@ Runtime.prototype.next = function(/* arguments */){
   var self = this, ctx = { };
   var main = this.get(arguments[0], ctx);
   var args = util.args(arguments, 1).concat('next');
-  var reporter = this.get('#report').handle;
+  var reporter = this.get('#report '+ctx.regex.path).handle;
 
   var pending = ctx.path;
   if(!main.handle){ main.handle = this.get().handle; }
