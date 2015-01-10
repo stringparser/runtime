@@ -24,6 +24,13 @@ app.set('parallel', function parallel(next){
   console.log('\nStarting <%s> in parallel', pending);
 });
 
+app.set(':handle', function command(next){
+  var rtime = Math.random()*10;
+  setTimeout(function(){
+    next();
+  }, rtime);
+});
+
 app.set(':src :dest', function task(next){
   var src = next.params.src;
   var dest = next.params.dest;

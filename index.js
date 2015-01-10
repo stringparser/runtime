@@ -80,15 +80,55 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
+Runtime.prototype.stack = function(/* arguments*/){
+  var stack = util.type(arguments[0]).plainObject;
+
+  if(!stack){
+    stack = {length: 0, index: 0};
+    stack.argv = util.boilFns(util.boilArgs(arguments));
+    stack.root = this.get(stack.argv);
+    stack.reporter = this.get('#reporter ' + stack.root.path);
+    stack.argv.forEach(function(elem, index){
+      if(typeof elem === 'function'){
+        index = stack.root.argv.indexOf(elem.toString());
+        stack.root.argv[index] = elem;
+      }
+    });
+    stack.argv = stack.root.argv;
+
+    delete stack.root.argv;
+    delete stack.reporter.argv;
+  }
+
+  var o = { };
+  var elem = this.get(stack.argv.slice(stack.index), o) || o;
+
+  if(typeof stack.argv[stack.index] === 'function'){
+    elem.handle = stack.argv[stack.index];
+    if(!stack.index){ stack.root.handle = elem.handle; }
+  }
+
+  elem.argv = stack.argv;
+  stack[stack.length++] = elem;
+  stack.index += (elem.depth || 1);
+
+  if(elem.depth && stack.argv[stack.index]){
+    return this.stack(stack);
+  } else { return stack; }
+};
+
+// ## Runtime.next(/* arguments */)
+// > dispatch next command
+//
+// arguments
+//
+// return
+//
+
 Runtime.prototype.next = function(/* arguments */){
 
   var self = this, ctx = { };
-  var main = this.get(arguments[0], ctx);
-  var args = util.args(arguments, 1).concat('next');
-  var reporter = this.get('#report '+ctx.regex.path).handle;
-
-  var pending = ctx.path;
-  if(!main.handle){ main.handle = this.get().handle; }
+  var args, pending;
 
   util.merge(tick, {
     argv: pending.split(/[ ]+/),
@@ -101,7 +141,7 @@ Runtime.prototype.next = function(/* arguments */){
   });
 
   ctx = self;
-  function tick(){
+  function tick(args_){
     /* jshint validthis:true */
     function next(err){
       if(next.time && typeof next.time !== 'string'){
@@ -143,7 +183,7 @@ Runtime.prototype.next = function(/* arguments */){
     });
   }
 
-  return tick();
+  return tick;
 };
 
 // ## Runtime.repl([opt])
