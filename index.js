@@ -85,23 +85,22 @@ Runtime.prototype.stack = function(/* arguments*/){
 
   if(!stack){
     stack = {length: 0, index: 0};
-    stack.argv = util.boilFns(util.boilArgs(arguments));
-    stack.root = this.get(stack.argv);
+    stack.root = this.get(util.boilArgs(arguments));
     stack.reporter = this.get('#reporter ' + stack.root.path);
-    stack.argv.forEach(function(elem, index){
-      if(typeof elem === 'function'){
-        index = stack.root.argv.indexOf(elem.toString());
-        stack.root.argv[index] = elem;
-      }
-    });
     stack.argv = stack.root.argv;
-
     delete stack.root.argv;
     delete stack.reporter.argv;
   }
 
-  var o = { };
-  var elem = this.get(stack.argv.slice(stack.index), o) || o;
+  var elem = { };
+  this.get(stack.argv.slice(stack.index), elem);
+
+  var type = typeof typeof stack.argv[stack.index];
+
+  if(!(/string|function/).test(type)){
+    throw new TypeError('stack(argv[, stack]):\n '+
+    'element should be `string` or `function`');
+  }
 
   if(typeof stack.argv[stack.index] === 'function'){
     elem.handle = stack.argv[stack.index];
