@@ -82,20 +82,14 @@ util.inherits(Runtime, Manifold);
 //
 
 Runtime.prototype.stack = function(stack){
-
   if(!(stack instanceof util.Stack)){
-    stack = new util.Stack({length: 0, index: 0});
-    stack.root = this.get(util.boilArgs(arguments));
-    stack.reporter = this.get('#reporter ' + stack.root.path);
-    stack.argv = stack.root.argv;
-    delete stack.root.argv;
-    delete stack.reporter.argv;
+    stack = new util.Stack(this, arguments);
   }
 
-  var elem = { };
+  function elem(){}
   this.get(stack.argv.slice(stack.index), elem);
 
-  var type = typeof typeof stack.argv[stack.index];
+  var type = typeof stack.argv[stack.index];
 
   if(!(/string|function/).test(type)){
     throw new TypeError('stack(argv[, stack]):\n '+
