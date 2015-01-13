@@ -81,11 +81,10 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
-Runtime.prototype.stack = function(/* arguments*/){
-  var stack = util.type(arguments[0]).plainObject;
+Runtime.prototype.stack = function(stack){
 
-  if(!stack){
-    stack = {length: 0, index: 0};
+  if(!(stack instanceof util.Stack)){
+    stack = new util.Stack({length: 0, index: 0});
     stack.root = this.get(util.boilArgs(arguments));
     stack.reporter = this.get('#reporter ' + stack.root.path);
     stack.argv = stack.root.argv;
