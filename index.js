@@ -25,7 +25,8 @@ get.cache = { };
 
 function create(name, opts){
   name = util.type(name).string || '#root';
-  return (get.cache[name] = new Runtime(name, opts));
+  get.cache[name] = get.cache[name] || new Runtime(name, opts);
+  return get.cache[name];
 }
 
 // ## Runtime([name, opts])
