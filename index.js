@@ -59,7 +59,7 @@ function Runtime(name, opts){
   });
 
   // default reporter (for errors and logging)
-  this.set('#report', function reportNode(err, next){
+  this.set('#report :path', function reportNode(err, next){
     if(err){ throw err; }
     var status = next.time ? 'done' : 'start';
     var time = next.time ? ('in ' + next.time) : '';
@@ -81,31 +81,39 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
+function Stack(){ }
+
 Runtime.prototype.stack = function(stack){
-  if(!(stack instanceof util.Stack)){
-    stack = new util.Stack(this, arguments);
+
+  if(!(stack instanceof Stack)){
+    stack = new Stack();
+    util.merge(stack, {
+      argv: util.boilArgs(arguments), length: 0
+    });
+
+    stack.handle = this.get().handle;
   }
 
-  function elem(){}
-  this.get(stack.argv.slice(stack.index), elem);
-
-  var type = typeof stack.argv[stack.index];
-
-  if(!(/string|function/).test(type)){
-    throw new TypeError('stack(argv[, stack]):\n '+
-    'element should be `string` or `function`');
+  var type, stem = stack.argv[stack.length];
+  if(!(/string|function/).test((type = typeof stem))){
+    throw new TypeError('argument should be `string` or `function`');
   }
 
-  if(typeof stack.argv[stack.index] === 'function'){
-    elem.handle = stack.argv[stack.index];
-    if(!stack.index){ stack.root.handle = elem.handle; }
+  function next(){}
+  stack[stack.length] = next;
+
+  if(type.length > 6){ // 'function'.length > 'string'.length
+    this.get(stem.path || stem.name || stem.displayName, next);
+    next.handle = stem; next.depth = next.depth || 1;
+    stack.length++;
+  } else {
+    this.get(stem, next);
+    if(!next.handle){ next.handle = stack.handle; }
   }
 
-  elem.argv = stack.argv;
-  stack[stack.length++] = elem;
-  stack.index += (elem.depth || 1);
+  next.argv = stack.argv;
 
-  if(elem.depth && stack.argv[stack.index]){
+  if(next.depth && stack.argv[stack.length]){
     return this.stack(stack);
   } else { return stack; }
 };
