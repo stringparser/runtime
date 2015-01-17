@@ -61,17 +61,68 @@ function Runtime(name, opts){
   // default reporter (for errors and logging)
   this.set('#report :path', function reportNode(err, next){
     if(err){ throw err; }
+    var wait = next.done();
     var status = next.time ? 'done' : 'start';
     var time = next.time ? ('in ' + next.time) : '';
-    console.log('[%s] >%s<', status, next.found, time);
-    console.log(' >pending: [%s]', !next.done());
-    if(next.done()){ console.log(next); }
+    console.log('[%s] >%s<', status, next.match, time);
+    if(next.time){
+      if(wait){ console.log('[wait] %s',  wait); }
+      console.log();
+    }
   });
 
   // make repl
   if(opts.input || opts.output){ this.repl(opts); }
 }
 util.inherits(Runtime, Manifold);
+
+// ## Stack(app, args)
+// > produce a consumable arguments array
+//
+// arguments
+//
+// return
+//
+// --
+// api.private
+// --
+
+function Stack(app, Args){
+  if(!(this instanceof Stack)){
+    return new Stack(app, Args);
+  }
+
+  var args = new Array(Args.length);
+  util.merge(this, {
+    path: '', args: ['next'],
+    index: 0, length: 0
+  });
+
+  var type, elem;
+  while(this.index < args.length){
+    elem = Args[this.index];
+    args[this.index] = Args[this.index++];
+    if( !(/function|string/).test((type = typeof elem)) ){
+      throw new TypeError('argument should be `string` or `function`');
+    }
+    if(type.length > 6){ // 'function'.length > 'string'.length
+      elem = elem.path || elem.name || elem.displayName;
+    }
+    this.path += elem + ' ';
+  }
+
+  app.get(this.path, this);
+  this.handle = util.type(this.handle).function
+    || app.get().handle;
+  this.report = util.type(this.report).function
+    || app.get('#report ' + (this.match || this.path)).handle;
+
+  this.argv = args;
+  this.match = null;
+  this.index = this.length = 0;
+  this.wait = false;
+  this.scope = app;
+}
 
 // ## Runtime.next(/* arguments */)
 // > dispatch next command
@@ -81,41 +132,78 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
-function Stack(){ }
-
-Runtime.prototype.stack = function(stack){
+Runtime.prototype.tick = function(stack){
 
   if(!(stack instanceof Stack)){
-    stack = new Stack();
-    util.merge(stack, {
-      argv: util.boilArgs(arguments), length: 0
-    });
-
-    stack.handle = this.get().handle;
+    stack = new Stack(this, arguments);
+    stack.done = function done(name){
+      if(name){ return stack.path.match(name); }
+      return stack.path;
+    };
   }
 
-  var type, stem = stack.argv[stack.length];
-  if(!(/string|function/).test((type = typeof stem))){
-    throw new TypeError('argument should be `string` or `function`');
+  var self = this;
+  var stem = stack.match || stack.argv[stack.length];
+  var type = typeof stem;
+
+  function next(err){
+    /* jshint validthis:true */
+    if(next.time && typeof next.time !== 'string'){
+      next.time = util.prettyTime(process.hrtime(next.time));
+      stack.path = stack.path.replace(next.match, '')
+      .replace(/[ ]{2,}/g, ' ').trim();
+    }
+
+    if(arguments.length > 1){
+      stack.args = util.args(arguments,
+        err && err instanceof Error ? 1 : 0).concat(next);
+    }
+
+    stack.wait = next.wait; // so wait propagates
+    stack.scope = this || stack.scope;
+    stack.report.call(stack.scope, err, next);
+    next.time = next.time || process.hrtime();
+
+    if(next.depth && next.argv[stack.length]){
+      self.tick(stack)();
+    }
+
+    return next.result;
   }
 
-  function next(){}
-  stack[stack.length] = next;
-
-  if(type.length > 6){ // 'function'.length > 'string'.length
-    this.get(stem.path || stem.name || stem.displayName, next);
-    next.handle = stem; next.depth = next.depth || 1;
-    stack.length++;
-  } else {
-    this.get(stem, next);
+  if(type.length < 8){ // 'string'.length < 'function'.length
+    self.get(stem, next);
     if(!next.handle){ next.handle = stack.handle; }
+    stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
+  } else {
+    self.get(stem.path || stem.name || stem.displayName, next);
+    next.handle = stem; next.depth = next.depth || 1;
   }
 
   next.argv = stack.argv;
+  next.done = stack.done;
+  if(!stack.match){ stack.length++; }
+  stack.args[stack.args.length-1] = next;
+  stack.index++;
 
-  if(next.depth && stack.argv[stack.length]){
-    return this.stack(stack);
-  } else { return stack; }
+  return function tick(/* arguments */){
+
+    if(arguments.length){
+      arguments[arguments.length++] = next;
+      stack.args = util.args(arguments);
+    }
+
+    util.asyncDone(function(){
+      next.time = process.hrtime();
+      next.index = stack.length;
+      next.result = next.handle.apply(stack.scope, stack.args);
+      stack.length = next.index;
+      if(next.wait){ return next.result; }
+      next.time = null; next();
+      if(!next.result){ next(); }
+      return next.result;
+    }, next);
+  };
 };
 
 // ## Runtime.next(/* arguments */)
