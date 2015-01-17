@@ -155,8 +155,8 @@ Runtime.prototype.tick = function(stack){
     }
 
     if(arguments.length > 1){
-      stack.args = util.args(arguments,
-        err && err instanceof Error ? 1 : 0).concat(next);
+      arguments[arguments.length++] = next;
+      stack.args = util.args(arguments, 1);
     }
 
     stack.wait = next.wait; // so wait propagates
@@ -195,9 +195,7 @@ Runtime.prototype.tick = function(stack){
     util.asyncDone(function(){
       next.index = stack.length;
       next.time = process.hrtime();
-
       next.result = next.handle.apply(stack.scope, stack.args);
-
       if(stack.length - next.index){
         stack.match = next.match;
         stack.length = next.index;
@@ -205,8 +203,9 @@ Runtime.prototype.tick = function(stack){
 
       if(next.wait){ return next.result; }
 
-      next.time = null; next();
-      if(!next.result){ next(); }
+      if(next.handle.length < stack.args.length){ next(); }
+      else { next.time = null; next(); }
+
       return next.result;
     }, function(err){ next(err); });
   };
