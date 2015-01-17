@@ -76,54 +76,6 @@ function Runtime(name, opts){
 }
 util.inherits(Runtime, Manifold);
 
-// ## Stack(app, args)
-// > produce a consumable arguments array
-//
-// arguments
-//
-// return
-//
-// --
-// api.private
-// --
-
-function Stack(app, Args){
-  if(!(this instanceof Stack)){
-    return new Stack(app, Args);
-  }
-
-  var args = new Array(Args.length);
-  util.merge(this, {
-    path: '', args: ['next'],
-    index: 0, length: 0
-  });
-
-  var type, elem;
-  while(this.index < args.length){
-    elem = Args[this.index];
-    args[this.index] = Args[this.index++];
-    if( !(/function|string/).test((type = typeof elem)) ){
-      throw new TypeError('argument should be `string` or `function`');
-    }
-    if(type.length > 6){ // 'function'.length > 'string'.length
-      elem = elem.path || elem.name || elem.displayName;
-    }
-    this.path += elem + ' ';
-  }
-
-  app.get(this.path, this);
-  this.handle = util.type(this.handle).function
-    || app.get().handle;
-  this.report = util.type(this.report).function
-    || app.get('#report ' + (this.match || this.path)).handle;
-
-  this.argv = args;
-  this.match = null;
-  this.index = this.length = 0;
-  this.wait = false;
-  this.scope = app;
-}
-
 // ## Runtime.next(/* arguments */)
 // > dispatch next command
 //
@@ -143,9 +95,6 @@ Runtime.prototype.tick = function(stack){
   }
 
   var self = this;
-  var stem = stack.match || stack.argv[stack.length];
-  var type = typeof stem;
-
   function next(err){
     /* jshint validthis:true */
     if(next.time && typeof next.time !== 'string'){
@@ -170,6 +119,13 @@ Runtime.prototype.tick = function(stack){
     return next.result;
   }
 
+  // ↑ above `next`
+  // ----------------------------------
+  // ↓ below `tick`
+
+  var stem = stack.match || stack.argv[stack.length];
+  var type = typeof stem;
+
   if(type.length < 8){ // 'string'.length < 'function'.length
     self.get(stem, next);
     if(!next.handle){ next.handle = stack.handle; }
@@ -179,13 +135,20 @@ Runtime.prototype.tick = function(stack){
     next.handle = stem; next.depth = next.depth || 1;
   }
 
-  next.argv = stack.argv;
-  next.done = stack.done;
-  if(!stack.match){ stack.length++; }
+  util.merge(next, {
+    wait: stack.wait,
+    argv: stack.argv,
+    done: stack.done,
+    result: stack.result || null
+  });
+
   stack.args[stack.args.length-1] = next;
+
+  if(!stack.match){ stack.length++; }
   stack.index++;
 
-  return function tick(/* arguments */){
+  tick.path = stack.path;
+  function tick(/* arguments */){
 
     if(arguments.length){
       arguments[arguments.length++] = next;
@@ -193,92 +156,81 @@ Runtime.prototype.tick = function(stack){
     }
 
     util.asyncDone(function(){
-      next.index = stack.length;
       next.time = process.hrtime();
-      next.result = next.handle.apply(stack.scope, stack.args);
+      next.index = stack.length;
+      var result = next.handle.apply(stack.scope, stack.args);
+      stack.result = result;
+
       if(stack.length - next.index){
         stack.match = next.match;
         stack.length = next.index;
       }
 
-      if(next.wait){ return next.result; }
+      if(next.wait){ return result; }
+      if(next.handle.length - stack.args.length){ }
+      else { next.time = null; }
 
-      if(next.handle.length < stack.args.length){ next(); }
-      else { next.time = null; next(); }
+      next();
 
-      return next.result;
-    }, function(err){ next(err); });
-  };
+      return result;
+
+    }, function(err){
+      console.log(arguments);
+      next(err);
+    });
+
+    return next;
+  }
+
+  return tick;
 };
 
-// ## Runtime.next(/* arguments */)
-// > dispatch next command
+// ## Stack(app, args)
+// > produce a consumable arguments array
 //
 // arguments
 //
 // return
 //
+// --
+// api.private
+// --
 
-Runtime.prototype.next = function(/* arguments */){
-
-  var self = this, ctx = { };
-  var args, pending;
-
-  util.merge(tick, {
-    argv: pending.split(/[ ]+/),
-    index: 0,
-    wait: false,
-    done: function done(name){
-      if(!name){ return !Boolean(pending); }
-      return !pending.match(name);
-    }
-  });
-
-  ctx = self;
-  function tick(args_){
-    /* jshint validthis:true */
-    function next(err){
-      if(next.time && typeof next.time !== 'string'){
-        next.time = util.prettyTime(process.hrtime(next.time));
-        pending = pending.replace(next.found, '')
-          .replace(/[ ]{2,}/g, ' ').trim();
-      }
-
-      if(arguments.length > 1){
-        args = util.args(arguments, 1).concat(next);
-      }
-
-      ctx = this || ctx;
-      tick.wait = next.wait; // so wait propagates
-      reporter.call(ctx, err, next);
-      next.time = next.time || process.hrtime();
-      if(!next.depth || !tick.argv[tick.index]){ return ; }
-      tick();
-      return next.result;
-    }
-    util.merge(next, tick);
-
-    var cmd = next.argv.slice(tick.index);
-    next.handle = self.get(cmd, next).handle;
-    if(!next.handle){ next.handle = main.handle; }
-    next.index = tick.index += (next.depth || 1);
-    args[args.length-1] = next;
-
-    util.asyncDone(function(){
-      next.time = process.hrtime();
-      next.result = next.handle.apply(ctx, args);
-      tick.index = next.index;
-      if(next.wait){ return next.result; }
-      next.time = null; next();
-      return next.result;
-    }, function(err){
-      if(err){ return next(err); }
-      next();
-    });
+function Stack(app, Args){
+  if(!(this instanceof Stack)){
+    return new Stack(app, Args);
   }
 
-  return tick;
-};
+  var args = new Array(Args.length);
+  util.merge(this, {
+    path: '', wait: false,
+    args: ['next'], index: 0, length: 0,
+    scope: app
+  });
+
+  var type, elem;
+  while(this.index < args.length){
+    elem = Args[this.index];
+    args[this.index] = Args[this.index++];
+    if( !(/function|string/).test((type = typeof elem)) ){
+      throw new TypeError('argument should be `string` or `function`');
+    }
+    if(type.length > 6){ // 'function'.length > 'string'.length
+      elem = elem.path || elem.name || elem.displayName;
+    }
+    this.path += elem + ' ';
+  }
+
+  app.get(this.path, this);
+  this.handle = util.type(this.handle).function
+    || app.get().handle;
+  this.report = util.type(this.report).function
+    || app.get('#report ' + (this.match || this.path)).handle;
+
+  this.argv = args;
+  this.match = null;
+  this.index = this.length = 0;
+}
 
 // ## Runtime.repl([opt])
 // > REPL powered by the readline module
