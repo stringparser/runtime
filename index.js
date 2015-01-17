@@ -167,7 +167,6 @@ Runtime.prototype.tick = function(stack){
     if(next.depth && next.argv[stack.length]){
       self.tick(stack)();
     }
-
     return next.result;
   }
 
@@ -194,15 +193,22 @@ Runtime.prototype.tick = function(stack){
     }
 
     util.asyncDone(function(){
-      next.time = process.hrtime();
       next.index = stack.length;
+      next.time = process.hrtime();
+
       next.result = next.handle.apply(stack.scope, stack.args);
-      stack.length = next.index;
+
+      if(stack.length - next.index){
+        stack.match = next.match;
+        stack.length = next.index;
+      }
+
       if(next.wait){ return next.result; }
+
       next.time = null; next();
       if(!next.result){ next(); }
       return next.result;
-    }, next);
+    }, function(err){ next(err); });
   };
 };
 
