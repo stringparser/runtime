@@ -156,7 +156,6 @@ Runtime.prototype.next = function(stack){
 
   tick.stack = stack;
   function tick(arg){
-    console.log(stack.args);
     var host;
     if(arguments.length){
       host = arg && arg.handle && arg.handle.stack instanceof Stack;
