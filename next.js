@@ -10,13 +10,14 @@ app.set(':handle :two', function handleTwo(next){
 });
 
 function once(next){
-  next.wait = true;
-  setTimeout(function(){ next(); }, 10);
+  setTimeout(function(){ next(); }, 2);
   return 'fake';
 }
 
 function twice(next){
+  console.log('wait?', next.wait);
+  console.log(arguments);
   if(next.wait){ next(); }
 }
 
-app.next('one two three', app.next(once, 'wavy', twice), 'four five six')(0, 1, 2);
+app.next('one two', app.next(once, 'wavy', twice), 'end')(0, 1, 2);

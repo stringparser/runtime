@@ -108,6 +108,12 @@ Runtime.prototype.next = function(stack){
     stack.scope = this || stack.scope;
     next.time = next.time || process.hrtime();
 
+    if(arguments.length){
+      var index = err ? 0 : -1;
+      arguments[index] = next;
+      stack.args = util.args(arguments, index);
+    }
+
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
     } else { console.log('next done'); }
@@ -126,9 +132,11 @@ Runtime.prototype.next = function(stack){
     self.get(stem, next);
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
-  } else if(stem.stack && stem.stack instanceof Stack){
+  } else if(stem && stem.stack instanceof Stack){
     util.merge(next, stack);
-    next.handle = stem; next.stack = stem.stack;
+    next.handle = stem;
+    next.stack = stem.stack;
+    next.stack.args = stack.args;
   } else {
     self.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
@@ -143,21 +151,22 @@ Runtime.prototype.next = function(stack){
     stack: stack
   });
 
-  stack.args[0] = next;
-
   tick.stack = stack;
   function tick(arg){
-    var host = arg && arg.handle;
+    var host;
+    if(arguments.length){
+      host = arg && arg.handle && (arg.handle.stack instanceof Stack);
+      if(!host){ stack.args = util.args(arguments); }
+    }
+
     util.asyncDone(function(){
       next.time = process.hrtime();
-      stack.result = next.handle.apply(stack.scope, stack.args);
+      stack.result = next.handle.call(stack.scope, next, stack.args);
       if(next.wait){ return next.result; }
 
       var res = stack.result;
       if(!res){ } else
       if(typeof (res.on || res.then || res.subscribe) !== 'function'){
-        next.time = null;
-      } else if(res.handle && res.handle.stack instanceof Stack){
         next.time = null;
       }
 
@@ -166,7 +175,7 @@ Runtime.prototype.next = function(stack){
       return stack.result;
     }, next);
 
-    if(!(host instanceof Stack) && !stack.length){
+    if(!host && !stack.length){
       next.begin = true;
       stack.report.call(stack.scope, null, next, stack.args);
     }
@@ -197,7 +206,7 @@ function Stack(app, Args){
   var args = new Array(Args.length);
   util.merge(this, {
     path: '', wait: false,
-    args: ['next'], index: 0, length: 0,
+    args: [], index: 0, length: 0,
     scope: app
   });
 
