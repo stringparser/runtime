@@ -65,7 +65,7 @@ function Runtime(name, opts){
     var path = next.match || next.path;
 
     if(next.start){
-      console.log('Stack begin: >%s<', next.start);
+      console.log('\nStack begin: >%s<', next.start);
     } else if(next.end){
       console.log('Stack ended with >%s< in %s\n', path, next.time);
       return ;
@@ -152,7 +152,7 @@ Runtime.prototype.next = function(stack){
 
   var chosen = stem.stack || stack;
   util.merge(next, {
-    wait: chosen.wait,
+    wait: stack.wait,
     argv: chosen.argv,
     done: chosen.done,
     result: chosen.result || null
