@@ -3,7 +3,6 @@
 var app = require('./.').create('next');
 
 app.set(':handle', function handloone(next){
-  next.wait = true; console.log(next.params.handle);
   if(next.wait){ next(); }
 });
 app.set(':handle :two', function handleTwo(next){
@@ -11,6 +10,7 @@ app.set(':handle :two', function handleTwo(next){
 });
 
 function once(next){
+  next.wait = true;
   setTimeout(function(){ next(); }, 10);
   return 'fake';
 }
