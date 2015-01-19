@@ -61,15 +61,18 @@ function Runtime(name, opts){
   // default reporter (for errors and logging)
   this.set('#report :path', function reportNode(error, next){
     if(error){ throw error; }
+
+    var path = next.match || next.path;
+
     if(next.start){
-      console.log('\nStack begin: >%s<', next.stack);
+      console.log('Stack begin: >%s<', next.start);
     } else if(next.end){
-      return console.log('Stack ended with >%s< in %s\n', next.stack, next.time);
+      console.log('Stack ended with >%s< in %s\n', path, next.time);
+      return ;
     }
 
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
-    var path = next.match || next.path;
     console.log('- %s >%s< %s', status, path, time);
   });
 
@@ -152,16 +155,15 @@ Runtime.prototype.next = function(stack){
     wait: chosen.wait,
     argv: chosen.argv,
     done: chosen.done,
-    stack: chosen.path,
     result: chosen.result || null
   });
 
   function tick(stem){
     stem = stem && stem.handle;
     if(stem && stem.stack instanceof Stack){
-      next.start = true;
+      next.start = chosen.path;
     } else if(arguments.length){
-      next.start = true;
+      next.start = chosen.path;
       stack.args = util.args(arguments);
     }
 
