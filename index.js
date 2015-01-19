@@ -122,7 +122,9 @@ Runtime.prototype.next = function(stack){
       self.next(stack)();
     } else { next.end = true; }
 
-    stack.report.call(stack.scope, err, next, stack.args);
+    if(!next.handle.stack){
+      stack.report.call(stack.scope, err, next, stack.args);
+    }
 
     return stack.result;
   }
