@@ -19,4 +19,4 @@ function twice(next){
   if(next.wait){ next(); }
 }
 
-app.next('one two three', app.next(once, 'wavy', twice), 'four')(0, 1, 2);
+app.next('one two three', app.next(once, 'wavy', twice), 'four five six')(0, 1, 2);

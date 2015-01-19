@@ -108,12 +108,6 @@ Runtime.prototype.next = function(stack){
     stack.scope = this || stack.scope;
     next.time = next.time || process.hrtime();
 
-    if(arguments.length){
-      var index = err ? -1 : 0;
-      arguments[index] = next;
-      stack.args = util.args(arguments, index);
-    }
-
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
     } else { console.log('next done'); }
@@ -133,11 +127,8 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if(stem.stack && stem.stack instanceof Stack){
-    next.handle = stem;
-    next.stack = stem.stack;
-    next.path = next.stack.path;
-    next.depth = next.stack.depth || 1;
-    stem.stack.args = [stem.stack.args[0]].concat(stack.args.slice(1));
+    util.merge(next, stack);
+    next.handle = stem; next.stack = stem.stack;
   } else {
     self.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
@@ -156,15 +147,7 @@ Runtime.prototype.next = function(stack){
 
   tick.stack = stack;
   function tick(arg){
-    var host;
-    if(arguments.length){
-      host = arg && arg.handle && arg.handle.stack instanceof Stack;
-      if(!host){
-        arguments[-1] = next;
-        stack.args = util.args(arguments, -1);
-      }
-    }
-
+    var host = arg && arg.handle;
     util.asyncDone(function(){
       next.time = process.hrtime();
       stack.result = next.handle.apply(stack.scope, stack.args);
@@ -183,7 +166,7 @@ Runtime.prototype.next = function(stack){
       return stack.result;
     }, next);
 
-    if(!host && !stack.length){
+    if(!(host instanceof Stack) && !stack.length){
       next.begin = true;
       stack.report.call(stack.scope, null, next, stack.args);
     }
