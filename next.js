@@ -2,22 +2,28 @@
 
 var app = require('./.').create('next');
 
-app.set(':handle', function handloone(next){
+app.set(':handle', function handloone(next, args){
+  // console.log(next.match, args);
+  // console.log('wait?', next.wait);
   if(next.wait){ next(); }
 });
-app.set(':handle :two', function handleTwo(next){
+app.set(':handle :two', function handleTwo(next, args){
+  // console.log(next.match, args);
+  // console.log('wait?', next.wait);
   if(next.wait){ next(); }
 });
 
-function once(next){
+function once(next, args){
   next.wait = true;
-  setTimeout(function(){ next(); }, 2);
+  // console.log(next.path, args);
+  // console.log('wait?', next.wait);
+  setTimeout(function(){ next(); }, 10);
   return 'fake';
 }
 
-function twice(next){
-  console.log('wait?', next.wait);
-  console.log(arguments);
+function twice(next, args){
+  // console.log(next.path, args);
+  // console.log('wait?', next.wait);
   if(next.wait){ next(); }
 }
 

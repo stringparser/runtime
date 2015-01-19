@@ -61,11 +61,16 @@ function Runtime(name, opts){
   // default reporter (for errors and logging)
   this.set('#report :path', function reportNode(error, next){
     if(error){ throw error; }
+    if(next.start){
+      console.log('\nStack begin: >%s<', next.stack);
+    } else if(next.end){
+      return console.log('Stack ended with >%s< in %s\n', next.stack, next.time);
+    }
+
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
-    var path = next.stack.path || next.match;
-    if(next.time){ path = next.match; }
-    console.log('[-] %s >%s< %s', status, path, time);
+    var path = next.match || next.path;
+    console.log('- %s >%s< %s', status, path, time);
   });
 
   // make repl
@@ -100,23 +105,23 @@ Runtime.prototype.next = function(stack){
         .replace(/[ ]{2,}/g, ' ').trim();
     }
 
-    next.error = err = err instanceof Error ? err : null;
-    stack.report.call(stack.scope, err, next, stack.args);
+    if(arguments.length){
+      err = err instanceof Error ? err : null;
+      stack.args = util.args(arguments, err ? 1 : 0);
+    }
 
     // propagate
     stack.wait = next.wait;
     stack.scope = this || stack.scope;
     next.time = next.time || process.hrtime();
 
-    if(arguments.length){
-      stack.args = util.args(arguments, err ? 1 : 0);
-    }
-
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
-    } else { console.log('next done'); }
+    } else { next.end = true; }
 
-    return next.result;
+    stack.report.call(stack.scope, err, next, stack.args);
+
+    return stack.result;
   }
 
   // ↑ above `next`
@@ -130,61 +135,54 @@ Runtime.prototype.next = function(stack){
     self.get(stem, next);
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
-  } else if(stem.stack && stem.stack instanceof Stack){
-    util.merge(next, stack);
+  } else if (stem && stem.stack instanceof Stack){
     next.handle = stem;
+    next.match = stem.stack.path;
     stem.stack.args = stack.args;
+    next.depth = stem.stack.depth || 1;
   } else {
     self.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
   }
 
+  if(!stack.match){ stack.length++; }
+
+  var chosen = stem.stack || stack;
   util.merge(next, {
-    wait: stack.wait,
-    argv: stack.argv,
-    done: stack.done,
-    index: stack.index,
-    result: stack.result || null,
-    stack: stem.stack || stack
+    wait: chosen.wait,
+    argv: chosen.argv,
+    done: chosen.done,
+    stack: chosen.path,
+    result: chosen.result || null
   });
 
-  tick.stack = stack;
-  function tick(arg){
-    var host;
-    if(arguments.length){
-      host = arg && arg.handle && (arg.handle.stack instanceof Stack);
-      if(!host){ stack.args = util.args(arguments, 0); }
+  function tick(stem){
+    stem = stem && stem.handle;
+    if(stem && stem.stack instanceof Stack){
+      next.start = true;
+    } else if(arguments.length){
+      next.start = true;
+      stack.args = util.args(arguments);
     }
+
+    stack.report.call(stack.scope, null, next, stack.args);
+    next.start = null;
 
     util.asyncDone(function(){
       next.time = process.hrtime();
       stack.result = next.handle.call(stack.scope, next, stack.args);
-      if(next.wait){
-        if(next.handle.stack instanceof Stack){
-          self.next(stack).apply(null, stack.args);
-        }
-        return next.result;
-      }
+      if(next.wait){ return stack.result; }
 
       var res = stack.result;
-      if(!res){ } else
-      if(typeof (res.on || res.then || res.subscribe) !== 'function'){
-        next.time = null;
-      }
-
-      next();
-
-      return stack.result;
+      res = !res || res.on || res.then || res.subscribe;
+      if(typeof res === 'function'){ next.time = null; }
+      return next();
     }, next);
 
-    if(!host && !stack.length){
-      next.begin = true;
-      stack.report.call(stack.scope, null, next, stack.args);
-    }
-
-    if(!stack.match){ stack.length++; }
     return next;
   }
+  tick.next = next;
+  tick.stack = stack;
 
   return tick;
 };
@@ -208,14 +206,13 @@ function Stack(app, Args){
   var args = new Array(Args.length);
   util.merge(this, {
     path: '', wait: false,
-    args: [], index: 0, length: 0,
+    args: ['n'], length: 0,
     scope: app
   });
 
-  var type, elem;
-  while(this.index < args.length){
-    elem = Args[this.index];
-    args[this.index] = Args[this.index++];
+  var type, elem, index = -1;
+  while(++index < args.length){
+    elem = args[index] = Args[index];
     if( !(/function|string/).test((type = typeof elem)) ){
       throw new TypeError('argument should be `string` or `function`');
     }
@@ -234,7 +231,6 @@ function Stack(app, Args){
 
   this.argv = args;
   this.match = null;
-  this.index = this.length = 0;
 }
 
 // ## Runtime.repl([opt])
