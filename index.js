@@ -29,6 +29,67 @@ function create(name, opts){
   return get.cache[name];
 }
 
+// ## Stack(app, args)
+// > produce a consumable stack object
+//
+// arguments
+//
+// return
+//
+// --
+// api.private
+// --
+
+function Stack(app, args){
+
+  if(!(this instanceof Stack)){
+    return new Stack(app, args);
+  }
+
+  this.path = ''; // root path
+
+  // args to array; extract string path
+  var index = -1;
+  var elem, type, len = args.length;
+  var argv = new Array(args.length);
+  while(++index < len){
+    elem = argv[index] = args[index];
+    type = typeof elem;
+    // unsupported types
+    if( !(/function|string/).test(type) ){
+      throw new TypeError('argument should be `string` or `function`');
+    }
+    // 'function'.length > 'string'.length
+    if(type.length > 6){
+      elem = (elem.stack && elem.stack.path)
+      || elem.path || elem.name || elem.displayName;
+    }
+    this.path += elem + ' ';
+  }
+
+  // populate main stack props
+  app.get(this.path, this);
+
+  // rootHandler: handle if not present
+  if(typeof this.handle !== 'function'){
+    this.handle = app.get();
+  }
+
+  elem = this.match || this.path;
+  // reportNode: errors and/or logging stack-wise
+  if(typeof this.report !== 'function'){
+    this.report = app.get('#report ' + elem).handle;
+  }
+
+  // defaults
+  this.argv = argv;
+  this.args = [ ];
+  this.wait = false;
+  this.match = null;
+  this.length = 0;
+  this.scope = app;
+}
+
 // ## Runtime([name, opts])
 // > constructor
 //
@@ -45,8 +106,7 @@ function Runtime(name, opts){
     return new Runtime(name, opts);
   }
 
-  // currywurst
-  //
+  // currywurst!
   opts = util.type(opts || name).plainObject || { };
   opts.name = opts.name || name;
 
@@ -59,8 +119,8 @@ function Runtime(name, opts){
   });
 
   // default reporter (for errors and logging)
-  this.set('#report :path', function reportNode(error, next){
-    if(error){ throw error; }
+  this.set('#report', function reportNode(err, next){
+    if(err){ throw err; }
 
     var path = next.match || next.path;
 
@@ -99,7 +159,39 @@ Runtime.prototype.next = function(stack){
     };
   }
 
+  // --
+  var stem = stack.match || stack.argv[stack.length];
+
+  if(typeof stem === 'string'){
+    this.get(stem, next);
+    if(!next.handle){ next.handle = stack.handle; }
+    stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
+  } else if (stem.stack instanceof Stack){
+    next.handle = stem;
+    next.stack = stack;
+    next.match = stem.stack.path;
+    next.depth = stem.stack.depth || 1;
+    // propagate arguments between stacks
+    stem.next.args = stack.args;
+  } else {
+    this.get(stem.path || stem.name || stem.displayName, next);
+    next.handle = stem; next.depth = next.depth || 1;
+  }
+
+  if(!stack.match){ stack.length++; }
+
+  // sync stack with next
+  var chosen = stem.stack || stack;
+  util.merge(next, {
+    wait: stack.wait,
+    argv: stack.argv,
+    args: stack.args,
+    done: chosen.done,
+    result: chosen.result || null
+  });
+
   var self = this;
+  var report = stack.report;
   function next(err){
     /* jshint validthis:true */
     if(next.time && typeof next.time !== 'string'){
@@ -108,23 +200,22 @@ Runtime.prototype.next = function(stack){
         .replace(/[ ]{2,}/g, ' ').trim();
     }
 
-    if(arguments.length){
+    // propagate
+    stack.wait = next.wait;
+    stack.args = next.args;
+    stack.scope = this || stack.scope;
+    next.time = next.time || process.hrtime();
+
+    if(err){
       err = err instanceof Error ? err : null;
       stack.args = util.args(arguments, err ? 1 : 0);
     }
-
-    // propagate
-    stack.wait = next.wait;
-    stack.scope = this || stack.scope;
-    next.time = next.time || process.hrtime();
 
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
     } else { next.end = true; }
 
-    if(!next.handle.stack){
-      stack.report.call(stack.scope, err, next, stack.args);
-    }
+    report.call(stack.scope, err, next);
 
     return stack.result;
   }
@@ -133,48 +224,24 @@ Runtime.prototype.next = function(stack){
   // ----------------------------------
   // ↓ below `tick`
 
-  var stem = stack.match || stack.argv[stack.length];
-  var type = typeof stem;
-
-  if(type.length < 8){ // 'string'.length < 'function'.length
-    self.get(stem, next);
-    if(!next.handle){ next.handle = stack.handle; }
-    stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
-  } else if (stem && stem.stack instanceof Stack){
-    next.handle = stem;
-    next.match = stem.stack.path;
-    stem.stack.args = stack.args;
-    next.depth = stem.stack.depth || 1;
-  } else {
-    self.get(stem.path || stem.name || stem.displayName, next);
-    next.handle = stem; next.depth = next.depth || 1;
-  }
-
-  if(!stack.match){ stack.length++; }
-
-  var chosen = stem.stack || stack;
-  util.merge(next, {
-    wait: stack.wait,
-    argv: chosen.argv,
-    done: chosen.done,
-    result: chosen.result || null
-  });
-
-  function tick(stem){
-    stem = stem && stem.handle;
-    if(stem && stem.stack instanceof Stack){
+  tick.next = next;
+  tick.stack = stack;
+  function tick(arg){
+    if(arg && arg.stack instanceof Stack){
       next.start = chosen.path;
     } else if(arguments.length){
       next.start = chosen.path;
-      stack.args = util.args(arguments);
+      next.args = stack.args = util.args(arguments);
     }
 
-    stack.report.call(stack.scope, null, next, stack.args);
+    report.call(stack.scope, null, next);
     next.start = null;
 
     util.asyncDone(function(){
       next.time = process.hrtime();
-      stack.result = next.handle.call(stack.scope, next, stack.args);
+      var args = [next].concat(stack.args);
+      stack.result = next.handle.apply(stack.scope, args);
+
       if(next.wait){ return stack.result; }
 
       var res = stack.result;
@@ -185,57 +252,9 @@ Runtime.prototype.next = function(stack){
 
     return next;
   }
-  tick.next = next;
-  tick.stack = stack;
 
   return tick;
 };
-
-// ## Stack(app, args)
-// > produce a consumable arguments array
-//
-// arguments
-//
-// return
-//
-// --
-// api.private
-// --
-
-function Stack(app, Args){
-  if(!(this instanceof Stack)){
-    return new Stack(app, Args);
-  }
-
-  var args = new Array(Args.length);
-  util.merge(this, {
-    path: '', wait: false,
-    args: ['n'], length: 0,
-    scope: app
-  });
-
-  var type, elem, index = -1;
-  while(++index < args.length){
-    elem = args[index] = Args[index];
-    if( !(/function|string/).test((type = typeof elem)) ){
-      throw new TypeError('argument should be `string` or `function`');
-    }
-    if(type.length > 6){ // 'function'.length > 'string'.length
-      elem = (elem.stack && elem.stack.path)
-       || elem.path || elem.name || elem.displayName;
-    }
-    this.path += elem + ' ';
-  }
-
-  app.get(this.path, this);
-  this.handle = util.type(this.handle).function
-    || app.get().handle;
-  this.report = util.type(this.report).function
-    || app.get('#report ' + (this.match || this.path)).handle;
-
-  this.argv = args;
-  this.match = null;
-}
 
 // ## Runtime.repl([opt])
 // > REPL powered by the readline module
