@@ -72,7 +72,7 @@ function Stack(app, args){
 
   // rootHandler: handle if not present
   if(typeof this.handle !== 'function'){
-    this.handle = app.get();
+    this.handle = app.get().handle;
   }
 
   elem = this.match || this.path;
