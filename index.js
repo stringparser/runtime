@@ -121,16 +121,13 @@ function Runtime(name, opts){
   // default reporter (for errors and logging)
   this.set('#report', function reportNode(err, next){
     if(err){ throw err; }
-
     var path = next.match || next.path;
-
     if(next.start){
       console.log('\nStack begin: >%s<', next.start);
     } else if(next.end){
       console.log('Stack ended with >%s< in %s\n', path, next.time);
       return ;
     }
-
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
     console.log('- %s >%s< %s', status, path, time);
