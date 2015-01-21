@@ -210,7 +210,7 @@ Runtime.prototype.next = function(stack){
 
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
-    } else { next.end = next.end++ || 1; }
+    } else { next.end = (next.end || 0) + 1; }
 
     report.call(stack.scope, err, next);
 
