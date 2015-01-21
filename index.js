@@ -150,10 +150,6 @@ Runtime.prototype.next = function(stack){
 
   if(!(stack instanceof Stack)){
     stack = new Stack(this, arguments);
-    stack.done = function done(name){
-      if(name){ return stack.path.match(name); }
-      return stack.path;
-    };
   }
 
   // --
@@ -183,13 +179,14 @@ Runtime.prototype.next = function(stack){
     wait: stack.wait,
     argv: stack.argv,
     args: stack.args,
-    done: chosen.done,
+    pending: chosen.path,
     result: chosen.result || null
   });
 
   var self = this;
   var report = stack.report;
   function next(err){
+    if(next.end){ return next.result; }
     /* jshint validthis:true */
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
@@ -210,7 +207,7 @@ Runtime.prototype.next = function(stack){
 
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
-    } else { next.end = (next.end || 0) + 1; }
+    } else { stack.end = next.end = true; }
 
     report.call(stack.scope, err, next);
 
@@ -226,13 +223,14 @@ Runtime.prototype.next = function(stack){
   function tick(arg){
     if(arg && arg.stack instanceof Stack){
       next.start = chosen.path;
+      report.call(stack.scope, null, next);
+      next.start = null;
     } else if(arguments.length){
       next.start = chosen.path;
       next.args = stack.args = util.args(arguments);
+      report.call(stack.scope, null, next);
+      next.start = null;
     }
-
-    report.call(stack.scope, null, next);
-    next.start = null;
 
     util.asyncDone(function(){
       next.time = process.hrtime();

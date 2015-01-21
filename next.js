@@ -5,6 +5,7 @@ var app = require('./.').create('next');
 app.set(':handle', function one(next){
   next.args[2]++;
   console.log(next.args);
+  console.log(next);
   if(next.wait){ next(); }
 });
 
