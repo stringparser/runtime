@@ -15,7 +15,8 @@ var Manifold = require('manifold');
 exports = module.exports = {
   get: get,
   create: create,
-  Runtime: Runtime
+  Runtime: Runtime,
+  Manifold: Manifold
 };
 
 function get(name){
@@ -27,67 +28,6 @@ function create(name, opts){
   name = util.type(name).string || '#root';
   get.cache[name] = get.cache[name] || new Runtime(name, opts);
   return get.cache[name];
-}
-
-// ## Stack(app, args)
-// > produce a consumable stack object
-//
-// arguments
-//
-// return
-//
-// --
-// api.private
-// --
-
-function Stack(app, args){
-
-  if(!(this instanceof Stack)){
-    return new Stack(app, args);
-  }
-
-  this.path = ''; // root path
-
-  // args to array; extract string path
-  var index = -1;
-  var elem, type, len = args.length;
-  var argv = new Array(args.length);
-  while(++index < len){
-    elem = argv[index] = args[index];
-    type = typeof elem;
-    // unsupported types
-    if( !(/function|string/).test(type) ){
-      throw new TypeError('argument should be `string` or `function`');
-    }
-    // 'function'.length > 'string'.length
-    if(type.length > 6){
-      elem = (elem.stack && elem.stack.path)
-      || elem.path || elem.name || elem.displayName;
-    }
-    this.path += elem + ' ';
-  }
-
-  // populate main stack props
-  app.get(this.path, this);
-
-  // rootHandler: handle if not present
-  if(typeof this.handle !== 'function'){
-    this.handle = app.get().handle;
-  }
-
-  elem = this.match || this.path;
-  // reportNode: errors and/or logging stack-wise
-  if(typeof this.report !== 'function'){
-    this.report = app.get('#report ' + elem).handle;
-  }
-
-  // defaults
-  this.argv = argv;
-  this.args = [ ];
-  this.wait = false;
-  this.match = null;
-  this.length = 0;
-  this.scope = app;
 }
 
 // ## Runtime([name, opts])
@@ -118,9 +58,13 @@ function Runtime(name, opts){
       'try this `runtime.set([Function])`\n');
   });
 
-  // default reporter (for errors and logging)
-  this.set('#report', function reportNode(err, next){
-    if(err){ throw err; }
+  // sugarish but cool
+  name = this.get().name;
+  this.log = new Manifold(name + ' logger');
+  this.error = new Manifold(name + ' error');
+
+  // default rootLoggerHandle
+  this.log.set(function defaultLogger(next){
     var path = next.match || next.path;
     if(next.start){
       console.log('\nStack begin: >%s<', next.start);
@@ -137,6 +81,73 @@ function Runtime(name, opts){
   if(opts.input || opts.output){ this.repl(opts); }
 }
 util.inherits(Runtime, Manifold);
+
+// ## Stack(app, args)
+// > produce a consumable stack object
+//
+// arguments
+//
+// return
+//
+// --
+// api.private
+// --
+
+function Stack(app, args){
+
+  if(!(this instanceof Stack)){
+    return new Stack(app, args);
+  }
+
+  // stack path
+  this.path = '';
+
+  var index = -1;
+  var elem, type, len = args.length;
+  var argv = new Array(args.length);
+
+  // extract string path
+  while(++index < len){
+    elem = argv[index] = args[index];
+    type = typeof elem;
+    // unsupported types
+    if( !(/function|string/).test(type) ){
+      throw new TypeError('argument should be `string` or `function`');
+    }
+    // 'function'.length > 'string'.length
+    if(type.length > 6){
+      elem = (elem.stack instanceof Stack && elem.stack.path)
+      || elem.path || elem.name || elem.displayName;
+    }
+    this.path += elem + ' ';
+  }
+
+  // populate main stack props
+  app.get(this.path, this);
+
+  // rootHandler: handle if not present
+  if(typeof this.handle !== 'function'){
+    this.handle = app.get().handle;
+  }
+
+  // logNode: logging stack-wise
+  if(typeof this.log !== 'function'){
+    this.log = app.log.get(this.path).handle;
+  }
+
+  // errorNode: error handling stack-wise
+  if(typeof this.error !== 'function'){
+    this.error = app.error.get(this.path).handle;
+  }
+
+  // defaults
+  this.argv = argv;
+  this.args = [ ];
+  this.wait = false;
+  this.match = null;
+  this.index = this.length = 0;
+  this.scope = app;
+}
 
 // ## Runtime.next(/* arguments */)
 // > dispatch next command
@@ -171,22 +182,24 @@ Runtime.prototype.next = function(stack){
     next.handle = stem; next.depth = next.depth || 1;
   }
 
-  if(!stack.match){ stack.length++; }
-
   // sync stack with next
   var chosen = stem.stack || stack;
   util.merge(next, {
     wait: stack.wait,
     argv: stack.argv,
     args: stack.args,
-    pending: chosen.path,
+    index: stack.length,
+    pending: stack.path,
     result: chosen.result || null
   });
+
+  stack.index++;
+  if(!stack.match){ stack.length++; }
 
   var self = this;
   var report = stack.report;
   function next(err){
-    if(next.end){ return next.result; }
+    if(next.done){ return next.result; }
     /* jshint validthis:true */
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
@@ -208,9 +221,9 @@ Runtime.prototype.next = function(stack){
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
     } else { stack.end = next.end = true; }
-
     report.call(stack.scope, err, next);
 
+    next.done = true;
     return stack.result;
   }
 
@@ -222,12 +235,14 @@ Runtime.prototype.next = function(stack){
   tick.stack = stack;
   function tick(arg){
     if(arg && arg.stack instanceof Stack){
-      next.start = chosen.path;
+      next.start = true;
       report.call(stack.scope, null, next);
       next.start = null;
-    } else if(arguments.length){
-      next.start = chosen.path;
-      next.args = stack.args = util.args(arguments);
+    } else if(stack.index < 2 || arguments.length){
+      next.start = true;
+      if(arguments.length){
+        next.args = stack.args = util.args(arguments);
+      }
       report.call(stack.scope, null, next);
       next.start = null;
     }

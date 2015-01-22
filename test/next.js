@@ -11,26 +11,45 @@ module.exports = function(Runtime){
     } else { next.wait = false; }
   });
 
-  app.set(':run(\\d+)', function defaults(next){
-    setTimeout(next, 10*Math.random());
+  app.set(':run(\\d+)', function numRunner(next){
+    setTimeout(next, 5*Math.random());
   });
 
   it('should run in parallel by default', function(done){
-    var pile = []; var end = false;
-    
+    var pile = [];
+    app.set('#report :num(\\d+)', function defaults(err, next){
+      if(err){ return done(err); }
+      if(next.start){ return ; }
 
-    app.next('0 1', '2 3', '4 5 6 7 8 9 10')();
+      var stem = Number(next.match);
+      if(!next.end){ return pile.push(stem); }
+      pile.push(stem);
+
+      pile.filter(function(item, index){
+        item.should.be.eql(index);
+        return item === index;
+      }).should.have.property('length', 10);
+
+      done();
+    });
+    console.log(app.next('0 1 2'))
+    app.next('0 1 2 3 4 5 6 7 8 9')();
   });
 
   it('should run in series if so needed', function(done){
     var pile = [];
-    app.set('#report', function(err, next){
+    app.set('#report series :num(\\d+)', function seriesReport(err, next){
       if(err){ return done(err); }
-      if(!next.end){ pile.push(next.match); }
+      if(next.start){ return ; }
 
-      pile.slice(1).filter(function(item, index){
-        return Number(item).should.be.eql(index);
-      });
+      var stem = next.param.num;
+      if(!next.end){ return pile.push(stem); }
+      pile.push(stem);
+
+      pile.filter(function(item, index){
+        return item.should.be.eql(index);
+      }).should.have.propert('length', 4);
+
       done();
     });
 
