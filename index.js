@@ -190,8 +190,6 @@ Runtime.prototype.next = function(stack){
   var chosen = stem.stack || stack;
   util.merge(next, {
     wait: stack.wait,
-    argv: stack.argv,
-    index: stack.length,
     stack: stack,
     pending: stack.path,
     result: chosen.result || null
