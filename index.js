@@ -176,7 +176,7 @@ Runtime.prototype.next = function(stack){
     next.match = stem.stack.path;
     next.depth = stem.stack.depth || 1;
     // propagate arguments between stacks
-    stem.next.args = stack.args;
+    stem.stack.args = stack.args;
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
@@ -187,7 +187,6 @@ Runtime.prototype.next = function(stack){
   util.merge(next, {
     wait: stack.wait,
     argv: stack.argv,
-    args: stack.args,
     index: stack.length,
     pending: stack.path,
     result: chosen.result || null
@@ -208,7 +207,6 @@ Runtime.prototype.next = function(stack){
 
     // propagate
     stack.wait = next.wait;
-    stack.args = next.args;
     stack.scope = this || stack.scope;
     next.time = next.time || process.hrtime();
 
@@ -240,7 +238,7 @@ Runtime.prototype.next = function(stack){
       stack.log(next);
     } else if(stack.index < 2 || arguments.length){
       if(arguments.length){
-        next.args = stack.args = util.args(arguments);
+        stack.args = util.args(arguments);
       }
       stack.log(next);
     }
