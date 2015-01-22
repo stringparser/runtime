@@ -197,7 +197,6 @@ Runtime.prototype.next = function(stack){
   if(!stack.match){ stack.length++; }
 
   var self = this;
-  var report = stack.report;
   function next(err){
     if(next.done){ return next.result; }
     /* jshint validthis:true */
@@ -214,14 +213,17 @@ Runtime.prototype.next = function(stack){
     next.time = next.time || process.hrtime();
 
     if(err){
-      err = err instanceof Error ? err : null;
+      if(err instanceof Error){
+        stack.error.apply(stack.scope, err, next);
+      } else { err = null; }
       stack.args = util.args(arguments, err ? 1 : 0);
     }
 
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
     } else { stack.end = next.end = true; }
-    report.call(stack.scope, err, next);
+
+    stack.log.apply(stack.scope, next.args);
 
     next.done = true;
     return stack.result;
@@ -235,16 +237,12 @@ Runtime.prototype.next = function(stack){
   tick.stack = stack;
   function tick(arg){
     if(arg && arg.stack instanceof Stack){
-      next.start = true;
-      report.call(stack.scope, null, next);
-      next.start = null;
+      stack.log(next);
     } else if(stack.index < 2 || arguments.length){
-      next.start = true;
       if(arguments.length){
         next.args = stack.args = util.args(arguments);
       }
-      report.call(stack.scope, null, next);
-      next.start = null;
+      stack.log(next);
     }
 
     util.asyncDone(function(){
