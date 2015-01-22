@@ -64,17 +64,22 @@ function Runtime(name, opts){
   this.error = new Manifold(name + ' error');
 
   // default rootLoggerHandle
-  this.log.set(function defaultLogger(next){
+  this.log.set(function rootLogger(next){
     var path = next.match || next.path;
-    if(next.start){
+    if(!next.index){
       console.log('\nStack begin: >%s<', next.start);
-    } else if(next.end){
+    } else if(next.stack.done){
       console.log('Stack ended with >%s< in %s\n', path, next.time);
       return ;
     }
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
     console.log('- %s >%s< %s', status, path, time);
+  });
+
+  // default rootErrorHandle
+  this.error.set(function rootErrorHandle(error){
+    if(error){ throw error; }
   });
 
   // make repl
@@ -187,6 +192,7 @@ Runtime.prototype.next = function(stack){
     wait: stack.wait,
     argv: stack.argv,
     index: stack.length,
+    stack: stack,
     pending: stack.path,
     result: chosen.result || null
   });
