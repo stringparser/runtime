@@ -171,10 +171,9 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if (stem.stack instanceof Stack){
+    util.merge(next, stem.stack);
+    next.stack = stem.stack;
     next.handle = stem;
-    next.stack = stack;
-    next.match = stem.stack.path;
-    next.depth = stem.stack.depth || 1;
     // propagate arguments between stacks
     stem.stack.args = stack.args;
   } else {
