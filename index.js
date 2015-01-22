@@ -52,28 +52,32 @@ function Runtime(name, opts){
 
   Manifold.call(this, opts);
 
-  // default handler
+  // loggers and errorHandlers
+  name = this.get().name;
+  this.log = new Manifold(name + ' logger');
+  this.error = new Manifold(name + ' error');
+
+  // default rootNodeHandle
   this.set(function rootNode(){
     throw new Error('no function to dispatch from\n' +
       'try this `runtime.set([Function])`\n');
   });
 
-  // sugarish but cool
-  name = this.get().name;
-  this.log = new Manifold(name + ' logger');
-  this.error = new Manifold(name + ' error');
-
   // default rootLoggerHandle
   this.log.set(function rootLogger(next){
+    var main = next.stack;
     var path = next.match || next.path;
-    if(!next.index){
-      console.log('\nStack begin: >%s<', next.start);
-    } else if(next.stack.done){
-      console.log('Stack ended with >%s< in %s\n', path, next.time);
-      return ;
-    }
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
+
+    if(main.start){
+      console.log('\nStack >%s< dispatch start', main.path);
+    }
+
+    if(main.end){
+      console.log('Stack >%s< dispatch end\n', main.path);
+    }
+
     console.log('- %s >%s< %s', status, path, time);
   });
 
@@ -146,6 +150,7 @@ function Stack(app, args){
   }
 
   // defaults
+  this.pending = this.path;
   this.argv = argv;
   this.args = [ ];
   this.wait = false;
@@ -168,6 +173,8 @@ Runtime.prototype.next = function(stack){
     stack = new Stack(this, arguments);
   }
 
+  stack.start = !stack.index;
+
   // --
   var stem = stack.match || stack.argv[stack.length];
 
@@ -179,6 +186,7 @@ Runtime.prototype.next = function(stack){
     util.merge(next, stem.stack);
     next.stack = stem.stack;
     next.handle = stem;
+    delete next.match;
     // propagate arguments between stacks
     stem.stack.args = stack.args;
   } else {
@@ -189,10 +197,11 @@ Runtime.prototype.next = function(stack){
   // sync stack with next
   var chosen = stem.stack || stack;
   util.merge(next, {
-    wait: stack.wait,
+    wait: stack.wait, // isolates the nested stack
+    argv: stack.argv,
+    args: chosen.args,
     stack: stack,
-    pending: stack.path,
-    result: chosen.result || null
+    result: chosen.result || null,
   });
 
   stack.index++;
@@ -200,33 +209,31 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
-    if(next.done){ return next.result; }
-    /* jshint validthis:true */
+
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
-      stack.path = stack.path.replace(next.match, '')
+      stack.pending = stack.pending.replace(next.match, '')
         .replace(/[ ]{2,}/g, ' ').trim();
+      next.done = true;
     }
 
-    // propagate
+    // propagate and correct
     stack.wait = next.wait;
-    stack.scope = this || stack.scope;
     next.time = next.time || process.hrtime();
 
-    if(err){
-      if(err instanceof Error){
-        stack.error.apply(stack.scope, err, next);
-      } else { err = null; }
+    if(err){ // handle those errors
+      err = err instanceof Error ? err : null;
+      stack.error.call(stack.scope, err, next);
       stack.args = util.args(arguments, err ? 1 : 0);
     }
 
+    // go next tick
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
-    } else { stack.end = next.end = true; }
+    } else { stack.end = true; }
 
     stack.log(next);
 
-    next.done = true;
     return stack.result;
   }
 
@@ -234,15 +241,13 @@ Runtime.prototype.next = function(stack){
   // ----------------------------------
   // ↓ below `tick`
 
-  tick.next = next;
   tick.stack = stack;
   function tick(arg){
+
     if(arg && arg.stack instanceof Stack){
       stack.log(next);
-    } else if(stack.index < 2 || arguments.length){
-      if(arguments.length){
-        stack.args = util.args(arguments);
-      }
+    } else if(stack.start){
+      if(arguments.length){ stack.args = util.args(arguments); }
       stack.log(next);
     }
 
@@ -250,13 +255,13 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       var args = [next].concat(stack.args);
       stack.result = next.handle.apply(stack.scope, args);
-
       if(next.wait){ return stack.result; }
 
+      // async-done checks
       var res = stack.result;
       res = !res || res.on || res.then || res.subscribe;
       if(typeof res === 'function'){ next.time = null; }
-      return next();
+      next(); return res;
     }, next);
 
     return next;
