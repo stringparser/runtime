@@ -223,7 +223,7 @@ Runtime.prototype.next = function(stack){
       self.next(stack)();
     } else { stack.end = next.end = true; }
 
-    stack.log.apply(stack.scope, next.args);
+    stack.log(next);
 
     next.done = true;
     return stack.result;
