@@ -230,8 +230,9 @@ Runtime.prototype.next = function(stack){
     // go next tick
     if(next.depth && next.argv[stack.length]){
       self.next(stack)();
-    } else { stack.end = true; }
+    } else { stack.done = true; }
 
+    next.end = true;
     stack.log(next);
 
     return stack.result;
