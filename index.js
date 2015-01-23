@@ -261,7 +261,7 @@ Runtime.prototype.next = function(stack){
       var res = stack.result;
       res = !res || res.on || res.then || res.subscribe;
       if(typeof res === 'function'){ next.time = null; }
-      next(); return res;
+      next(); return stack.result;
     }, next);
 
     return next;
