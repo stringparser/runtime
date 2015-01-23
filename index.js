@@ -60,7 +60,7 @@ function Runtime(name, opts){
   // default rootNodeHandle
   this.set(function rootNode(){
     throw new Error('no function to dispatch from\n' +
-      'try this `runtime.set([Function])`\n');
+      'try this `runtime.set([Function])`');
   });
 
   // default rootLoggerHandle
@@ -74,11 +74,11 @@ function Runtime(name, opts){
       console.log('\nStack >%s< dispatch start', main.path);
     }
 
+    console.log('- %s >%s< %s', status, path, time);
+
     if(main.end){
       console.log('Stack >%s< dispatch end\n', main.path);
     }
-
-    console.log('- %s >%s< %s', status, path, time);
   });
 
   // default rootErrorHandle
