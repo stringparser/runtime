@@ -58,22 +58,25 @@ function Runtime(name, opts){
   this.log = new Manifold(name + ' logger');
   this.error = new Manifold(name + ' error');
 
-  // default rootNodeHandle
-  this.set(function rootNode(){
-    throw new Error('no function to dispatch from\n' +
-      'try this `runtime.set([Function])`');
+  // default notFound handle
+  this.set(function notFound(next){
+    throw new Error(' No handle found for \''+next.path+'\' path, you can:\n' +
+      '\t- Define one with `runtime.set('+next.path+', [Function])`\n'+
+      '\t- Provide a function instead of a string to runtime.next\n'+
+      '\t- Override this handle with `runtime.set([Function])` and do'
+      +' something about it\n');
   });
 
   // default rootLoggerHandle
   this.log.set(function rootLogger(next){
-    var main = next.handle.stack || next.stack;
     var path = next.match || next.path;
+    var main = next.handle.stack || next.stack;
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
 
     if(main.start){
       console.log('>%s< dispatch started', main.path);
-    } else if(!next.handle.stack){ // only log foremost stack
+    } else if(main.index > 1){ // only log foremost stack
       console.log('%s >%s< %s', status, path, time);
     }
 
@@ -116,7 +119,7 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if (stem.stack instanceof Stack){
-    util.merge(next, stem.stack)
+    util.merge(next, stem.stack);
     next.handle = stem;
     // propagate arguments between stacks
     stem.stack.args = stack.args;

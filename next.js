@@ -2,16 +2,18 @@
 
 var app = require('./.').create('next');
 
-app.set(':handle', function one(next){
+app.set(':handle :this', function one(next){
   if(next.wait){ next(); }
 });
 
 function nested(next){
+  next.wait = true;
   setTimeout(next, 10);
   return 'fake';
 }
 
-function wait(){
+function wait(next){
+  next();
 }
 
 var compose = app.next(nested, 'thing', wait);
