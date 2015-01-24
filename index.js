@@ -181,7 +181,7 @@ Runtime.prototype.next = function(stack){
     // go next tick
     if(next.depth && stack.argv[stack.length]){
       self.next(stack)();
-    } else { stack.done = !stack.pending; }
+    }
 
     stack.log(next);
     next.time = next.time || process.hrtime();
