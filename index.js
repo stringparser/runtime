@@ -66,16 +66,14 @@ function Runtime(name, opts){
 
   // default rootLoggerHandle
   this.log.set(function rootLogger(next){
-    var main = next.stack;
+    var main = next.handle.stack || next.stack;
     var path = next.match || next.path;
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + next.time) : '';
 
     if(main.start){
-      console.log('\n>%s< started', main.path);
-    }
-
-    if(!next.handle.stack){ // only log foremost stack
+      console.log('>%s< dispatch started', main.path);
+    } else if(!next.handle.stack){ // only log foremost stack
       console.log('%s >%s< %s', status, path, time);
     }
 
@@ -118,7 +116,7 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if (stem.stack instanceof Stack){
-    next.path = stem.stack.path;
+    util.merge(next, stem.stack)
     next.handle = stem;
     // propagate arguments between stacks
     stem.stack.args = stack.args;
@@ -132,35 +130,13 @@ Runtime.prototype.next = function(stack){
   util.merge(next, {
     // isolates nested stack's state
     wait: stack.wait,
-    stack: chosen,
+    argv: stack.argv,
+    stack: stack,
     result: chosen.result || null,
   });
 
   stack.index++;
   if(!stack.match){ stack.length++; }
-
-  var isStack;
-  tick.stack = stack;
-  function tick(arg){
-    if(stack.start){
-      if(arg && arg.stack instanceof Stack){ isStack = true; }
-      else if(arguments.length){
-        stack.args = util.args(arguments);
-        stack.log(next);
-      }
-    }
-
-    util.asyncDone(function(){
-      next.time = process.hrtime();
-      var args = [next].concat(stack.args);
-      stack.result = next.handle.apply(stack.scope, args);
-      if(isStack){ next.time = null; return next(); }
-      if(next.wait){ return stack.result; }
-      return next();
-    }, next);
-
-    return next;
-  }
 
   var self = this;
   function next(err){
@@ -189,6 +165,27 @@ Runtime.prototype.next = function(stack){
     next.time = next.time || process.hrtime();
 
     return stack.result;
+  }
+
+  var isStack;
+  tick.stack = stack;
+  function tick(arg){
+    if(arg && arg.stack instanceof Stack){ isStack = true; }
+    else if(stack.start){
+      if(arguments.length){ stack.args = util.args(arguments); }
+      stack.log(next);
+    }
+
+    util.asyncDone(function(){
+      next.time = process.hrtime();
+      var args = [next].concat(stack.args);
+      stack.result = next.handle.apply(stack.scope, args);
+      if(next.wait){ return stack.result; }
+      next.time = null;
+      return next();
+    }, next);
+
+    return next;
   }
 
   return tick;
