@@ -67,29 +67,6 @@ function Runtime(name, opts){
       +' something about it\n');
   });
 
-  // default rootLoggerHandle
-  this.log.set(function rootLogger(next){
-    var path = next.match || next.path;
-    var main = next.handle.stack || next.stack;
-    var status = next.time ? 'Finished' : 'Wait for';
-    var time = next.time ? ('in ' + next.time) : '';
-
-    if(main.start){
-      console.log('>%s< dispatch started', main.path);
-    } else if(main.index > 1){ // only log foremost stack
-      console.log('%s >%s< %s', status, path, time);
-    }
-
-    if(!main.pending){
-      console.log('>%s< dispatch ended\n', main.path);
-    }
-  });
-
-  // default rootErrorHandle
-  this.error.set(function rootErrorHandle(error){
-    if(error){ throw error; }
-  });
-
   // make repl
   if(opts.input || opts.output){ this.repl(opts); }
 }
