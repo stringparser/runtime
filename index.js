@@ -41,22 +41,17 @@ function create(name, opts){
 // return
 //
 
-function Runtime(name, opts){
+function Runtime(name, opt){
 
   if( !(this instanceof Runtime) ){
-    return new Runtime(name, opts);
+    return new Runtime(name, opt);
   }
 
-  // currywurst!
-  opts = util.type(opts || name).plainObject || { };
-  opts.name = opts.name || name;
+  // Runtime `name`
+  opt = util.type(opt || name).plainObject || { };
+  opt.name = opt.name || name;
 
-  Manifold.call(this, opts);
-
-  // loggers and errorHandlers
-  name = this.get().name;
-  this.log = new Manifold(name + ' logger');
-  this.error = new Manifold(name + ' error');
+  Manifold.call(this, opt);
 
   // default notFound handle
   this.set(function notFound(next){
@@ -67,8 +62,13 @@ function Runtime(name, opts){
       +' something about it\n');
   });
 
-  // make repl
-  if(opts.input || opts.output){ this.repl(opts); }
+  // loggers and errorHandlers
+  name = this.get().name;
+  this.log = new Manifold(name + ' loggers');
+  this.error = new Manifold(name + ' errorHandlers');
+
+  // make repl if so desired
+  if(opt.input || opt.output){ this.repl(opt); }
 }
 util.inherits(Runtime, Manifold);
 
@@ -100,19 +100,18 @@ Runtime.prototype.next = function(stack){
     next.handle = stem;
     // propagate arguments between stacks
     stem.stack.args = stack.args;
+    stem.stack.result = stack.result;
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
   }
 
   // sync stack with next
-  var chosen = stem.stack || stack;
   util.merge(next, {
     // isolates nested stack's state
     wait: stack.wait,
-    argv: stack.argv,
     stack: stack,
-    result: chosen.result || null,
+    result: stack.result || null,
   });
 
   stack.index++;
@@ -120,15 +119,17 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
-
+    if(next.end){ return next.result; }
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
       stack.pending = stack.pending.replace(next.match, '')
       .replace(/[ ]{2,}/g, ' ').trim();
+      next.end = true;
     }
 
     // propagate and correct
     stack.wait = next.wait;
+    next.result = stack.result;
 
     if(err){ // handle those errors
       err = err instanceof Error ? err : null;
@@ -159,10 +160,11 @@ Runtime.prototype.next = function(stack){
     util.asyncDone(function(){
       next.time = process.hrtime();
       var args = [next].concat(stack.args);
-      stack.result = next.handle.apply(stack.scope, args);
+      var res = next.handle.apply(stack.scope, args);
+      if(res){ stack.result = res; }
       if(next.wait){ return stack.result; }
-      next.time = null;
-      return next();
+      next.time = null; next();
+      return res;
     }, next);
 
     return next;
