@@ -75,9 +75,11 @@ function Runtime(name, opts){
       console.log('\n>%s< started', main.path);
     }
 
-    console.log('%s >%s< %s', status, path, time);
+    if(!next.handle.stack){ // only log foremost stack
+      console.log('%s >%s< %s', status, path, time);
+    }
 
-    if(main.done){
+    if(!main.pending){
       console.log('>%s< dispatch ended\n', main.path);
     }
   });
