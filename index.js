@@ -137,39 +137,6 @@ Runtime.prototype.next = function(stack){
   stack.index++;
   if(!stack.match){ stack.length++; }
 
-  var self = this;
-  function next(err){
-
-    if(next.time && typeof next.time !== 'string'){
-      next.time = util.prettyTime(process.hrtime(next.time));
-      stack.pending = stack.pending.replace(next.match, '')
-        .replace(/[ ]{2,}/g, ' ').trim();
-    }
-
-    // propagate and correct
-    stack.wait = next.wait;
-
-    if(err){ // handle those errors
-      err = err instanceof Error ? err : null;
-      stack.error.call(stack.scope, err, next);
-      stack.args = util.args(arguments, err ? 1 : 0);
-    }
-
-    // go next tick
-    if(next.depth && stack.argv[stack.length]){
-      self.next(stack)();
-    } else { stack.done = !stack.pending; }
-
-    stack.log(next);
-    next.time = next.time || process.hrtime();
-
-    return stack.result;
-  }
-
-  // ↑ above `next`
-  // ----------------------------------
-  // ↓ below `tick`
-
   var isStack;
   tick.stack = stack;
   function tick(arg){
@@ -191,6 +158,35 @@ Runtime.prototype.next = function(stack){
     }, next);
 
     return next;
+  }
+
+  var self = this;
+  function next(err){
+
+    if(next.time && typeof next.time !== 'string'){
+      next.time = util.prettyTime(process.hrtime(next.time));
+      stack.pending = stack.pending.replace(next.match, '')
+      .replace(/[ ]{2,}/g, ' ').trim();
+    }
+
+    // propagate and correct
+    stack.wait = next.wait;
+
+    if(err){ // handle those errors
+      err = err instanceof Error ? err : null;
+      stack.error.call(stack.scope, err, next);
+      stack.args = util.args(arguments, err ? 1 : 0);
+    }
+
+    // go next tick
+    if(next.depth && stack.argv[stack.length]){
+      self.next(stack)();
+    } else { stack.done = !stack.pending; }
+
+    stack.log(next);
+    next.time = next.time || process.hrtime();
+
+    return stack.result;
   }
 
   return tick;
