@@ -68,9 +68,6 @@ function Runtime(name, opt){
   name = this.get().name;
   this.log = new Manifold(name + ' loggers');
   this.error = new Manifold(name + ' errorHandlers');
-
-  // make repl if so desired
-  if(opt.input || opt.output){ this.repl(opt); }
 }
 util.inherits(Runtime, Manifold);
 
