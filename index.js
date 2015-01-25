@@ -93,7 +93,7 @@ Runtime.prototype.next = function(stack){
   if(typeof stem === 'string'){
     this.get(stem, next);
     if(!next.handle){ next.handle = stack.handle; }
-    stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
+    stack.match = next.path.replace(next.match, '').trim();
   } else if (stem.stack instanceof Stack){
     isStack = true;
     util.merge(next, stem.stack);
@@ -160,7 +160,7 @@ Runtime.prototype.next = function(stack){
     util.asyncDone(function(){
       next.time = process.hrtime();
       var args = [next].concat(stack.args);
-      var res = next.handle.apply(stack.scope, args);
+      var res = next.handle.apply(stack.scope || self, args);
       stack.result = res || stack.result;
       if(next.wait){ return res; }
       if(!next.end){ next(); }
