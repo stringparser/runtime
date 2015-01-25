@@ -1,11 +1,12 @@
 'use strict';
 
 var gulp = require('gulp');
-var argv = process.argv.slice(2);
-var app = require('./.').create('context').repl({
+var runtime = require('./.');
+
+var app = runtime.create();
+runtime.repl(app, {
   input : process.stdin,
-  output : process.stdout,
-  completion : null
+  output : process.stdout
 });
 
 app.set(function rootNode(next){
@@ -38,5 +39,5 @@ app.set(':src :dest', function task(next){
         .pipe(gulp.dest(dest));
 });
 
-console.log(argv);
+var argv = process.argv.slice(2);
 if(argv.length){ app.next(argv); }
