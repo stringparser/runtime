@@ -19,4 +19,4 @@ function wait(next){
 
 var compose = app.next(nest, wait);
 
-app.next('first', compose, 'last')(0, 1, 2);
+app.next(['first', compose, 'last'])(0, 1, 2);
