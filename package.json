@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "async-done": "^1.0.0",
+    "browser-process-hrtime": "0.0.3",
     "inherits": "^2.0.1",
     "lodash.clone": "2.x.x",
     "manifold": "1.x.x",
