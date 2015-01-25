@@ -1,6 +1,7 @@
 'use strict';
 
 var util = require('./lib/util');
+var repl = require('./lib/repl');
 var Stack = require('./lib/stack');
 var Manifold = require('manifold');
 
@@ -15,6 +16,7 @@ var Manifold = require('manifold');
 
 exports = module.exports = {
   get: get,
+  repl: repl,
   create: create,
   Runtime: Runtime,
   Manifold: Manifold
@@ -169,58 +171,4 @@ Runtime.prototype.next = function(stack){
   }
 
   return tick;
-};
-
-// ## Runtime.repl([opt])
-// > REPL powered by the readline module
-//
-// arguments
-//
-// return
-//
-
-Runtime.prototype.repl = function(o){
-
-  if(this.input){ return this; }
-
-  // this was the very beginning of it all :D
-  var readline = require('readline');
-
-  util.merge(this, readline.createInterface({
-    input: util.type(o.input).match(/stream/) || util.through.obj(),
-    output: util.type(o.output).match(/stream/) || util.through.obj(),
-    terminal: o.terminal,
-    completer: util.type(o.completer).function || util.completer,
-  }));
-
-  this.on('line', this.next);
-  if(!this.terminal){ return this; }
-
-  // the default prompt
-  this.setPrompt(' '+this.store.name+' > ');
-
-  var self = this;
-  // modify the default keypress for SIGINT
-  this.input.removeAllListeners('keypress');
-  this.input.on('keypress', function (s, key){
-    if( key && key.ctrl && key.name === 'c'){
-      process.stdout.write('\n');
-      process.exit(0);
-    } else { self._ttyWrite(s, key); }
-  });
-
-  // make some methods chain
-  var prompt = this.prompt;
-  this.prompt = function(/* arguments */){
-    prompt.apply(this, arguments);
-    return this;
-  };
-
-  var setPrompt = this.setPrompt;
-  this.setPrompt = function(/* arguments */){
-    setPrompt.apply(this, arguments);
-    return this;
-  };
-
-  return this;
 };
