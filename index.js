@@ -1,7 +1,6 @@
 'use strict';
 
 var util = require('./lib/util');
-var repl = require('./lib/repl');
 var Stack = require('./lib/stack');
 var Manifold = require('manifold');
 
@@ -16,7 +15,7 @@ var Manifold = require('manifold');
 
 exports = module.exports = {
   get: get,
-  repl: repl,
+  repl: require('./lib/repl'),
   create: create,
   Runtime: Runtime,
   Manifold: Manifold
