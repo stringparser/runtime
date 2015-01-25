@@ -120,6 +120,7 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
+    if(!stack.pending){ return next.result; }
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
       stack.pending = stack.pending.replace(next.match, '')
@@ -134,9 +135,8 @@ Runtime.prototype.next = function(stack){
     next.time = next.time || process.hrtime();
 
     if(arguments.length){ // handle those errors
-      err = err instanceof Error ? err : null;
-      stack.error.call(stack.scope, err, next);
-      stack.args = util.args(arguments, err ? 0 : 1);
+      stack.error(err, next);
+      stack.args = util.args(arguments, 1);
     }
 
     // go next tick
