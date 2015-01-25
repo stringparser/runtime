@@ -96,6 +96,7 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if (stem.stack instanceof Stack){
+    var isStack = true;
     util.merge(next, stem.stack);
     next.handle = stem;
     // propagate arguments between stacks
@@ -119,22 +120,23 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
-    if(next.end){ return next.result; }
     if(next.time && typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
       stack.pending = stack.pending.replace(next.match, '')
-      .replace(/[ ]{2,}/g, ' ').trim();
+        .replace(/[ ]{2,}/g, ' ').trim();
       next.end = true;
     }
 
-    // propagate and correct
+    // report, propagate and correct
+    stack.log(next);
     stack.wait = next.wait;
     next.result = stack.result;
+    next.time = next.time || process.hrtime();
 
-    if(err){ // handle those errors
+    if(arguments.length){ // handle those errors
       err = err instanceof Error ? err : null;
       stack.error.call(stack.scope, err, next);
-      stack.args = util.args(arguments, err ? 1 : 0);
+      stack.args = util.args(arguments, err ? 0 : 1);
     }
 
     // go next tick
@@ -142,13 +144,9 @@ Runtime.prototype.next = function(stack){
       self.next(stack)();
     }
 
-    stack.log(next);
-    next.time = next.time || process.hrtime();
-
     return stack.result;
   }
 
-  var isStack;
   tick.stack = stack;
   function tick(arg){
     if(arg && arg.stack instanceof Stack){ isStack = true; }
@@ -161,10 +159,10 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       var args = [next].concat(stack.args);
       var res = next.handle.apply(stack.scope, args);
-      if(res){ stack.result = res; }
+      if(res && !isStack){ stack.result = res; }
       if(next.wait){ return stack.result; }
-      next.time = null; next();
-      return res;
+      next.time = null;
+      return next();
     }, next);
 
     return next;

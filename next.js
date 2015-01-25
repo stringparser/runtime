@@ -13,11 +13,11 @@ function nested(next){
   return next.result;
 }
 
-function wait(next){
-  next();
+function wait(next, res){
+  console.log('res', res); next();
   return next.result;
 }
 
-var compose = app.next(nested, 'thing', wait);
+var compose = app.next(nested, wait);
 
 app.next('first', compose, 'last')(0, 1, 2);
