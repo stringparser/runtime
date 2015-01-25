@@ -7,17 +7,16 @@ app.set(':handle', function one(next){
   return 'result';
 });
 
-function nested(next){
+function nest(next){
   next.wait = true;
   setTimeout(next, 10);
-  return next.result;
 }
 
-function wait(next, res){
-  console.log('res', res); next();
-  return next.result;
+function wait(next){
+  if(next.wait){ next(); }
+  console.log('res', next.result);
 }
 
-var compose = app.next(nested, wait);
+var compose = app.next(nest, wait);
 
 app.next('first', compose, 'last')(0, 1, 2);

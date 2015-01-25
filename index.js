@@ -89,6 +89,7 @@ Runtime.prototype.next = function(stack){
   stack.start = !stack.index;
 
   // --
+  var isStack;
   var stem = stack.match || stack.argv[stack.length];
 
   if(typeof stem === 'string'){
@@ -96,7 +97,7 @@ Runtime.prototype.next = function(stack){
     if(!next.handle){ next.handle = stack.handle; }
     stack.match = next.argv.slice(next.depth || 1).join(' ') || null;
   } else if (stem.stack instanceof Stack){
-    var isStack = true;
+    isStack = true;
     util.merge(next, stem.stack);
     next.handle = stem;
     // propagate arguments between stacks
@@ -120,19 +121,18 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
-    if(!stack.pending){ return next.result; }
-    if(next.time && typeof next.time !== 'string'){
+    if(next.end){ return next.result; }
+    if(typeof next.time !== 'string'){
       next.time = util.prettyTime(process.hrtime(next.time));
       stack.pending = stack.pending.replace(next.match, '')
         .replace(/[ ]{2,}/g, ' ').trim();
-      next.end = true;
+      next.end = true; stack.start = null;
+      if(!isStack){ stack.log(next); }
     }
 
-    // report, propagate and correct
-    stack.log(next);
+    // propagate and correct
     stack.wait = next.wait;
     next.result = stack.result;
-    next.time = next.time || process.hrtime();
 
     if(arguments.length){ // handle those errors
       stack.error(err, next);
@@ -149,20 +149,20 @@ Runtime.prototype.next = function(stack){
 
   tick.stack = stack;
   function tick(arg){
-    if(arg && arg.stack instanceof Stack){ isStack = true; }
-    else if(stack.start){
-      if(arguments.length){ stack.args = util.args(arguments); }
-      stack.log(next);
+    if(arg && !(arg.stack instanceof Stack) && arguments.length){
+      stack.args = util.args(arguments);
     }
+
+    if(!isStack){ stack.log(next); }
 
     util.asyncDone(function(){
       next.time = process.hrtime();
       var args = [next].concat(stack.args);
       var res = next.handle.apply(stack.scope, args);
-      if(res && !isStack){ stack.result = res; }
-      if(next.wait){ return stack.result; }
-      next.time = null;
-      return next();
+      stack.result = res || stack.result;
+      if(next.wait){ return res; }
+      if(!next.end){ next(); }
+      return res;
     }, next);
 
     return next;
