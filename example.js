@@ -3,7 +3,7 @@
 var gulp = require('gulp');
 var runtime = require('./.');
 
-var app = runtime.create();
+var app = runtime.create('app');
 runtime.repl(app, {
   input : process.stdin,
   output : process.stdout
