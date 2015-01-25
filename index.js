@@ -121,7 +121,7 @@ Runtime.prototype.next = function(stack){
   function next(err){
     if(next.end){ return next.result; }
     if(typeof next.time !== 'string'){
-      next.time = util.prettyTime(process.hrtime(next.time));
+      next.time = process.hrtime(next.time);
       stack.pending = stack.pending.replace(next.match, '')
         .replace(/[ ]{2,}/g, ' ').trim();
       next.end = true; stack.start = null;
