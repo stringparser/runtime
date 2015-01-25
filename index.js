@@ -67,7 +67,7 @@ function Runtime(name, opt){
   // loggers and errorHandlers
   name = this.get().name;
   this.log = new Manifold(name + ' loggers');
-  this.error = new Manifold(name + ' errorHandlers');
+  this.error = new Manifold(name + ' errorHandlers');   
 }
 util.inherits(Runtime, Manifold);
 
