@@ -24,7 +24,7 @@
   "dependencies": {
     "async-done": "^1.0.0",
     "inherits": "^2.0.1",
-    "manifold": "2.x.x",
+    "manifold": " 2.x.x",
     "pretty-hrtime": "0.2.x",
     "utils-merge": "^1.0.0",
     "utils-type": "0.8.x"
