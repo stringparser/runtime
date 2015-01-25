@@ -123,7 +123,7 @@ Runtime.prototype.next = function(stack){
   function next(err){
     if(next.end){ return next.result; }
     if(typeof next.time !== 'string'){
-      next.time = util.prettyTime(util.hrtime(next.time));
+      next.time = util.prettyTime(process.hrtime(next.time));
       stack.pending = stack.pending.replace(next.match, '')
         .replace(/[ ]{2,}/g, ' ').trim();
       next.end = true; stack.start = null;
@@ -156,7 +156,7 @@ Runtime.prototype.next = function(stack){
     if(!isStack){ stack.log(next); }
 
     util.asyncDone(function(){
-      next.time = util.hrtime();
+      next.time = process.hrtime();
       var args = [next].concat(stack.args);
       var res = next.handle.apply(stack.scope, args);
       stack.result = res || stack.result;
