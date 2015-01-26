@@ -65,13 +65,28 @@ function Runtime(name, opt){
 
   // loggers and errorHandlers
   name = this.get().name;
-  this.log = new Manifold(name + ' loggers');
-  this.error = new Manifold(name + ' errorHandlers');
+  this.error = new Manifold({name: name + ' errors'});
+  if(opt.log === false){ return this; }
+
+  this.log = new Manifold({name: name + ' loggers'});
+  this.log.set(function rootLogger(next){
+    var path = next.match || next.path;
+    var main = next.handle.stack || next.stack;
+    var status = next.time ? 'Finished' : 'Wait for';
+    var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
+
+    if(main.start){
+      console.log('Stack `%s` dispatch started', main.path);
+    }
+
+    console.log('- %s `%s` %s', status, path, time);
+  });
+
 }
 util.inherits(Runtime, Manifold);
 
 // ## Runtime.next(/* arguments */)
-// > dispatch next command
+// > dispatch next commands
 //
 // arguments
 //
@@ -96,10 +111,10 @@ Runtime.prototype.next = function(stack){
     stack.match = next.path.replace(next.match, '').trim();
   } else if (stem.stack instanceof Stack){
     isStack = true;
-    util.merge(next, stem.stack);
     next.handle = stem;
-    // propagate arguments between stacks
-    stem.stack.args = stack.args;
+    next.path = stem.stack.path;
+    next.depth = stem.stack.depth || 1;
+    stem.stack.args = stack.args; // propagate arguments between stacks
     stem.stack.result = stack.result;
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
@@ -108,8 +123,7 @@ Runtime.prototype.next = function(stack){
 
   // sync next with stack
   util.merge(next, {
-    // isolates nested stack's state
-    wait: stack.wait,
+    wait: stack.wait, // isolates nested stack's state
     stack: stack,
     result: stack.result || null,
   });
@@ -132,9 +146,10 @@ Runtime.prototype.next = function(stack){
     stack.wait = next.wait;
     next.result = stack.result;
 
-    if(arguments.length){ // handle those errors
+    var length = arguments.length;
+    if(length){ // handle those errors
       stack.error(err, next);
-      stack.args = util.args(arguments, 1);
+      if(length > 1){ stack.args = util.args(arguments, 1); }
     }
 
     // go next tick
