@@ -40,7 +40,6 @@ module.exports = function(runtime){
       bar.should.be.eql(2);
       baz.should.be.eql(3);
       next(null, 2, 3, 4);
-      console.log(next);
     }
 
     function two(next, foo, bar, baz){
@@ -131,9 +130,9 @@ module.exports = function(runtime){
       done();
     }
 
-    var pile = app.next(app.next(one, two), app.next(three));
-    pile.stack.wait = true;
-    pile(1, 2, 3);
+    var stackOne = app.next(one, {wait: true});
+    var stackTwo = app.next(two, three, {wait: true});
+    app.next(stackOne, stackTwo, {wait: true})(1,2,3);
 
   });
 };
