@@ -40,6 +40,7 @@ module.exports = function(runtime){
       bar.should.be.eql(2);
       baz.should.be.eql(3);
       next(null, 2, 3, 4);
+      console.log(next);
     }
 
     function two(next, foo, bar, baz){
@@ -108,10 +109,6 @@ module.exports = function(runtime){
   });
 
   it('should not be able to change arguments between stacks', function(done){
-
-    app.error.set(function(err){
-      if(err){ throw err; }
-    });
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
