@@ -116,20 +116,18 @@ Runtime.prototype.next = function(stack){
   } else if (stem.stack instanceof Stack){
     isStack = true;
     next.handle = stem;
+    next.stack = stem.stack;
     next.path = stem.stack.path;
     next.depth = stem.stack.depth || 1;
-    stem.stack.args = stack.args; // pass args between stacks
+    stem.stack.args = stack.args; // from previous stem
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
   }
 
   // sync next with stack
-  util.merge(next, {
-    wait: stack.wait, // isolates nested stack's state
-    stack: stack,
-    result: (next.stack || stack).result || null,
-  });
+  next.wait = stack.wait;
+  next.result = (next.stack || stack).result || null;
 
   stack.index++;
   if(!stack.match){ stack.length++; }

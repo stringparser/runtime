@@ -128,12 +128,15 @@ module.exports = function(runtime){
     }
 
     function three(next, foo, bar, baz){
-      foo.should.not.be.eql(3).and.be.eql(1);
-      bar.should.not.be.eql(4).and.be.eql(2);
-      baz.should.not.be.eql(5).and.be.eql(3);
+      foo.should.be.eql(3);
+      bar.should.be.eql(4);
+      baz.should.be.eql(5);
       done();
     }
 
-    app.next(app.next(one, two), app.next(three))(1, 2, 3);
+    var pile = app.next(app.next(one, two), app.next(three));
+    pile.stack.wait = true;
+    pile(1, 2, 3);
+
   });
 };
