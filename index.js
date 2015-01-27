@@ -150,13 +150,12 @@ Runtime.prototype.next = function(stack){
     }
     stack.wait = next.wait;
     next.result = stack.result;
-
     // go next tick
     if(next.depth && stack.argv[stack.length]){
       self.next(stack)();
-    } else if(next.wait && tick.host && tick.host.argv[tick.host.length]){
-      var host = self.next(tick.host);
-      host.stack.args = stack.args; host();
+    } else if(tick.host && tick.host.argv[tick.host.length]){
+      if(stack.wait){ tick.host.args = stack.args; }
+      self.next(tick.host)();
     }
 
     return stack.result;
@@ -180,7 +179,7 @@ Runtime.prototype.next = function(stack){
       stack.result = next.handle.apply(stack.scope || self, args);
       if(!next.wait && !next.end){ next(); }
       return stack.result;
-    }, function(err){ next(err); });
+    }, function(err){ if(err){ next(err); } });
 
     return stack.result;
   }
