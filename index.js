@@ -66,6 +66,10 @@ function Runtime(name, opt){
   // loggers and errorHandlers
   name = this.get().name;
   this.error = new Manifold({name: name + ' errors'});
+  this.error.set(function rootError(err){
+    if(err){ throw err; }
+  });
+
   if(opt.log === false){ return this; }
 
   this.log = new Manifold({name: name + ' loggers'});
@@ -114,8 +118,7 @@ Runtime.prototype.next = function(stack){
     next.handle = stem;
     next.path = stem.stack.path;
     next.depth = stem.stack.depth || 1;
-    stem.stack.args = stack.args; // propagate arguments between stacks
-    stem.stack.result = stack.result;
+    stem.stack.args = stack.args; // pass args between stacks
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
@@ -125,7 +128,7 @@ Runtime.prototype.next = function(stack){
   util.merge(next, {
     wait: stack.wait, // isolates nested stack's state
     stack: stack,
-    result: stack.result || null,
+    result: (next.stack || stack).result || null,
   });
 
   stack.index++;
@@ -133,6 +136,7 @@ Runtime.prototype.next = function(stack){
 
   var self = this;
   function next(err){
+    stack.error(err, next);
     if(next.end){ return next.result; }
     if(typeof next.time !== 'string'){
       next.time = process.hrtime(next.time);
@@ -146,10 +150,8 @@ Runtime.prototype.next = function(stack){
     stack.wait = next.wait;
     next.result = stack.result;
 
-    var length = arguments.length;
-    if(length){ // handle those errors
-      stack.error(err, next);
-      if(length > 1){ stack.args = util.args(arguments, 1); }
+    if(arguments.length > 1){
+      stack.args = util.args(arguments, 1);
     }
 
     // go next tick
@@ -166,8 +168,9 @@ Runtime.prototype.next = function(stack){
 
   tick.stack = stack;
   function tick(arg){
-    if(arg && !(arg.stack instanceof Stack) && arguments.length){
-      stack.args = util.args(arguments);
+    if(stack.start && arguments.length){
+      stack.args = util.args(arguments,
+        arg && arg.stack instanceof Stack ? 1 : 0);
     }
 
     if(!isStack){ stack.log(next); }
@@ -180,7 +183,7 @@ Runtime.prototype.next = function(stack){
       if(next.wait){ return res; }
       if(!next.end){ next(); }
       return res;
-    }, next);
+    }, function(err){ return next(err); });
 
     return next;
   }

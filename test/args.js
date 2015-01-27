@@ -6,7 +6,6 @@ module.exports = function(runtime){
   should.exists(runtime);
   var app = runtime.create('args');
 
-  var logger = app.log.get().handle;
   app.log.set(function(){}); // disable logging
 
   it('should pass arguments around', function(done){
@@ -90,14 +89,12 @@ module.exports = function(runtime){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      next(null);
     }
 
     function two(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      next(null);
     }
 
     function three(next, foo, bar, baz){
@@ -108,5 +105,35 @@ module.exports = function(runtime){
     }
 
     app.next(app.next(one), app.next(two), app.next(three))(1, 2, 3);
+  });
+
+  it('should not be able to change arguments between stacks', function(done){
+
+    app.error.set(function(err){
+      if(err){ throw err; }
+    });
+
+    function one(next, foo, bar, baz){
+      foo.should.be.eql(1);
+      bar.should.be.eql(2);
+      baz.should.be.eql(3);
+      next(null, 2, 3, 4);
+    }
+
+    function two(next, foo, bar, baz){
+      foo.should.be.eql(2);
+      bar.should.be.eql(3);
+      baz.should.be.eql(4);
+      next(null, 3, 4, 5);
+    }
+
+    function three(next, foo, bar, baz){
+      foo.should.not.be.eql(3).and.be.eql(1);
+      bar.should.not.be.eql(4).and.be.eql(2);
+      baz.should.not.be.eql(5).and.be.eql(3);
+      done();
+    }
+
+    app.next(app.next(one, two), app.next(three))(1, 2, 3);
   });
 };
