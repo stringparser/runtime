@@ -135,11 +135,10 @@ Runtime.prototype.next = function(stack){
   function next(err){
     stack.error(err, next);
     if(next.end){ return next.result; }
-    if(typeof next.time !== 'string'){
-      next.time = process.hrtime(next.time);
-      next.end = true; stack.start = null;
-      if(!isTick){ stack.log(next); }
-    }
+
+    next.end = true;
+    next.time = process.hrtime(next.time);
+    if(!isTick){ stack.log(next); }    
 
     // propagate and correct
     if(arguments.length > 1){
