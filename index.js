@@ -74,14 +74,15 @@ function Runtime(name, opt){
 
   this.log = new Manifold({name: name + ' loggers'});
   this.log.set(function rootLogger(next){
+    var main = next.stack;
+    var host = next.stack.host;
     var path = next.match || next.path;
-    var main = next.handle.stack || next.stack;
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
 
     if(main.start){
-      if(next.stack.host){
-        console.log('Host `%s` started stack `%s`', next.stack.host.path, main.path);
+      if(host){
+        console.log('Host `%s` started with `%s`', host.path, main.path);
       } else {
         console.log('Stack `%s` dispatch started', main.path);
       }
