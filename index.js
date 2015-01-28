@@ -135,6 +135,9 @@ Runtime.prototype.next = function(stack, host){
     next.end = true;
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
+    stack.pending = stack.pending.replace(next.match, '')
+      .replace(/[ ]{2,}/g, ' ').trim();
+      
     if(!stackPath){ stack.log(next); }
 
     if(arguments.length > 1){

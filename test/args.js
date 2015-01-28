@@ -130,9 +130,7 @@ module.exports = function(runtime){
       done();
     }
 
-    var stackOne = app.next(one, {wait: true});
-    var stackTwo = app.next(two, three, {wait: true});
-    app.next(stackOne, stackTwo, {wait: true})(1,2,3);
+    app.next(app.next(one), app.next(two, three), {wait: true})(1,2,3);
 
   });
 };
