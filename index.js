@@ -137,8 +137,6 @@ Runtime.prototype.next = function(stack){
     if(next.end){ return next.result; }
     if(typeof next.time !== 'string'){
       next.time = process.hrtime(next.time);
-      stack.pending = stack.pending.replace(next.match, '')
-        .replace(/[ ]{2,}/g, ' ').trim();
       next.end = true; stack.start = null;
       if(!isTick){ stack.log(next); }
     }
