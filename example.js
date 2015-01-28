@@ -1,43 +1,30 @@
 'use strict';
 
-var gulp = require('gulp');
 var runtime = require('./.');
-
+var should = require('should');
 var app = runtime.create('app');
-runtime.repl(app, {
-  input : process.stdin,
-  output : process.stdout
-});
 
-app.set(function rootNode(next){
-  if(next.done){ console.log('done!'); console.log(next); }
-});
+should.exists(app);
 
-app.set('series', function series(next){
-  var pending = next.argv.slice(next.index).join(', ');
-  next.wait = true; next();
-  console.log('\nStarting <%s> in series', pending);
-});
+function one(next, foo, bar, baz){
+  foo.should.be.eql(1);
+  bar.should.be.eql(2);
+  baz.should.be.eql(3);
+}
 
-app.set('parallel', function parallel(next){
-  var pending = next.argv.slice(next.index).join(', ');
-  next.wait = false; next();
-  console.log('\nStarting <%s> in parallel', pending);
-});
+function two(next, foo, bar, baz){
+  foo.should.be.eql(1);
+  bar.should.be.eql(2);
+  baz.should.be.eql(3);
+}
 
-app.set(':handle', function command(next){
-  var rtime = Math.random()*10;
-  setTimeout(function(){
-    next();
-  }, rtime);
-});
+function three(next, foo, bar, baz){
+  foo.should.be.eql(1);
+  bar.should.be.eql(2);
+  baz.should.be.eql(3);
+}
 
-app.set(':src :dest', function task(next){
-  var src = next.params.src;
-  var dest = next.params.dest;
-  return gulp.src(src)
-        .pipe(gulp.dest(dest));
-});
+app.next(app.next(one), two)(1, 2, 3);
 
 var argv = process.argv.slice(2);
 if(argv.length){ app.next(argv); }

@@ -118,7 +118,6 @@ Runtime.prototype.next = function(stack){
     next.stack = stem.stack;
     next.path = stem.stack.path;
     next.depth = stem.stack.depth || 1;
-    stem.host = stack;
   } else {
     this.get(stem.path || stem.name || stem.displayName, next);
     next.handle = stem; next.depth = next.depth || 1;
@@ -153,9 +152,6 @@ Runtime.prototype.next = function(stack){
     // go next tick
     if(next.depth && stack.argv[stack.length]){
       self.next(stack)();
-    } else if(tick.host && tick.host.argv[tick.host.length]){
-      if(stack.wait){ tick.host.args = stack.args; }
-      self.next(tick.host)();
     }
 
     return stack.result;
@@ -167,8 +163,9 @@ Runtime.prototype.next = function(stack){
   tick.stack = stack;
   function tick(arg){
     if(arguments.length){
-      stack.args = util.args(arguments,
-        arg && arg.stack instanceof Stack ? 1 : 0);
+      var host = arg && arg.stack instanceof Stack;
+      stack.args = util.args(arguments, host ? 1 : 0);
+      console.log('%s', host ? 'host' : 'stack', arguments);
     }
 
     if(!isTick){ stack.log(next); }
