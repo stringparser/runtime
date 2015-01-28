@@ -81,12 +81,13 @@ function Runtime(name, opt){
 
     if(main.start){
       if(next.stack.host){
-        console.log('\nHost is: %s', next.stack.host.path);
+        console.log('Host `%s` started stack `%s`', next.stack.host.path, main.path);
+      } else {
+        console.log('Stack `%s` dispatch started', main.path);
       }
-      console.log('\nStack `%s` dispatch started', main.path);
     }
 
-    console.log('%s - %s `%s` %s', main.path, status, path, time);
+    console.log('- %s `%s` %s', status, path, time);
   });
 
 }
@@ -105,6 +106,7 @@ Runtime.prototype.next = function(stack, host){
   if(!(stack instanceof Stack)){
     stack = new Stack(this, arguments);
     stack.start = true;
+    host = host && host instanceof Stack;
   }
 
   // --
@@ -155,6 +157,7 @@ Runtime.prototype.next = function(stack, host){
 
   tick.stack = stack;
   function tick(arg){
+
     if(arguments.length){
       // check if we are nested inside other stack
       host = arg && arg.stack instanceof Stack && arg.stack;
@@ -163,11 +166,14 @@ Runtime.prototype.next = function(stack, host){
     }
 
     next.stack = stack;
-    next.wait = (host || stack).wait;
+
     if(!stackPath){
       stack.log(next);
       stack.start = false;
+      if(host){ host.start = false; }
     }
+
+    next.wait = (host || stack).wait;
 
     util.asyncDone(function(){
       next.time = process.hrtime();

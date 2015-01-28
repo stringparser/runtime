@@ -21,13 +21,13 @@ function two(next, foo, bar, baz){
 }
 
 function three(next, foo, bar, baz){
-  foo.should.be.eql(3);
-  bar.should.be.eql(4);
-  baz.should.be.eql(5);
+  foo.should.be.eql(1);
+  bar.should.be.eql(2);
+  baz.should.be.eql(3);
   if(next.wait){ next(); }
 }
 
-app.next(app.next(one, two), three, {wait: true})(1, 2, 3);
+app.next(app.next(one, two), three)(1, 2, 3);
 
 var argv = process.argv.slice(2);
 if(argv.length){ app.next(argv); }
