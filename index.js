@@ -110,7 +110,6 @@ Runtime.prototype.next = function(stack){
   var self = this;
   if(stack instanceof Stack){
     tick.stack = stack;
-    stack.time = stack.time || process.hrtime();
     return tick();
   } else {
     stack = new Stack(this, arguments);
@@ -182,6 +181,7 @@ Runtime.prototype.next = function(stack){
     next.wait = (stack.host || stack).wait;
 
     stack.note(err, next);
+    stack.time = stack.time || process.hrtime();
 
     util.asyncDone(function(){
       stack.args[0] = next;

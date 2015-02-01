@@ -28,7 +28,7 @@ function three(next, foo, bar, baz){
   if(next.wait){ next(); }
 }
 
-app.next(app.next(one, two), three)(1, 2, 3);
+app.next(app.next(one, two), app.next(three))(1, 2, 3);
 
 var argv = process.argv.slice(2);
 if(argv.length){ app.next(argv); }
