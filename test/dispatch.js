@@ -19,12 +19,14 @@ module.exports = function(runtime){
     }, Math.random()*Number(next.match));
   });
 
-  var log = app.log;
+  var log = app.note;
 
   it('should dispatch in parallel by default', function(done){
-    log.set(function(next){
-      if(next.end){ next.stack.args.push(Number(next.match)); }
-      if(!next.stack.pending){
+    log.set(function(err, next){
+      if(next.time){ next.stack.args.push(Number(next.match)); }
+      if(next.stack.end){
+        console.log(next.stack.args);
+        throw new Error();
         next.stack.args.filter(function(num, index){
           return num === index;
         }).length.should.be.lessThan(5);
@@ -36,13 +38,13 @@ module.exports = function(runtime){
 
   it('should dispatch in series if so decided', function(done){
 
-    log.set(function(next){
+    log.set(function(err, next){
       var num = Number(next.match);
       if(next.end && num){
         next.stack.args.push(num);
       }
 
-      if(!next.stack.pending){
+      if(next.stack.end){
         next.stack.args.filter(function(num, index){
           return num === (index+1);
         }).length.should.be.eql(5);
@@ -55,13 +57,13 @@ module.exports = function(runtime){
 
   it('should dispatch series and parallel on demand', function(done){
 
-    log.set(function(next){
+    log.set(function(err, next){
       var num = Number(next.match);
       if(next.end && num){
         next.stack.args.push(num);
       }
 
-      if(!next.stack.pending){
+      if(next.stack.end){
         var pile = next.stack.args;
         pile.should.have.property('length', 5);
 

@@ -126,7 +126,6 @@ Runtime.prototype.next = function(stack){
     if(next.end){ return stack.result; }
     if(arguments.length > 1){
       stack.args = util.args(arguments);
-      console.log(stack.args);
     }
 
     next.end = true;
@@ -194,7 +193,7 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       result = next.handle.apply(stack.context, stack.args);
       stack.result = result || stack.result;
-      if(!result && !next.wait && !next.end){ self.next(stack); }
+      if(!next.wait && !result){ self.next(stack); }
       return result;
     }, function(err){ stack.note(err, next); });
 

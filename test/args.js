@@ -6,7 +6,7 @@ module.exports = function(runtime){
   should.exists(runtime);
   var app = runtime.create('args');
 
-  app.log.set(function(){}); // disable logging
+  app.note.set(function(){}); // disable logging
 
   it('should pass arguments around', function(done){
     function one(next, foo, bar, baz){

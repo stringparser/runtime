@@ -14,7 +14,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (separated, strings)', function(done){
-    app.log.set(function(next){
+    app.note.set(function(next){
       if(next.stack.start){
         next.match.should.be.eql('1');
       }
@@ -28,7 +28,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (join strings argument)', function(done){
-    app.log.set(function(next){
+    app.note.set(function(next){
       if(next.stack.start){
         next.match.should.be.eql('1');
       }
@@ -46,7 +46,7 @@ module.exports = function(runtime){
     function one(next){ next(); }
     function two(next){ next(); }
 
-    app.log.set(function(next){
+    app.note.set(function(next){
       if(next.stack.start){
         next.path.should.be.eql('one');
       }
@@ -69,7 +69,7 @@ module.exports = function(runtime){
 
     function one(next){ next(); }
 
-    app.log.set(function(next){
+    app.note.set(function(next){
       if(next.stack.start){
         next.path.should.be.eql('one');
       }
