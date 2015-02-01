@@ -11,6 +11,7 @@ function one(next, foo, bar, baz){
   bar.should.be.eql(2);
   baz.should.be.eql(3);
   next(null, 2, 3, 4);
+  return 'one';
 }
 
 function two(next, foo, bar, baz){

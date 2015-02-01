@@ -79,15 +79,19 @@ function Runtime(name, opt){
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
 
-    if(main.start){
-      if(host){
-        console.log('Host `%s` started with `%s`', host.path, main.path);
-      } else {
-        console.log('Stack `%s` dispatch started', main.path);
-      }
+    if(host && !main.time){
+      console.log('Host `%s` dispatched stack `%s`', host.path, main.path);
+    } else if(!main.time){
+      console.log('Stack `%s` dispatch started', main.path);
+    } else {
+      console.log('- %s `%s` %s', status, path, time);
     }
 
-    console.log('- %s `%s` %s', status, path, time);
+    if(main.end){
+      path = main.path;
+      time = util.prettyTime(main.time);
+      console.log('Stack `%s` dispatch ended in', path, time);
+    }
   });
 
 }
@@ -106,6 +110,7 @@ Runtime.prototype.next = function(stack){
   var self = this;
   if(stack instanceof Stack){
     tick.stack = stack;
+    stack.time = stack.time || process.hrtime();
     return tick();
   } else {
     stack = new Stack(this, arguments);
@@ -113,23 +118,20 @@ Runtime.prototype.next = function(stack){
     return tick;
   }
 
-  // runtime `next`
+  // `next` callback
   //  > dispatch next handle
   //
 
   function next(err){
-    if(next.end && next.end++){
-      stack.note(err, next);
-      return next.result;
-    }
+    if(err){ stack.note(err, next); }
+    if(next.end){ return ; }
 
-    next.end = 1;
+    next.end = true;
     stack.wait = next.wait;
-    next.result = stack.result;
     next.time = process.hrtime(next.time);
 
     if(arguments.length > 1){
-      stack.args = util.args(arguments, 1);
+      stack.args = util.args(arguments);
     }
 
     // go next tick
@@ -145,7 +147,6 @@ Runtime.prototype.next = function(stack){
     }
 
     stack.note(err, next);
-
     return stack.result;
   }
 
@@ -153,26 +154,26 @@ Runtime.prototype.next = function(stack){
   // > fetch and run a handle
   //
 
-  function tick(host){
-    var err = null;
+  function tick(arg){
+    var err;
     if(arguments.length){
-      err = host instanceof Error ? host : null;
-      stack.host = !err && host && host.stack instanceof Stack && host.stack;
-      stack.args = util.args(arguments, (err || stack.host) ? 1 : 0);
+       err = arg instanceof Error && arg;
+      stack.host = arg && arg.stack instanceof Stack && arg.stack;
+      stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
     }
 
     var stem = stack.match || stack.argv[stack.index];
 
     if(typeof stem === 'string'){
       self.get(stem, next);
-      if(!next.handle){ next.handle = stack.handle; }
       stack.match = next.path.replace(next.match, '').trim();
+      if(typeof next.handle !== 'function'){ next.handle = stack.handle; }
     } else if(typeof stem === 'function'){
       var guestPath = stem.stack instanceof Stack && stem.stack.path;
       self.get(guestPath || stem.name || stem.displayName, next);
       next.handle = stem; next.depth = next.depth || 1;
     } else {
-      throw new TypeError('stack elements should be `string` or `function`');
+      throw new TypeError('elements should be `string` or `function`');
     }
 
     if(!stack.match){ stack.index++; }
@@ -181,14 +182,14 @@ Runtime.prototype.next = function(stack){
     next.wait = (stack.host || stack).wait;
 
     stack.note(err, next);
-    stack.time = stack.time || process.hrtime();
 
     util.asyncDone(function(){
+      stack.args[0] = next;
       next.time = process.hrtime();
-      var args = [next].concat(stack.args);
-      stack.result = next.handle.apply(stack.context || self, args);
-      if(!next.wait && !next.end){ next(); }
-      return stack.result;
+      var res = next.handle.apply(stack.context || self, stack.args);
+      stack.result = res || stack.result;
+      if(!res && !next.end && !next.wait){ next(); }
+      return res;
     }, function(err){ stack.note(err, next); });
 
     return stack.result;
