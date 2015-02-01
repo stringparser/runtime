@@ -83,9 +83,9 @@ function Runtime(name, opt){
       console.log('Host `%s` is dispatching stack `%s`', host.path, main.path);
     } else if(!main.time){
       console.log('Stack `%s` started', main.path);
+    } else {
+      console.log('- %s `%s` %s', status, path, time);
     }
-
-    console.log('- %s `%s` %s', status, path, time);
 
     if(main.end){
       path = main.path;
@@ -126,20 +126,22 @@ Runtime.prototype.next = function(stack){
     if(next.end){ return stack.result; }
     if(arguments.length > 1){
       stack.args = util.args(arguments);
+      console.log(stack.args);
     }
 
     next.end = true;
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
 
-    // go next-tick
-    if(next.depth && !stack.end){
+    // go tick
+    if(next.depth && stack.argv[stack.index]){
       self.next(stack);
-    } else if(next.wait && stack.host && !stack.host.end){
+    } else if(next.wait && stack.host && stack.host.argv[stack.host.index]){
       stack.time = process.hrtime(stack.time);
       stack.host.args = stack.args;
       self.next(stack.host);
     } else {
+      stack.end = true;
       stack.time = process.hrtime(stack.time);
     }
 
@@ -152,7 +154,7 @@ Runtime.prototype.next = function(stack){
   //
 
   function tick(arg){
-    if(stack.end){
+    if(!stack.argv[stack.index]){
       stack = new Stack(self, stackArgs);
       tick.stack = next.stack = stack;
       next.time = next.wait = next.end = null;
@@ -180,7 +182,6 @@ Runtime.prototype.next = function(stack){
     }
 
     if(!stack.match){ stack.index++; }
-    stack.end = !stack.argv[stack.index];
     next.wait = (stack.host || stack).wait;
 
     stack.note(err, next);
@@ -192,7 +193,7 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       result = next.handle.apply(stack.context, stack.args);
       stack.result = result || stack.result;
-      if(!result && !next.wait && !next.end){ next(); }
+      if(!result && !next.wait && !next.end){ self.next(stack); }
       return result;
     }, function(err){ stack.note(err, next); });
 
