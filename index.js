@@ -110,10 +110,11 @@ Runtime.prototype.next = function(stack){
   var self = this;
   if(stack instanceof Stack){
     tick.stack = stack;
-    return tick();
+    if(stack.argv[stack.index]){ return tick(); }
+    else { return stack.result; }
   } else {
-    stack = new Stack(this, arguments);
-    tick.stack = util.merge({}, stack);
+    stack = new Stack(this, arguments); // instantiate
+    tick.stack = new Stack(stack); // so it can be used more than once
     return tick;
   }
 
@@ -124,19 +125,16 @@ Runtime.prototype.next = function(stack){
   function next(err){
     if(err){ stack.note(err, next); }
     if(next.end){ return ; }
+    if(arguments.length > 1){ stack.args = util.args(arguments); }
 
     next.end = true;
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
 
-    if(arguments.length > 1){
-      stack.args = util.args(arguments);
-    }
-
-    // go next tick
+    // go next-tick
     if(next.depth && stack.argv[stack.index]){
       self.next(stack);
-    } else if(next.wait && stack.host && stack.host.argv[stack.host.index]){
+    } else if(next.wait && stack.host){
       stack.time = process.hrtime(stack.time);
       stack.host.args = stack.args;
       self.next(stack.host);
@@ -153,6 +151,7 @@ Runtime.prototype.next = function(stack){
   // > fetch and run a handle
   //
 
+  var result = null;
   function tick(arg){
     var err;
     if(arguments.length){
@@ -186,10 +185,10 @@ Runtime.prototype.next = function(stack){
     util.asyncDone(function(){
       stack.args[0] = next;
       next.time = process.hrtime();
-      var res = next.handle.apply(stack.context || self, stack.args);
-      stack.result = res || stack.result;
-      if(!next.end && !next.wait){ next(); }
-      return res;
+      result = next.handle.apply(stack.context || self, stack.args);
+      stack.result = result || stack.result;
+      if(!result && !next.end && !next.wait){ stack.next(stack); }
+      return result;
     }, function(err){ stack.note(err, next); });
 
     return stack.result;

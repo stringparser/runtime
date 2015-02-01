@@ -3,7 +3,6 @@
 var runtime = require('./.');
 var should = require('should');
 var app = runtime.create('app');
-var Stack = require('./lib/stack');
 
 should.exists(app);
 
@@ -28,10 +27,9 @@ function three(next, foo, bar, baz){
   baz.should.be.eql(5);
   if(next.wait){ next(); }
   console.log(tick);
-  console.log('is tick.stack an Stack instance?', tick.stack instanceof Stack);
 }
 
-var tick = app.next(one, two, three);
+var tick = app.next(app.next(one, two), three, {wait: true});
 
 tick(1, 2, 3);
 
