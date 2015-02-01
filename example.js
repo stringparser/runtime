@@ -22,13 +22,16 @@ function two(next, foo, bar, baz){
 }
 
 function three(next, foo, bar, baz){
-  foo.should.be.eql(1);
-  bar.should.be.eql(2);
-  baz.should.be.eql(3);
+  foo.should.be.eql(3);
+  bar.should.be.eql(4);
+  baz.should.be.eql(5);
   if(next.wait){ next(); }
+  console.log(stack);
 }
 
-app.next(app.next(one, two), app.next(three))(1, 2, 3);
+var stack = app.next(one, two, three);
+
+stack(1, 2, 3);
 
 var argv = process.argv.slice(2);
 if(argv.length){ app.next(argv); }

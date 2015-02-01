@@ -80,9 +80,9 @@ function Runtime(name, opt){
     var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
 
     if(host && !main.time){
-      console.log('Host `%s` dispatched stack `%s`', host.path, main.path);
+      console.log('Host `%s` is dispatching stack `%s`', host.path, main.path);
     } else if(!main.time){
-      console.log('Stack `%s` dispatch started', main.path);
+      console.log('Stack `%s` started', main.path);
     } else {
       console.log('- %s `%s` %s', status, path, time);
     }
@@ -90,7 +90,7 @@ function Runtime(name, opt){
     if(main.end){
       path = main.path;
       time = util.prettyTime(main.time);
-      console.log('Stack `%s` dispatch ended in', path, time);
+      console.log('Stack `%s` ended in', path, time);
     }
   });
 
@@ -113,7 +113,7 @@ Runtime.prototype.next = function(stack){
     return tick();
   } else {
     stack = new Stack(this, arguments);
-    tick.stack = stack;
+    tick.stack = util.merge({}, stack);
     return tick;
   }
 
@@ -188,7 +188,7 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       var res = next.handle.apply(stack.context || self, stack.args);
       stack.result = res || stack.result;
-      if(!res && !next.end && !next.wait){ next(); }
+      if(!next.end && !next.wait){ next(); }
       return res;
     }, function(err){ stack.note(err, next); });
 
