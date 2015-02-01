@@ -6,30 +6,25 @@ var app = runtime.create('app');
 
 should.exists(app);
 
-function one(next, foo, bar, baz){
-  foo.should.be.eql(1);
-  bar.should.be.eql(2);
-  baz.should.be.eql(3);
-  next(null, 2, 3, 4);
-  return 'one';
-}
-
-function two(next, foo, bar, baz){
-  foo.should.be.eql(2);
-  bar.should.be.eql(3);
-  baz.should.be.eql(4);
-  next(null, 3, 4, 5);
-}
-
-function three(next, foo, bar, baz){
-  foo.should.be.eql(3);
-  bar.should.be.eql(4);
-  baz.should.be.eql(5);
-  if(next.wait){ next(); }
-  console.log(tick);
-}
-
 var tick = app.next(app.next(one, two), three, {wait: true});
+
+function one(next){
+  if(next.wait){ next(); }
+}
+
+function two(next){
+  if(next.wait){ next(); }
+}
+
+var count = 0;
+function three(next){
+  if(next.wait){ next(); }
+  if(count++ < 1){
+    console.log(' -- new Tick -- ');
+    tick(1, 2, 3);
+    console.log(tick);
+  }
+}
 
 tick(1, 2, 3);
 

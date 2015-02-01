@@ -83,9 +83,9 @@ function Runtime(name, opt){
       console.log('Host `%s` is dispatching stack `%s`', host.path, main.path);
     } else if(!main.time){
       console.log('Stack `%s` started', main.path);
-    } else {
-      console.log('- %s `%s` %s', status, path, time);
     }
+
+    console.log('- %s `%s` %s', status, path, time);
 
     if(main.end){
       path = main.path;
@@ -107,14 +107,14 @@ util.inherits(Runtime, Manifold);
 
 Runtime.prototype.next = function(stack){
 
-  var self = this;
+  var self = this, stackArgs;
   if(stack instanceof Stack){
-    tick.stack = stack;
-    if(stack.argv[stack.index]){ return tick(); }
-    else { return stack.result; }
+    next.stack = stack;
+    return tick();
   } else {
-    stack = new Stack(this, arguments); // instantiate
-    tick.stack = new Stack(stack); // so it can be used more than once
+    stackArgs = arguments;
+    stack = new Stack(this, arguments);
+    next.stack = tick.stack = stack;
     return tick;
   }
 
@@ -123,24 +123,24 @@ Runtime.prototype.next = function(stack){
   //
 
   function next(err){
-    if(err){ stack.note(err, next); }
-    if(next.end){ return ; }
-    if(arguments.length > 1){ stack.args = util.args(arguments); }
+    if(next.end){ return stack.result; }
+    if(arguments.length > 1){
+      stack.args = util.args(arguments);
+    }
 
     next.end = true;
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
 
     // go next-tick
-    if(next.depth && stack.argv[stack.index]){
+    if(next.depth && !stack.end){
       self.next(stack);
-    } else if(next.wait && stack.host){
+    } else if(next.wait && stack.host && !stack.host.end){
       stack.time = process.hrtime(stack.time);
       stack.host.args = stack.args;
       self.next(stack.host);
     } else {
       stack.time = process.hrtime(stack.time);
-      stack.end = true;
     }
 
     stack.note(err, next);
@@ -151,9 +151,14 @@ Runtime.prototype.next = function(stack){
   // > fetch and run a handle
   //
 
-  var result = null;
   function tick(arg){
-    var err;
+    if(stack.end){
+      stack = new Stack(self, stackArgs);
+      tick.stack = next.stack = stack;
+      next.time = next.wait = next.end = null;
+    }
+
+    var err = null;
     if(arguments.length){
        err = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
@@ -167,7 +172,7 @@ Runtime.prototype.next = function(stack){
       stack.match = next.path.replace(next.match, '').trim();
       if(typeof next.handle !== 'function'){ next.handle = stack.handle; }
     } else if(typeof stem === 'function'){
-      var guestPath = stem.stack instanceof Stack && stem.stack.path;
+      var guestPath = stem.stack && stem.stack.path;
       self.get(guestPath || stem.name || stem.displayName, next);
       next.handle = stem; next.depth = next.depth || 1;
     } else {
@@ -175,19 +180,19 @@ Runtime.prototype.next = function(stack){
     }
 
     if(!stack.match){ stack.index++; }
-
-    next.stack = stack;
+    stack.end = !stack.argv[stack.index];
     next.wait = (stack.host || stack).wait;
 
     stack.note(err, next);
     stack.time = stack.time || process.hrtime();
 
+    var result;
     util.asyncDone(function(){
       stack.args[0] = next;
       next.time = process.hrtime();
-      result = next.handle.apply(stack.context || self, stack.args);
+      result = next.handle.apply(stack.context, stack.args);
       stack.result = result || stack.result;
-      if(!result && !next.end && !next.wait){ stack.next(stack); }
+      if(!result && !next.wait && !next.end){ next(); }
       return result;
     }, function(err){ stack.note(err, next); });
 
