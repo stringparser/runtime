@@ -118,7 +118,7 @@ Runtime.prototype.next = function(stack){
     return tick;
   }
 
-  // `next` callback
+  // runtime `next`
   //  > dispatch next handle
   //
 
@@ -172,6 +172,7 @@ Runtime.prototype.next = function(stack){
     if(typeof stem === 'string'){
       self.get(stem, next);
       stack.match = next.path.replace(next.match, '').trim();
+
       if(typeof next.handle !== 'function'){ next.handle = stack.handle; }
     } else if(typeof stem === 'function'){
       var guestPath = stem.stack && stem.stack.path;
