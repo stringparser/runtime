@@ -153,7 +153,7 @@ Runtime.prototype.next = function(stack){
   //
 
   function tick(arg){
-    if(!stack.argv[stack.index]){
+    if(stackArgs && !stack.argv[stack.index]){
       stack = new Stack(self, stackArgs);
       tick.stack = next.stack = stack;
       next.time = next.wait = next.end = null;
