@@ -133,14 +133,12 @@ Runtime.prototype.next = function(stack){
     next.time = process.hrtime(next.time);
 
     // go tick
-    if(next.depth && stack.argv[stack.index]){
+    if(next.depth && !stack.end){
       self.next(stack);
     } else if(next.wait && stack.host && stack.host.argv[stack.host.index]){
-      stack.time = process.hrtime(stack.time);
       stack.host.args = stack.args;
       self.next(stack.host);
     } else {
-      stack.end = true;
       stack.time = process.hrtime(stack.time);
     }
 
@@ -171,12 +169,18 @@ Runtime.prototype.next = function(stack){
     if(typeof stem === 'string'){
       self.get(stem, next);
       stack.match = next.path.replace(next.match, '').trim();
-
-      if(typeof next.handle !== 'function'){ next.handle = stack.handle; }
+      if(next.handle instanceof Function){
+        next.handle = stack.handle;
+      }
     } else if(typeof stem === 'function'){
-      var guestPath = stem.stack && stem.stack.path;
-      self.get(guestPath || stem.name || stem.displayName, next);
-      next.handle = stem; next.depth = next.depth || 1;
+      if(stem.stack instanceof Stack){
+        self.get(stem.stack.path, next);
+      } else if(stem.path instanceof String){
+        self.get(stem.path, next);
+      }
+      next.handle = stem;
+      next.depth = next.depth || 1;
+      next.path = next.path || stem.name || stem.displayName;
     } else {
       throw new TypeError('elements should be `string` or `function`');
     }
@@ -185,6 +189,7 @@ Runtime.prototype.next = function(stack){
     next.wait = (stack.host || stack).wait;
 
     stack.note(err, next);
+    stack.end = !stack.argv[stack.index];
     stack.time = stack.time || process.hrtime();
 
     var result;
@@ -193,9 +198,7 @@ Runtime.prototype.next = function(stack){
       next.time = process.hrtime();
       result = next.handle.apply(stack.context, stack.args);
       stack.result = result || stack.result;
-      if(!next.wait && !result && stack.argv[stack.index]){
-        self.next(stack);
-      }
+      if(!stack.end && !next.wait && !result){ self.next(stack); }
       return result;
     }, function(err){ stack.note(err, next); });
 
