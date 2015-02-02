@@ -113,8 +113,7 @@ Runtime.prototype.next = function(stack, time){
     return tick();
   } else {
     time = null;
-    stack = new Stack(this, arguments);
-    next.stack = tick.stack = stack;
+    tick.stack = new Stack(arguments);
     return tick;
   }
 
@@ -150,16 +149,23 @@ Runtime.prototype.next = function(stack, time){
   // > run next.handle
   //
 
+  var err;
   function tick(arg){
-    var err = null;
+    if(time === null){
+      console.log(arg);
+      console.log('tick'); console.log(tick);
+      self.next(new Stack(self, tick.stack.args), process.hrtime());
+      return stack;
+    }
+
     if(arguments.length){
        err = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
     }
 
-    var stem = stack.match || stack.argv[stack.index];
-
+    var stem = stack.match || stack.next;
+    console.log('stack'); console.log(stack);
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
@@ -178,12 +184,12 @@ Runtime.prototype.next = function(stack, time){
         throw new TypeError('`string` or `function`');
     }
 
+
     if(!stack.match){ stack.index++; }
     next.wait = (stack.host || stack).wait;
+    stack.next = stack.argv[stack.index];
 
     stack.note(err, next);
-    time = time || process.hrtime();
-    stack.next = stack.argv[stack.index];
 
     var result = stack.context;
     util.asyncDone(function(){
