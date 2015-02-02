@@ -130,17 +130,16 @@ Runtime.prototype.next = function(stack, time){
 
     next.end = true;
     stack.wait = next.wait;
-    next.time = process.hrtime(next.time);
+    stack.end = !stack.next;
     stack.time = process.hrtime(time);
+    next.time = process.hrtime(next.time);
 
     // ->tick<-
     if(next.depth && stack.next){
       self.next(stack);
-    } else if(next.wait && stack.host && stack.host.next){
+    } else if(next.wait && stack.host){
       stack.host.args = stack.args;
       self.next(stack.host);
-    } else {
-      stack.end = true;
     }
 
     stack.note(err, next);
@@ -165,16 +164,14 @@ Runtime.prototype.next = function(stack, time){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.replace(next.match, '').trim();
-        if(typeof next.handle !== 'function'){ next.handle = stack.handle; }
+        if(typeof next.handle !== 'function'){
+          next.handle = stack.handle;
+        }
       break;
       case 'function':
-        if(stem.stack instanceof Stack){
-          self.get(stem.stack.path, next);
-        } else if(stem.path instanceof String){
-          self.get(stem.path, next);
-        }
-        next.handle = stem;
-        next.depth = next.depth || 1;
+        var path = (stem.stack && stem.stack.path) || stem.path;
+        if(typeof path === 'string'){ self.get(path, next); }
+        next.handle = stem; next.depth = next.depth || 1;
         next.path = next.path || stem.name || stem.displayName;
       break;
       default:
