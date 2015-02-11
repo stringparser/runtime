@@ -107,12 +107,12 @@ util.inherits(Runtime, Manifold);
 
 Runtime.prototype.next = function(stack, time){
 
-  var self = this;
+  var self = this, stackArgs;
   if(stack instanceof Stack){
     next.stack = stack;
     return tick();
   } else {
-    time = null;
+    stackArgs = arguments;
     tick.stack = new Stack(this, arguments);
     return tick;
   }
@@ -138,7 +138,7 @@ Runtime.prototype.next = function(stack, time){
       self.next(stack);
     } else if(next.wait && stack.host){
       stack.host.args = stack.args;
-      self.next(stack.host);
+      self.next(stack.host, process.hrtime());
     }
 
     stack.note(err, next);
@@ -151,16 +151,12 @@ Runtime.prototype.next = function(stack, time){
 
   var err;
   function tick(arg){
-    time = time || process.hrtime();
     if(tick.stack instanceof Stack){
-      stack = new Stack(self, tick.stack.argv);
-      next.stack = stack;
-    }
-
-    if(arguments.length){
+      stack = new Stack(self, stackArgs);
        err = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
+      return self.next(stack, process.hrtime());
     }
 
     var stem = stack.match || stack.next;
