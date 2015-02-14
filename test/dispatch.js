@@ -56,7 +56,7 @@ module.exports = function(runtime){
     app.next('series 1 2 3 4 5')();
   });
 
-  it('series and parallel can share space', function(done){
+  it('series and parallel should be able to share space', function(done){
 
     var num, pile = [];
     app.note.set('series', function(err, next){
@@ -79,5 +79,28 @@ module.exports = function(runtime){
     });
 
     app.next('series 1 2 3 parallel 3 4 5')();
+  });
+
+  it('wait state can be changed on demand', function(done){
+
+    function one(next){
+      next.wait = 1;
+      setTimeout(function(){
+        next.wait = 0;
+        next();
+      }, 2);
+    }
+
+    function two(next){
+      next.wait++;
+      next();
+    }
+
+    function three(next){
+      next.wait.should.be.eql(1);
+      done();
+    }
+
+    app.next(one, two, three)();
   });
 };
