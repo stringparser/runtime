@@ -105,7 +105,7 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
-Runtime.prototype.next = function(stack, hrtime){
+Runtime.prototype.stack = function(stack, hrtime){
 
   var self = this, stackArgs;
   if(stack instanceof Stack){
@@ -135,10 +135,10 @@ Runtime.prototype.next = function(stack, hrtime){
 
     // ->tick<-
     if(next.depth && stack.next){
-      self.next(stack, hrtime);
+      self.stack(stack, hrtime);
     } else if(next.wait && stack.host instanceof Stack){
       stack.host.args = stack.args;
-      self.next(stack.host, process.hrtime());
+      self.stack(stack.host, process.hrtime());
     }
 
     stack.note.call(stack, err, next);
@@ -156,7 +156,7 @@ Runtime.prototype.next = function(stack, hrtime){
        err = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
-      return self.next(stack, process.hrtime());
+      return self.stack(stack, process.hrtime());
     }
 
     var stem = stack.match || stack.next;
@@ -194,7 +194,7 @@ Runtime.prototype.next = function(stack, hrtime){
       result = next.handle.apply(stack, stack.args);
       stack.result = result || stack.result;
       if(stack.next && !next.wait && !result){
-        self.next(stack, hrtime);
+        self.stack(stack, hrtime);
       }
       return result;
     }, function(err){ stack.note.call(stack, err, next); });

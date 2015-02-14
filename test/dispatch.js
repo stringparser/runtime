@@ -33,7 +33,7 @@ module.exports = function(runtime){
 
     app.note.set(':handle', annotate);
 
-    app.next('1 2 3 4 5')();
+    app.stack('1 2 3 4 5')();
   });
 
   it('should dispatch in series if so desired', function(done){
@@ -53,7 +53,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.next('series 1 2 3 4 5')();
+    app.stack('series 1 2 3 4 5')();
   });
 
   it('series and parallel should be able to share space', function(done){
@@ -78,7 +78,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.next('series 1 2 3 parallel 3 4 5')();
+    app.stack('series 1 2 3 parallel 3 4 5')();
   });
 
   it('wait state can be changed on demand', function(done){
@@ -101,6 +101,6 @@ module.exports = function(runtime){
       done();
     }
 
-    app.next(one, two, three)();
+    app.stack(one, two, three)();
   });
 };

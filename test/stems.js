@@ -20,7 +20,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.next('1', '2')();
+    app.stack('1', '2')();
   });
 
   it('should accept (join strings argument)', function(done){
@@ -35,7 +35,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.next('1 2')();
+    app.stack('1 2')();
   });
 
   it('should accept (function, function)', function(done){
@@ -48,7 +48,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.next(one, two)();
+    app.stack(one, two)();
   });
 
   it('should accept (string, function)', function(done){
@@ -61,6 +61,6 @@ module.exports = function(runtime){
       done();
     }
 
-    app.next('a word', two)();
+    app.stack('a word', two)();
   });
 };

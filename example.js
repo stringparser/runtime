@@ -5,7 +5,7 @@ var should = require('should');
 var app = runtime.create('app');
 
 should.exists(app);
-var tick = app.next(one, app.next(two), three, {wait: true});
+var tick = app.stack(one, app.stack(two), three, {wait: true});
 
 tick(1,2,3);
 
@@ -34,6 +34,3 @@ function three(next, foo, bar, baz){
     tick(1,2,3);
   }
 }
-
-var argv = process.argv.slice(2);
-if(argv.length){ app.next(argv); }
