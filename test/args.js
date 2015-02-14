@@ -108,7 +108,7 @@ module.exports = function(runtime){
     app.next(app.next(one), app.next(two), app.next(three))(1, 2, 3);
   });
 
-  it('should not be able to change arguments between stacks', function(done){
+  it('should not be able to change arguments between stacks that wait', function(done){
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -132,6 +132,5 @@ module.exports = function(runtime){
     }
 
     app.next(app.next(one), app.next(two, three), {wait: true})(1,2,3);
-
   });
 };

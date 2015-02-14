@@ -6,79 +6,61 @@ module.exports = function(runtime){
   should.exists(runtime);
   var app = runtime.create('stems');
 
-  app.set(':num(\\d+)', function(next){
-    setTimeout(function(){
-      next(null, next.match, next.match);
-    }, Math.random()*Number(next.match));
-
-  });
+  app.note.set(function(err){ if(err){ throw err; } });
 
   it('should accept (separated, strings)', function(done){
-    app.note.set(function(next){
-      if(next.stack.start){
-        next.match.should.be.eql('1');
-      }
-      if(!next.stack.pending){
-        next.match.should.be.eql('2');
-        done();
-      }
+    app.set('1', function(next){
+      next.match.should.be.eql('1');
+      next.path.should.be.eql('1');
+    });
+
+    app.set('2', function(next){
+      next.match.should.be.eql('2');
+      next.path.should.be.eql('2');
+      done();
     });
 
     app.next('1', '2')();
   });
 
   it('should accept (join strings argument)', function(done){
-    app.note.set(function(next){
-      if(next.stack.start){
-        next.match.should.be.eql('1');
-      }
-      if(!next.stack.pending){
-        next.match.should.be.eql('2');
-        done();
-      }
+    app.set('1', function(next){
+      next.match.should.be.eql('1');
+      next.path.should.be.eql('1 2');
+    });
+
+    app.set('2', function(next){
+      next.match.should.be.eql('2');
+      next.path.should.be.eql('2');
+      done();
     });
 
     app.next('1 2')();
   });
 
-  it('should accept (separated, functions)', function(done){
+  it('should accept (function, function)', function(done){
+    function one(next){
+      next.match.should.be.eql('one');
+    }
 
-    function one(next){ next(); }
-    function two(next){ next(); }
-
-    app.note.set(function(next){
-      if(next.stack.start){
-        next.path.should.be.eql('one');
-      }
-      if(!next.stack.pending){
-        next.path.should.be.eql('two');
-        done();
-      }
-    });
+    function two(next){
+      next.match.should.be.eql('two');
+      done();
+    }
 
     app.next(one, two)();
   });
 
-  app.set(':word([a-z]+)', function(next, one, two){
-    setTimeout(function(){
-      next(null, 1, two || 2);
-    }, Math.random()*2);
-  });
-
   it('should accept (string, function)', function(done){
-
-    function one(next){ next(); }
-
-    app.note.set(function(next){
-      if(next.stack.start){
-        next.path.should.be.eql('one');
-      }
-      if(!next.stack.pending){
-        next.path.should.be.eql('two');
-        done();
-      }
+    app.set('a :string', function(next){
+      next.match.should.be.eql('a word');
     });
 
-    app.next(one, 'two')();
+    function two(next){
+      next.match.should.be.eql('two');
+      done();
+    }
+
+    app.next('a word', two)();
   });
 };

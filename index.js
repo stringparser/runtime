@@ -73,8 +73,8 @@ function Runtime(name, opt){
   this.note.set(function rootNotes(err, next){
     if(err){ throw err; }
 
-    var main = this;
-    var host = this.host;
+    var main = next.stack;
+    var host = next.stack.host;
     var path = next.match || next.path;
     var status = next.time ? 'Finished' : 'Wait for';
     var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
@@ -108,7 +108,10 @@ util.inherits(Runtime, Manifold);
 Runtime.prototype.next = function(stack, hrtime){
 
   var self = this, stackArgs;
-  if(stack instanceof Stack){ return tick(); } else {
+  if(stack instanceof Stack){
+    next.stack = stack;
+    return tick();
+  } else {
     hrtime = null;
     stackArgs = arguments;
     tick.stack = new Stack(this, arguments);
@@ -147,7 +150,7 @@ Runtime.prototype.next = function(stack, hrtime){
   // > run next.handle
   //
 
-  var err = null;
+  var err;
   function tick(arg){
     if(tick.stack instanceof Stack){
       stack = new Stack(self, stackArgs);
@@ -162,7 +165,7 @@ Runtime.prototype.next = function(stack, hrtime){
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
-        stack.match = next.path.replace(next.match, '').trim();
+        stack.match = next.path.replace(next.match || next.path, '').trim();
         if(typeof next.handle !== 'function'){
           next.handle = stack.handle;
         }
@@ -171,7 +174,7 @@ Runtime.prototype.next = function(stack, hrtime){
         var path = (stem.stack && stem.stack.path) || stem.path;
         if(typeof path === 'string'){ self.get(path, next); }
         next.handle = stem; next.depth = next.depth || 1;
-        next.path = next.path || stem.name || stem.displayName;
+        next.match = next.path || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('`string` or `function`');

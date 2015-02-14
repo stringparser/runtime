@@ -11,8 +11,7 @@ module.exports = {
     var exclude = [
       '_main.js',
       '_util.js',
-      'dispatch.js',
-      'stems.js'
+      'dispatch.js'
     ];
 
     // use it also to omit _main & _util files
