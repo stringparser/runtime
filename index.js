@@ -149,11 +149,11 @@ Runtime.prototype.stack = function(stack, hrtime){
   // > run next.handle
   //
 
-  var err;
+  var err = null;
   function tick(arg){
     if(tick.stack instanceof Stack){
       stack = new Stack(self, stackArgs);
-        err = arg instanceof Error && arg;
+        err = (arg instanceof Error && arg) || null;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
       return self.stack(stack, process.hrtime());
