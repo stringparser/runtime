@@ -141,7 +141,7 @@ Runtime.prototype.stack = function(stack, hrtime){
       self.stack(stack.host, process.hrtime());
     }
 
-    stack.note.call(stack, err, next);
+    stack.note(err, next);
     return stack.result;
   }
 
@@ -153,7 +153,7 @@ Runtime.prototype.stack = function(stack, hrtime){
   function tick(arg){
     if(tick.stack instanceof Stack){
       stack = new Stack(self, stackArgs);
-       err = arg instanceof Error && arg;
+        err = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
       return self.stack(stack, process.hrtime());
@@ -184,7 +184,7 @@ Runtime.prototype.stack = function(stack, hrtime){
     next.wait = (stack.host || stack).wait;
     stack.next = stack.argv[stack.index];
 
-    stack.note.call(stack, err, next);
+    stack.note(err, next);
 
     var result;
     util.asyncDone(function(){
@@ -197,7 +197,7 @@ Runtime.prototype.stack = function(stack, hrtime){
         self.stack(stack, hrtime);
       }
       return result;
-    }, function(err){ stack.note.call(stack, err, next); });
+    }, function(err){ stack.note(err, next); });
 
     return stack.result;
   }
