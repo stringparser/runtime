@@ -168,9 +168,10 @@ Runtime.prototype.stack = function(stack, hrtime){
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        if(typeof stem.path === 'string'){ self.get(stem.path, next); }
+        var path = (stem.stack && stem.stack.path) || stem.path;
+        if(typeof path === 'string'){ self.get(path, next); }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = next.match || stem.name || stem.displayName;
+        next.match = next.path || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('`string` or `function`');
