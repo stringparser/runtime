@@ -29,8 +29,7 @@ function three(next, foo, bar, baz){
   bar.should.be.eql(4);
   baz.should.be.eql(5);
   if(next.wait){ next(); }
-  if(count++ < 1){
-    console.log(tick);
+  if(count++ < 3){
     tick(1,2,3);
   }
 }
