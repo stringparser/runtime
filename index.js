@@ -87,7 +87,7 @@ function Runtime(name, opt){
       console.log('- %s `%s` %s', status, path, time);
     }
 
-    if(main.end){
+    if(!main.pending){
       path = main.path;
       time = util.prettyTime(main.time);
       console.log('Stack `%s` ended in', path, time);
@@ -130,9 +130,8 @@ Runtime.prototype.next = function(stack, hrtime){
 
     next.end = true;
     stack.wait = next.wait;
-    stack.end = !stack.next;
-    stack.time = process.hrtime(hrtime);
     next.time = process.hrtime(next.time);
+    stack.pending = stack.pending.replace(next.match, '').trim();
 
     // ->tick<-
     if(next.depth && stack.next){
@@ -191,6 +190,7 @@ Runtime.prototype.next = function(stack, hrtime){
     util.asyncDone(function(){
       stack.args[0] = next;
       next.time = process.hrtime();
+      stack.time = process.hrtime(hrtime);
       result = next.handle.apply(stack, stack.args);
       stack.result = result || stack.result;
       if(stack.next && !next.wait && !result){
