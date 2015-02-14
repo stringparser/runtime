@@ -193,7 +193,7 @@ Runtime.prototype.stack = function(stack, hrtime){
       stack.time = process.hrtime(hrtime);
       result = next.handle.apply(stack, stack.args);
       stack.result = result || stack.result;
-      if(stack.next && !next.wait && !result){
+      if(stack.next && !next.wait){
         self.stack(stack, hrtime);
       }
       return result;
