@@ -112,7 +112,6 @@ Runtime.prototype.stack = function(stack, hrtime){
     next.stack = stack;
     return tick();
   } else {
-    hrtime = null;
     stackArgs = arguments;
     tick.stack = new Stack(this, arguments);
     return tick;
@@ -159,16 +158,17 @@ Runtime.prototype.stack = function(stack, hrtime){
       return self.stack(stack, process.hrtime());
     }
 
-    var stem = stack.match || stack.next;
-
+    var path, stem = stack.match || stack.next;
+    
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
-        stack.match = next.path.replace(next.match || next.path, '').trim();
+        path = next.match || next.path;
+        stack.match = next.path.replace(path, '').trim();
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        var path = (stem.stack && stem.stack.path) || stem.path;
+        path = (stem.stack && stem.stack.path) || stem.path;
         if(typeof path === 'string'){ self.get(path, next); }
         next.handle = stem; next.depth = next.depth || 1;
         next.match = next.path || stem.name || stem.displayName;
