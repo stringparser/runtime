@@ -56,11 +56,7 @@ function Runtime(name, opt){
 
   // default rootNode, notFound handle
   this.set(function notFound(next){
-    throw new Error(' No handle found for \''+next.path+'\' path, you can:\n' +
-      '\t- Define one with `runtime.set('+next.path+', [Function])`\n'+
-      '\t- Provide a function instead of a string to runtime.next\n'+
-      '\t- Override this handle with `runtime.set([Function])` and do'
-      +' something about it\n');
+    throw new Error(' No handle found for `'+next.path+'` path');
   });
 
   // ## runtime.note
@@ -159,7 +155,7 @@ Runtime.prototype.stack = function(stack, hrtime){
     }
 
     var path, stem = stack.match || stack.next;
-    
+
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
