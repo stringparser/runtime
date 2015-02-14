@@ -165,20 +165,16 @@ Runtime.prototype.stack = function(stack, hrtime){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.replace(next.match || next.path, '').trim();
-        if(typeof next.handle !== 'function'){
-          next.handle = stack.handle;
-        }
+        next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        var path = (stem.stack && stem.stack.path) || stem.path;
-        if(typeof path === 'string'){ self.get(path, next); }
+        if(typeof stem.path === 'string'){ self.get(stem.path, next); }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = next.path || stem.name || stem.displayName;
+        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('`string` or `function`');
     }
-
 
     if(!stack.match){ stack.index++; }
     next.wait = (stack.host || stack).wait;
