@@ -10,8 +10,7 @@ module.exports = {
     var testFirst = [];
     var exclude = [
       '_main.js',
-      '_util.js',
-      'dispatch.js'
+      '_util.js'
     ];
 
     // use it also to omit _main & _util files
