@@ -14,25 +14,20 @@ var Manifold = require('manifold');
 //
 
 exports = module.exports = {
-  get: get,
   create: create,
   Runtime: Runtime,
   Manifold: Manifold
 };
 
-function get(name){
-  return get.cache[name];
-}
-get.cache = { };
-
 function create(name, opts){
   name = util.type(name).string || '#root';
-  get.cache[name] = get.cache[name] || new Runtime(name, opts);
-  return get.cache[name];
+  create.cache[name] = create.cache[name] || new Runtime(name, opts);
+  return create.cache[name];
 }
+create.cache = { };
 
 // ## Runtime([name, opts])
-// > constructor
+//  runtime constructor
 //
 // arguments
 //  - name: type `string`, name for the runtime
