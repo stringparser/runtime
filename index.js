@@ -15,7 +15,6 @@ var Manifold = require('manifold');
 
 exports = module.exports = {
   get: get,
-  repl: require('./lib/repl'),
   create: create,
   Runtime: Runtime,
   Manifold: Manifold
