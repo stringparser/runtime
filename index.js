@@ -55,7 +55,10 @@ function Runtime(name, opt){
 
   // default rootNode, notFound handle
   this.set(function notFound(next){
-    throw new Error(' No handle found for `'+next.path+'` path');
+    throw new Error(
+      'No handle found for `'+next.path+'` path'+
+      ', set one with runtime.set([function])'
+    );
   });
 
   // ## runtime.note
