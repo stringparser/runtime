@@ -10,21 +10,26 @@ var Manifold = require('manifold');
 // - get: obtain a Runtime instance from cache
 // - create: instantiate a Runtime instance and cache it
 //
-// returns this.next(ctx, args, next)
+//
 //
 
 exports = module.exports = {
+  get: get,
   create: create,
   Runtime: Runtime,
   Manifold: Manifold
 };
 
+function get(name){
+  return get.cache[name];
+}
+get.cache = { };
+
 function create(name, opts){
   name = util.type(name).string || '#root';
-  create.cache[name] = create.cache[name] || new Runtime(name, opts);
-  return create.cache[name];
+  get.cache[name] = get.cache[name] || new Runtime(name, opts);
+  return get.cache[name];
 }
-create.cache = { };
 
 // ## Runtime([name, opts])
 //  runtime constructor
