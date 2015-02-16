@@ -105,19 +105,7 @@ util.inherits(Runtime, Manifold);
 
 Runtime.prototype.stack = function(stack, hrtime){
 
-  var self = this, stackArgs;
-  if(stack instanceof Stack){
-    next.stack = stack;
-    return tick();
-  } else {
-    stackArgs = arguments;
-    tick.stack = new Stack(this, arguments);
-    return tick;
-  }
-
-  // runtime `next`
-  //  > dispatch next handle
-  //
+  var self = this;
 
   function next(err){
     if(next.end){ return next.result; }
@@ -142,14 +130,14 @@ Runtime.prototype.stack = function(stack, hrtime){
     return stack.result;
   }
 
-  // runtime `tick`
-  // > run next.handle
+  //
+  // ---------
   //
 
   var err = null;
   function tick(arg){
     if(tick.stack instanceof Stack){
-      stack = new Stack(self, stackArgs);
+      stack = new Stack(self, tick.stack.args);
         err = (arg instanceof Error && arg) || null;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
       stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
@@ -172,6 +160,7 @@ Runtime.prototype.stack = function(stack, hrtime){
         next.match = next.path || stem.name || stem.displayName;
       break;
       default:
+        console.log(stack);
         throw new TypeError('`string` or `function`');
     }
 
@@ -195,5 +184,13 @@ Runtime.prototype.stack = function(stack, hrtime){
     }, function(err){ stack.note(err, next); });
 
     return stack.result;
+  }
+
+  if(stack instanceof Stack){
+    next.stack = stack;
+    return tick();
+  } else {
+    tick.stack = new Stack(arguments);
+    return tick;
   }
 };
