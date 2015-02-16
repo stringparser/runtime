@@ -103,7 +103,7 @@ util.inherits(Runtime, Manifold);
 // return
 //
 
-Runtime.prototype.stack = function(stack, hrtime){
+Runtime.prototype.stack = function(stack, hrtime, error){
 
   var self = this;
 
@@ -134,14 +134,13 @@ Runtime.prototype.stack = function(stack, hrtime){
   // ---------
   //
 
-  var err = null;
   function tick(arg){
     if(tick.stack instanceof Stack){
-      stack = new Stack(self, tick.stack.args);
-        err = (arg instanceof Error && arg) || null;
+      stack = new Stack(tick.stack.args, self);
+      error = (arg instanceof Error && arg) || null;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
-      stack.args = util.args(arguments, (err || stack.host) ? 0 : -1);
-      return self.stack(stack, process.hrtime());
+      stack.args = util.args(arguments, (error || stack.host) ? 0 : -1);
+      return self.stack(stack, process.hrtime(), error);
     }
 
     var path, stem = stack.match || stack.next;
@@ -168,7 +167,7 @@ Runtime.prototype.stack = function(stack, hrtime){
     next.wait = (stack.host || stack).wait;
     stack.next = stack.argv[stack.index];
 
-    stack.note(err, next);
+    stack.note(error, next);
 
     var result;
     util.asyncDone(function(){
