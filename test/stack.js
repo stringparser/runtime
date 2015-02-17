@@ -131,6 +131,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(app.stack(one), app.stack(two), app.stack(three), {wait: true})(1,2,3);
+    app.stack({wait: true},
+      app.stack(one), app.stack(two), app.stack(three))(1,2,3);
   });
 };

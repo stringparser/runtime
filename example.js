@@ -5,7 +5,7 @@ var should = require('should');
 var app = runtime.create('app');
 
 should.exists(app);
-var tick = app.stack(one, app.stack(two), three, {wait: true});
+var tick = app.stack({wait: true}, one, app.stack(two), three);
 
 tick(1,2,3);
 
