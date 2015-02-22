@@ -6,7 +6,7 @@ module.exports = function(runtime){
   should.exists(runtime);
   var app = runtime.create('args');
 
-  app.note.set(function(err){ if(err){ throw err;} });
+  app.set(function(err){ if(err){ throw err;} });
 
   it('should pass arguments around', function(done){
 

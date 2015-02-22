@@ -3,7 +3,11 @@ var should = require('should');
 
 module.exports = function(runtime){
   should.exists(runtime);
-  var app = runtime.create('dispatch');
+  var app = runtime.create('dispatch',{log: false});
+
+  app.set(function(err){
+    if(err){ throw err; }
+  });
 
   app.set('series', function(next){
     next.wait = true; next();
@@ -19,9 +23,9 @@ module.exports = function(runtime){
 
   it('should dispatch in parallel by default', function(done){
     var pile = [];
-    function annotate(err, next){
-      if(err){ throw err; }
 
+    function handleNotes(err, next){
+      if(err){ throw err; }
       if(next.end){ pile.push(Number(next.match)); }
       if(next.stack.pending){ return ; }
       pile.should.have.property('length', 5);
@@ -31,14 +35,14 @@ module.exports = function(runtime){
       done();
     }
 
-    app.note.set(':handle', annotate);
-
+    app.set(':handle', {note: handleNotes});
     app.stack('1 2 3 4 5')();
   });
 
   it('should dispatch in series if so desired', function(done){
     var pile = [];
-    app.note.set('series', function seriesNotes(err, next){
+
+    function seriesNotes(err, next){
       if(err){ throw err; }
 
       var num = Number(next.match);
@@ -51,15 +55,16 @@ module.exports = function(runtime){
       }).length.should.be.eql(5);
 
       done();
-    });
+    }
 
+    app.set('series', {note: seriesNotes});
     app.stack('series 1 2 3 4 5')();
   });
 
   it('series and parallel should be able to share space', function(done){
 
     var num, pile = [];
-    app.note.set('series', function(err, next){
+    function seriesNotes(err, next){
       if(err){ throw err; }
 
       num = Number(next.match);
@@ -76,8 +81,9 @@ module.exports = function(runtime){
       }).length.should.be.lessThan(3);
 
       done();
-    });
+    }
 
+    app.set('series', {note: seriesNotes});
     app.stack('series 1 2 3 parallel 3 4 5')();
   });
 
