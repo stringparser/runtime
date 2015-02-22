@@ -9,15 +9,13 @@ var Manifold = require('manifold');
 //
 // - get: obtain a Runtime instance from cache
 // - create: instantiate a Runtime instance and cache it
-//
-//
+// - Runtime: the runtime constructor
 //
 
 exports = module.exports = {
   get: get,
   create: create,
-  Runtime: Runtime,
-  Manifold: Manifold
+  Runtime: Runtime
 };
 
 function get(name){
@@ -25,9 +23,9 @@ function get(name){
 }
 get.cache = { };
 
-function create(name, opts){
+function create(name, opt){
   name = util.type(name).string || '#root';
-  get.cache[name] = get.cache[name] || new Runtime(name, opts);
+  get.cache[name] = get.cache[name] || new Runtime(name, opt);
   return get.cache[name];
 }
 
@@ -36,9 +34,9 @@ function create(name, opts){
 //
 // arguments
 //  - name: type `string`, name for the runtime
-//  - opts
+//  - opt: options passed to the Manifold constructor
 
-// return
+// returns the runtime instance
 //
 
 function Runtime(name, opt){
@@ -47,65 +45,26 @@ function Runtime(name, opt){
     return new Runtime(name, opt);
   }
 
-  // Runtime `name`
-  opt = util.type(opt || name).plainObject || { };
-  opt.name = opt.name || name;
-
   Manifold.call(this, opt);
-
-  // default rootNode, notFound handle
-  this.set(function notFound(next){
-    throw new Error(
-      'No handle found for `'+next.path+'` path'+
-      ', set one with runtime.set([function])'
-    );
-  });
-
-  // ## runtime.note
-  // > annotate stacks: logging, errors, etc.
-  //
-  // instanceof Manifold
-  //
-
-  this.note = new Manifold({name: this.get().name + 'Notes'});
-  this.note.set(function rootNotes(err, next){
-    if(err){ throw err; }
-
-    var main = next.stack;
-    var host = next.stack.host;
-    var path = next.match || next.path;
-    var status = next.time ? 'Finished' : 'Wait for';
-    var time = next.time ? ('in ' + util.prettyTime(next.time)) : '';
-
-    if(host && !main.time){
-      console.log('Host `%s` is dispatching stack `%s`', host.path, main.path);
-    } else if(!main.time){
-      console.log('Stack `%s` started', main.path);
-    } else {
-      console.log('- %s `%s` %s', status, path, time);
-    }
-
-    if(!main.pending){
-      path = main.path;
-      time = util.prettyTime(main.time);
-      console.log('Stack `%s` ended in', path, time);
-    }
-  });
 
 }
 util.inherits(Runtime, Manifold);
 
-// ## Runtime.next(/* arguments */)
-// > dispatch next commands
+// ## Runtime.stack(/* arguments */)
+// > dispatch next element of a stack
 //
-// arguments
+// arguments can be `strings` and/or `functions`
+//  - string: will correspond to handlers set with runtime.set
+//  - function: will be run as written
 //
-// return
+// returns a `tick` function, this function can be called
+// in order to execute the next element of the given stack.
 //
 
-Runtime.prototype.stack = function(stack, hrtime, error){
+Runtime.prototype.stack = function(stack, opt){
 
   var self = this;
+  var stackArgs = arguments;
 
   function next(err){
     if(next.end){ return next.result; }
@@ -120,10 +79,10 @@ Runtime.prototype.stack = function(stack, hrtime, error){
 
     // ->tick<-
     if(next.depth && stack.next){
-      self.stack(stack, hrtime);
+      self.stack(stack, opt);
     } else if(next.wait && stack.host instanceof Stack){
       stack.host.args = stack.args;
-      self.stack(stack.host, process.hrtime());
+      self.stack(stack.host, {hrtime: process.hrtime()});
     }
 
     stack.note(err, next);
@@ -136,14 +95,18 @@ Runtime.prototype.stack = function(stack, hrtime, error){
 
   function tick(arg){
     if(tick.stack instanceof Stack){
-      stack = new Stack(tick.stack.args, self);
-      error = (arg instanceof Error && arg) || null;
+      stack = new Stack(stackArgs, self);
+      var error = arg instanceof Error && arg;
       stack.host = arg && arg.stack instanceof Stack && arg.stack;
-      stack.args = util.args(arguments, (error || stack.host) ? 0 : -1);
-      return self.stack(stack, process.hrtime(), error);
+      stack.args = util.args(arguments, stack.host ? 0 : -1);
+      return self.stack(stack, {
+        error: error,
+        hrtime: process.hrtime()
+      });
     }
 
-    var path, stem = stack.match || stack.next;
+    var path;
+    var stem = stack.match || stack.next;
 
     switch(typeof stem){
       case 'string':
@@ -164,20 +127,22 @@ Runtime.prototype.stack = function(stack, hrtime, error){
     }
 
     if(!stack.match){ stack.index++; }
+
     next.wait = (stack.host || stack).wait;
     stack.next = stack.argv[stack.index];
-
-    stack.note(error, next);
+    stack.note(opt.error, next);
 
     var result;
+    var args = stack.args.concat();
+
     util.asyncDone(function(){
-      stack.args[0] = next;
+      args[0] = next;
       next.time = process.hrtime();
-      stack.time = process.hrtime(hrtime);
-      result = next.handle.apply(stack, stack.args);
+      stack.time = process.hrtime(opt.hrtime);
+      result = next.handle.apply(stack, args);
       stack.result = result || stack.result;
       if(stack.next && !next.wait){
-        self.stack(stack, hrtime);
+        self.stack(stack, opt.hrtime);
       }
       return result;
     }, function(err){ stack.note(err, next); });
@@ -189,7 +154,7 @@ Runtime.prototype.stack = function(stack, hrtime, error){
     next.stack = stack;
     return tick();
   } else {
-    tick.stack = new Stack(arguments);
+    tick.stack = new Stack(stackArgs);
     return tick;
   }
 };
