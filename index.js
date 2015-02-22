@@ -45,8 +45,9 @@ function Runtime(name, opt){
     return new Runtime(name, opt);
   }
 
+  opt = opt || name || { };
   Manifold.call(this, opt);
-
+  this.set({log: opt.log === void 0});
 }
 util.inherits(Runtime, Manifold);
 
@@ -105,19 +106,19 @@ Runtime.prototype.stack = function(stack, opt){
       });
     }
 
-    var path;
     var stem = stack.match || stack.next;
 
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
-        path = next.match || next.path;
-        stack.match = next.path.replace(path, '').trim();
+        stack.match = next.match || next.path;
+        stack.match = next.path.replace(stack.match, '').trim();
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        path = (stem.stack && stem.stack.path) || stem.path;
-        if(typeof path === 'string'){ self.get(path, next); }
+        if(typeof stem.path === 'string'){
+          self.get(stem.path, next);
+        }
         next.handle = stem; next.depth = next.depth || 1;
         next.match = next.path || stem.name || stem.displayName;
       break;
@@ -133,16 +134,14 @@ Runtime.prototype.stack = function(stack, opt){
     stack.note(opt.error, next);
 
     var result;
-    var args = stack.args.concat();
-
     util.asyncDone(function(){
-      args[0] = next;
+      stack.args[0] = next;
       next.time = process.hrtime();
       stack.time = process.hrtime(opt.hrtime);
-      result = next.handle.apply(stack, args);
+      result = next.handle.apply(stack, stack.args.concat());
       stack.result = result || stack.result;
       if(stack.next && !next.wait){
-        self.stack(stack, opt.hrtime);
+        self.stack(stack, opt);
       }
       return result;
     }, function(err){ stack.note(err, next); });
