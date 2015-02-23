@@ -120,11 +120,13 @@ Runtime.prototype.stack = function(stack, opt){
           self.get(stem.path, next);
         }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = next.path || stem.name || stem.displayName;
+        next.match = (stem.stack instanceof Stack && stem.stack.path)
+         || next.path || stem.name || stem.displayName;
       break;
       default:
-        console.log(stack);
-        throw new TypeError('`string` or `function`');
+        throw new TypeError(
+          'elements of the stack should be `string` or `function`'
+        );
     }
 
     if(!stack.match){ stack.index++; }
@@ -145,8 +147,6 @@ Runtime.prototype.stack = function(stack, opt){
       }
       return result;
     }, function(err){ stack.note(err, next); });
-
-    return stack.result;
   }
 
   if(stack instanceof Stack){
