@@ -4,9 +4,7 @@ var should = require('should');
 
 module.exports = function(runtime){
   should.exists(runtime);
-  var app = runtime.create('args');
-
-  app.set(function(err){ if(err){ throw err;} });
+  var app = runtime.create('args', {log: false});
 
   it('should pass arguments around', function(done){
 

@@ -4,9 +4,7 @@ var should = require('should');
 
 module.exports = function(runtime){
   should.exists(runtime);
-  var app = runtime.create('stems');
-
-  app.set(function(err){ if(err){ throw err; } });
+  var app = runtime.create('stems', {log: false});
 
   it('should accept (separated, strings)', function(done){
     app.set('1', function(next){
