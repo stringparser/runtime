@@ -124,9 +124,7 @@ Runtime.prototype.stack = function(stack, opt){
          || next.path || stem.name || stem.displayName;
       break;
       default:
-        throw new TypeError(
-          'elements of the stack should be `string` or `function`'
-        );
+        throw new TypeError('argument should be `string` or `function`');
     }
 
     if(!stack.match){ stack.index++; }
