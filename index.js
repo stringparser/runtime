@@ -1,6 +1,7 @@
 'use strict';
 
 var util = require('./lib/util');
+var repl = require('./lib/repl');
 var Stack = require('./lib/stack');
 var Manifold = require('manifold');
 
@@ -13,21 +14,17 @@ var Manifold = require('manifold');
 //
 
 exports = module.exports = {
-  get: get,
+  repl: repl,
   create: create,
   Runtime: Runtime
 };
 
-function get(name){
-  return get.cache[name];
-}
-get.cache = { };
-
 function create(name, opt){
   name = util.type(name).string || '#root';
-  get.cache[name] = get.cache[name] || new Runtime(name, opt);
-  return get.cache[name];
+  create.cache[name] = create.cache[name] || new Runtime(name, opt);
+  return create.cache[name];
 }
+create.cache = { };
 
 // ## Runtime([name, opts])
 //  runtime constructor
