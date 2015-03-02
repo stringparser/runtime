@@ -1,9 +1,6 @@
 'use strict';
 
 var util = require('./lib/util');
-var repl = require('./lib/repl');
-var Stack = require('./lib/stack');
-var Manifold = require('manifold');
 
 //
 // ## module.exports
@@ -14,7 +11,7 @@ var Manifold = require('manifold');
 //
 
 exports = module.exports = {
-  repl: repl,
+  repl: util.repl,
   create: create,
   Runtime: Runtime
 };
@@ -43,10 +40,10 @@ function Runtime(name, opt){
   }
 
   opt = opt || name || { };
-  Manifold.call(this, opt);
+  util.Manifold.call(this, opt);
   this.set({log: opt.log === void 0});
 }
-util.inherits(Runtime, Manifold);
+util.inherits(Runtime, util.Manifold);
 
 // ## Runtime.stack(/* arguments */)
 // > dispatch next element of a stack
@@ -59,6 +56,7 @@ util.inherits(Runtime, Manifold);
 // in order to execute the next element of the given stack.
 //
 
+var Stack = util.Stack;
 Runtime.prototype.stack = function(stack, opt){
 
   var self = this;
@@ -126,7 +124,7 @@ Runtime.prototype.stack = function(stack, opt){
 
     if(!stack.match){ stack.index++; }
 
-    next.wait = (stack.host || stack).wait;
+    next.wait = stack.wait;
     stack.next = stack.argv[stack.index];
     stack.note(opt.error, next);
 

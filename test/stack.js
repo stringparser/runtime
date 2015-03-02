@@ -109,7 +109,6 @@ module.exports = function(runtime){
   it('should pass arguments between stacks that wait', function(done){
 
     function one(next, foo, bar, baz){
-      next.wait = true;
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
@@ -117,7 +116,6 @@ module.exports = function(runtime){
     }
 
     function two(next, foo, bar, baz){
-      next.wait = true;
       foo.should.be.eql(2);
       bar.should.be.eql(3);
       baz.should.be.eql(4);
@@ -125,7 +123,6 @@ module.exports = function(runtime){
     }
 
     function three(next, foo, bar, baz){
-      next.wait = true;
       foo.should.be.eql(3);
       bar.should.be.eql(4);
       baz.should.be.eql(5);
@@ -133,7 +130,10 @@ module.exports = function(runtime){
     }
 
     app.stack(
-      app.stack(one), app.stack(two), app.stack(three), {wait: true}
+      app.stack(one, {wait: true}),
+      app.stack(two, {wait: true}),
+      app.stack(three, {wait: true}),
+      {wait: true}
     )(1,2,3);
   });
 };
