@@ -4,7 +4,7 @@ var should = require('should');
 module.exports = function(runtime){
   should.exists(runtime);
   var app = runtime.create('dispatch');
-  
+
   app.set('series', function(next){
     next.wait = true; next();
   });
