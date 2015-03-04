@@ -56,14 +56,14 @@ util.inherits(Runtime, util.Manifold);
 // in order to execute the next element of the given stack.
 //
 
-var Stack = util.Stack;
-Runtime.prototype.stack = function(stack, opt){
+Runtime.prototype.stack = function(stack){
 
   var self = this;
   var stackArgs = arguments;
 
   function next(err){
     if(next.end){ return next.result; }
+
     if(arguments.length > 1){
       stack.args = util.args(arguments);
     }
@@ -71,9 +71,12 @@ Runtime.prototype.stack = function(stack, opt){
     next.end = true;
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
+    stack.time = process.hrtime(stack.hrtime);
     stack.pending = stack.pending.replace(next.match, '').trim();
-    if(next.depth && stack.next){ self.stack(stack, opt); }
-    stack.note(err, next);
+
+    if(next.depth && stack.next){ self.stack(stack); }
+    stack.console(err, next);
+
     return stack.result;
   }
 
@@ -82,15 +85,15 @@ Runtime.prototype.stack = function(stack, opt){
   //
 
   function tick(arg){
-    if(tick.stack instanceof Stack){
-      stack = new Stack(stackArgs, self);
-      var error = arg instanceof Error && arg;
-      stack.host = arg && arg.stack instanceof Stack && arg.stack;
+    if(tick.stack instanceof util.Stack){
+      stack = new util.Stack(stackArgs, self);
+
+      stack.hrtime = process.hrtime();
+      if(arg instanceof Error){ stack.console(arg, next); }
+      stack.host = arg && arg.stack instanceof util.Stack && arg.stack;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
-      return self.stack(stack, {
-        error: error,
-        hrtime: process.hrtime()
-      });
+
+      return self.stack(stack);
     }
 
     var stem = stack.match || stack.next;
@@ -107,7 +110,7 @@ Runtime.prototype.stack = function(stack, opt){
           self.get(stem.path, next);
         }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = (stem.stack instanceof Stack && stem.stack.path)
+        next.match = (stem.stack instanceof util.Stack && stem.stack.path)
          || next.path || stem.name || stem.displayName;
       break;
       default:
@@ -118,32 +121,31 @@ Runtime.prototype.stack = function(stack, opt){
 
     next.wait = stack.wait;
     stack.next = stack.argv[stack.index];
-    stack.note(opt.error, next);
+    stack.console(null, next);
 
     var result;
     util.asyncDone(function(){
       stack.args[0] = next;
       next.time = process.hrtime();
-      stack.time = process.hrtime(opt.hrtime);
       result = next.handle.apply(stack, stack.args.concat());
       stack.result = result || stack.result;
       if(stack.next && !next.wait){
-        self.stack(stack, opt);
-      } else if(stack.host instanceof Stack && stack.host.next){
+        self.stack(stack);
+      } else if(stack.host instanceof util.Stack && stack.host.next){
+        stack.host.pending = stack.host.pending
+          .replace(stack.path, '').trim();
         stack.host.args = stack.args;
-        self.stack(stack.host, {
-          hrtime: process.hrtime()
-        });
+        self.stack(stack.host);
       }
       return result;
     }, function(err){ next(err); });
   }
 
-  if(stack instanceof Stack){
+  if(stack instanceof util.Stack){
     next.stack = stack;
     return tick();
   } else {
-    tick.stack = new Stack(stackArgs);
+    tick.stack = new util.Stack(stackArgs);
     return tick;
   }
 };
