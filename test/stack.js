@@ -130,9 +130,9 @@ module.exports = function(runtime){
     }
 
     app.stack(
-      app.stack(one, {wait: true}),
-      app.stack(two, {wait: true}),
-      app.stack(three, {wait: true}),
+      app.stack(one),
+      app.stack(two),
+      app.stack(three),
       {wait: true}
     )(1,2,3);
   });
