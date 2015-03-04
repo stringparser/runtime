@@ -58,7 +58,7 @@ util.inherits(Runtime, util.Manifold);
 
 var Stack = util.Stack;
 
-Runtime.prototype.stack = function(error, stack){
+Runtime.prototype.stack = function(stack){
 
   var self = this;
   var stackArgs = arguments;
@@ -77,10 +77,10 @@ Runtime.prototype.stack = function(error, stack){
     stack.pending = stack.pending.replace(matchRE, '').trim();
 
     if(next.depth && stack.next){
-      self.stack(null, stack);
+      self.stack(stack);
     } else if(next.wait && stack.host && stack.host.next){
       stack.host.args = stack.args;
-      self.stack(null, stack.host);
+      self.stack(stack.host);
     }
 
     stack.console(null, next);
@@ -96,6 +96,7 @@ Runtime.prototype.stack = function(error, stack){
       stack = new Stack(stackArgs, self);
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
+      if(arg instanceof Error){ stack.console(arg, next); }
       return self.stack(arg instanceof Error && arg, stack);
     }
 
@@ -123,7 +124,7 @@ Runtime.prototype.stack = function(error, stack){
     }
 
     next.wait = stack.wait;
-    stack.console(error, next);    
+    stack.console(null, next);
     if(!stack.match){ ++stack.index; }
     stack.next = stack.argv[stack.index];
 
@@ -136,14 +137,15 @@ Runtime.prototype.stack = function(error, stack){
       stack.result = result || stack.result;
 
       if(stack.next && !next.wait){
-        self.stack(null, stack);
+        self.stack(stack);
       } else if(stack.host && stack.host.next && !stack.host.wait){
         stack.host.args = stack.args;
-        self.stack(null, stack.host);
+        self.stack(stack.host);
       }
 
       return result;
-    }, next);
+
+    }, function(err){ next(err); });
   }
 
   if(stack instanceof Stack){
