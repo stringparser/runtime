@@ -3,7 +3,7 @@ var should = require('should');
 
 module.exports = function(runtime){
   should.exists(runtime);
-  var app = runtime.create('dispatch');
+  var app = runtime.create('dispatch', {log: false});
 
   app.set('series', function(next){
     next.wait = true; next();
@@ -13,69 +13,60 @@ module.exports = function(runtime){
     next.wait = false; next();
   });
 
-  app.set(':handle', function(next){
-    setTimeout(next, Math.random()*10+1);
-  });
-
   it('should dispatch in parallel by default', function(done){
     var pile = [];
+    app.set(':handle(\\d+)', function(next){
+      var stack = this;
+      setTimeout(function(){
+        pile.push(Number(next.match));
+        next(); if(stack.pending){ return ; }
+        pile.length.should.be.eql(5);
+        pile.filter(function(elem, index){
+          return (index+1) === elem;
+        }).length.should.be.lessThan(5);
+        done();
+      }, Math.random()*10+1);
+    });
 
-    function handleLog(next){
-      if(next.end){ pile.push(Number(next.match)); }
-      if(next.stack.pending){ return ; }
-      pile.should.have.property('length', 5);
-      pile.filter(function(item, index){
-        return index === item;
-      }).length.should.be.lessThan(5);
-      done();
-    }
-
-    app.set(':handle', handleLog);
     app.stack('1 2 3 4 5')();
   });
 
   it('should dispatch in series if so desired', function(done){
     var pile = [];
+    app.set(':handle(\\d+)', function(next){
+      var stack = this;
+      setTimeout(function(){
+        pile.push(Number(next.match));
+        next(); if(stack.pending){ return ; }
+        pile.length.should.be.eql(5);
+        pile.filter(function(elem, index){
+          return (index+1) === elem;
+        }).length.should.be.eql(5);
+        done();
+      }, Math.random()*10+1);
+    });
 
-    function handleLog(next){
-      var num = Number(next.match);
-      if(next.end && num){ pile.push(num); }
-      if(next.stack.pending){ return ; }
-
-      pile.should.have.property('length', 5);
-      pile.filter(function(item, index){
-        return (index + 1) === item;
-      }).length.should.be.eql(5);
-
-      done();
-    }
-
-    app.set('series', handleLog);
     app.stack('series 1 2 3 4 5')();
   });
 
   it('series and parallel should be able to share space', function(done){
 
-    var num, pile = [];
-    function handleLog(next){
-      num = Number(next.match);
-      if(next.end && num){ pile.push(num); }
-      if(next.stack.pending){ return ; }
+    var pile = [];
+    app.set(':handle(\\d+)', function seriesParallel(next){
+      var stack = this;
+      setTimeout(function(){
+        next();
+        pile.push(Number(next.match));
+        if(stack.pending){ return ; }
+        pile.slice(0, 3).should.be.eql([1,2,3]);
+        pile.slice(3).should.not.be.eql([4,5,6]);
 
-      pile.should.have.property('length', 6);
-      pile.slice(0,3).filter(function(item, index){
-        return (index+1) === item;
-      }).length.should.be.eql(3);
+        done();
 
-      pile.slice(3).filter(function(item, index){
-        return (index+4) === item;
-      }).length.should.be.lessThan(3);
+      }, Math.random()*10+1);
+    });
 
-      done();
-    }
-
-    app.set('series', handleLog);
-    app.stack('series 1 2 3 parallel 3 4 5')();
+    app.stack('series 1 2 3 parallel 4 5 6')();
   });
 
   it('wait state can be changed on demand', function(done){
@@ -85,7 +76,7 @@ module.exports = function(runtime){
       setTimeout(function(){
         next.wait = 0;
         next();
-      }, 2);
+      }, 1);
     }
 
     function two(next){
