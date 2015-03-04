@@ -72,15 +72,7 @@ Runtime.prototype.stack = function(stack, opt){
     stack.wait = next.wait;
     next.time = process.hrtime(next.time);
     stack.pending = stack.pending.replace(next.match, '').trim();
-
-    // ->tick<-
-    if(next.depth && stack.next){
-      self.stack(stack, opt);
-    } else if(next.wait && stack.host instanceof Stack){
-      stack.host.args = stack.args;
-      self.stack(stack.host, {hrtime: process.hrtime()});
-    }
-
+    if(next.depth && stack.next){ self.stack(stack, opt); }
     stack.note(err, next);
     return stack.result;
   }
@@ -137,9 +129,14 @@ Runtime.prototype.stack = function(stack, opt){
       stack.result = result || stack.result;
       if(stack.next && !next.wait){
         self.stack(stack, opt);
+      } else if(stack.host instanceof Stack && stack.host.next){
+        stack.host.args = stack.args;
+        self.stack(stack.host, {
+          hrtime: process.hrtime()
+        });
       }
       return result;
-    }, function(err){ stack.note(err, next); });
+    }, function(err){ next(err); });
   }
 
   if(stack instanceof Stack){
