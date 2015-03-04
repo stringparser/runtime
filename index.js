@@ -56,28 +56,35 @@ util.inherits(Runtime, util.Manifold);
 // in order to execute the next element of the given stack.
 //
 
-Runtime.prototype.stack = function(stack){
+var Stack = util.Stack;
+
+Runtime.prototype.stack = function(error, stack){
 
   var self = this;
   var stackArgs = arguments;
 
   function next(err){
-    if(next.end){ return next.result; }
-
-    if(arguments.length > 1){
+    if(err){ stack.console(err, next); }
+    if(next.end) { return next.result; }
+    if(next.wait && arguments.length > 1){
       stack.args = util.args(arguments);
     }
 
     next.end = true;
     stack.wait = next.wait;
-    next.time = process.hrtime(next.time);
-    stack.time = process.hrtime(stack.hrtime);
-    stack.pending = stack.pending.replace(next.match, '').trim();
+    next.result = stack.result;
+    var matchRE = new RegExp(next.match);
+    stack.pending = stack.pending.replace(matchRE, '').trim();
 
-    if(next.depth && stack.next){ self.stack(stack); }
-    stack.console(err, next);
+    if(next.depth && stack.next){
+      self.stack(null, stack);
+    } else if(next.wait && stack.host && stack.host.next){
+      stack.host.args = stack.args;
+      self.stack(null, stack.host);
+    }
 
-    return stack.result;
+    stack.console(null, next);
+    return next.result;
   }
 
   //
@@ -85,67 +92,64 @@ Runtime.prototype.stack = function(stack){
   //
 
   function tick(arg){
-    if(tick.stack instanceof util.Stack){
-      stack = new util.Stack(stackArgs, self);
-
-      stack.hrtime = process.hrtime();
-      if(arg instanceof Error){ stack.console(arg, next); }
-      stack.host = arg && arg.stack instanceof util.Stack && arg.stack;
+    if(tick.stack instanceof Stack){
+      stack = new Stack(stackArgs, self);
+      stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
-
-      return self.stack(stack);
+      return self.stack(arg instanceof Error && arg, stack);
     }
 
     var stem = stack.match || stack.next;
-
-    switch(typeof stem){
+    switch(typeof stack.next){
       case 'string':
         self.get(stem, next);
-        stack.match = next.match || next.path;
-        stack.match = next.path.replace(stack.match, '').trim();
+        next.match = next.match || next.path;
+        stack.match = next.path.substring(next.match.length).trim();
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        if(typeof stem.path === 'string'){
+        if(stem.stack instanceof Stack){
+          stack.args[0] = stack;
+          next.match = stem.stack.path;
+        } else if(typeof stem.path === 'string'){
           self.get(stem.path, next);
         }
-        next.handle = stem; next.depth = next.depth || 1;
-        next.match = (stem.stack instanceof util.Stack && stem.stack.path)
-         || next.path || stem.name || stem.displayName;
+        next.handle = stem;
+        next.depth = next.depth || 1;
+        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
     }
 
-    if(!stack.match){ stack.index++; }
-
     next.wait = stack.wait;
+    stack.console(error, next);    
+    if(!stack.match){ ++stack.index; }
     stack.next = stack.argv[stack.index];
-    stack.console(null, next);
 
     var result;
     util.asyncDone(function(){
       stack.args[0] = next;
       next.time = process.hrtime();
-      result = next.handle.apply(stack, stack.args.concat());
+      stack.time = stack.time || process.hrtime();
+      result = next.handle.apply(stack, stack.args);
       stack.result = result || stack.result;
+
       if(stack.next && !next.wait){
-        self.stack(stack);
-      } else if(stack.host instanceof util.Stack && stack.host.next){
-        stack.host.pending = stack.host.pending
-          .replace(stack.path, '').trim();
+        self.stack(null, stack);
+      } else if(stack.host && stack.host.next && !stack.host.wait){
         stack.host.args = stack.args;
-        self.stack(stack.host);
+        self.stack(null, stack.host);
       }
+
       return result;
-    }, function(err){ next(err); });
+    }, next);
   }
 
-  if(stack instanceof util.Stack){
-    next.stack = stack;
-    return tick();
+  if(stack instanceof Stack){
+    tick();
   } else {
-    tick.stack = new util.Stack(stackArgs);
+    tick.stack = new Stack(stackArgs);
     return tick;
   }
 };
