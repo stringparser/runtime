@@ -83,7 +83,7 @@ Runtime.prototype.stack = function(stack){
       self.stack(stack.host);
     }
 
-    stack.console(next);
+    stack.console(null, next);
     return next.result;
   }
 
@@ -109,14 +109,13 @@ Runtime.prototype.stack = function(stack){
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        if(stem.stack instanceof Stack){
-          next.match = stem.stack.path;
-        } else if(typeof stem.path === 'string'){
+        if(typeof stem.path === 'string'){
           self.get(stem.path, next);
         }
         next.handle = stem;
         next.depth = next.depth || 1;
-        next.match = next.match || stem.name || stem.displayName;
+        next.match = (stem.stack instanceof Stack && stem.stack.path)
+          || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
@@ -129,10 +128,13 @@ Runtime.prototype.stack = function(stack){
 
     var result;
     util.asyncDone(function(){
-      stack.args[0] = next;
+
       next.time = process.hrtime();
       stack.time = stack.time || process.hrtime();
+      stack.args[0] = stem.stack instanceof Stack ? stack : next;
+
       result = next.handle.apply(stack, stack.args);
+
       stack.result = result || stack.result;
 
       if(stack.next && !next.wait){
