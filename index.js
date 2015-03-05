@@ -64,25 +64,26 @@ Runtime.prototype.stack = function(stack, error){
   var stackArgs = arguments;
 
   function next(err){
+    if(err){ stack.console(err, next); }
     if(next.end) { return next.result; }
-    if(next.wait && arguments.length > 1){
+    if(arguments.length > 1){
       stack.args = util.args(arguments);
     }
 
     next.end = true;
     stack.wait = next.wait;
     next.result = stack.result;
-    var matchRE = new RegExp(next.match);
-    stack.pending = stack.pending.replace(matchRE, '').trim();
+    stack.pile = stack.pile.replace(next.match, '').trim();
 
     if(next.depth && stack.next){
       self.stack(stack);
-    } else if(next.wait && stack.host && stack.host.next){
+    } else if(stack.host && stack.host.next){
+      stack.host.pile = stack.host.pile.replace(stack.path, '').trim();
       stack.host.args = stack.args;
       self.stack(stack.host);
     }
 
-    stack.console(err, next);
+    stack.console(null, next);
     return next.result;
   }
 
@@ -98,8 +99,11 @@ Runtime.prototype.stack = function(stack, error){
       return self.stack(stack, arg);
     }
 
+    next.wait = stack.wait;
+    next.args = stack.args.concat();
     var stem = stack.match || stack.next;
-    switch(typeof stack.next){
+
+    switch(typeof stem){
       case 'string':
         self.get(stem, next);
         next.match = next.match || next.path;
@@ -110,31 +114,29 @@ Runtime.prototype.stack = function(stack, error){
         if(typeof stem.path === 'string'){ self.get(stem.path, next); }
         next.handle = stem; next.depth = next.depth || 1;
         next.match = (stem.stack instanceof Stack && stem.stack.path)
-          || stem.name || stem.displayName;
+          || next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
     }
 
-    next.wait = stack.wait;
-    stack.console(error, next);
     if(!stack.match){ ++stack.index; }
     stack.next = stack.argv[stack.index];
+    next.args[0] = stem.stack instanceof Stack ? stack : next;
+    stack.console(error, next);
 
-    var result;
     util.asyncDone(function(){
       next.time = process.hrtime();
       stack.time = stack.time || process.hrtime();
-      stack.args[0] = stem.stack instanceof Stack ? stack : next;
-
-      result = next.handle.apply(stack, stack.args);
+      var result = next.handle.apply(stack.context || stack, next.args);
       stack.result = result || stack.result;
 
       if(stack.next && !next.wait){
         self.stack(stack);
-      } else if(stack.host && stack.host.next && !stack.host.wait){
+      } else if(stack.host && stack.host.next){
+        stack.host.pile = stack.host.pile.replace(stack.path, '').trim();
         stack.host.args = stack.args;
-        self.stack(stack.host);
+        if(!next.wait){ self.stack(stack.host); }
       }
 
       return result;
@@ -142,7 +144,7 @@ Runtime.prototype.stack = function(stack, error){
   }
 
   if(stack instanceof Stack){
-    tick();
+    return tick();
   } else {
     tick.stack = new Stack(stackArgs);
     return tick;
