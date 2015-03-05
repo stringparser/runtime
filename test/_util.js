@@ -10,10 +10,10 @@ module.exports = {
     var testFirst = [
       'stems.js',
       'stack.js',
-      'state.js'
+      'state.js',
+      'resolve.js'
     ];
     var exclude = [
-      'dir',
       '_main.js',
       '_util.js'
     ];

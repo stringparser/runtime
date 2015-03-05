@@ -4,6 +4,7 @@ var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
 var gulp = require('gulp');
+var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var should = require('should');
 
@@ -12,7 +13,11 @@ module.exports = function(runtime){
   var app = runtime.create('resolve', {log: false});
 
   before(function(done){
-    rimraf('dir', done);
+    rimraf('dir', function(){
+      mkdirp('dir/src', function(){
+        fs.open('dir/src/file.js', 'w', done);
+      });
+    });
   });
 
   it('can wait to gulp streams', function(done){
@@ -59,9 +64,9 @@ module.exports = function(runtime){
     app.stack(ls, end)();
   });
 
-  after(function(done){
-    setTimeout(function(){
-      rimraf('dir', done);
-    }, 1000);
-  });
+  // after(function(done){
+  //   setTimeout(function(){
+  //     rimraf('dir', done);
+  //   }, 600);
+  // });
 };
