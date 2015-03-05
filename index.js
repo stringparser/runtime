@@ -80,6 +80,7 @@ Runtime.prototype.stack = function(stack, error){
       the.host.pile = the.host.pile.replace(the.path, '').trim();
       the = the.host;
     }
+    stack.log(next);
 
     if(next.depth && stack.next){
       self.stack(stack);
@@ -88,7 +89,6 @@ Runtime.prototype.stack = function(stack, error){
       self.stack(stack.host);
     }
 
-    stack.log(next);
     return next.result;
   }
 
@@ -129,11 +129,11 @@ Runtime.prototype.stack = function(stack, error){
         throw new TypeError('argument should be `string` or `function`');
     }
 
-    stack.console(error, next);
-    if(!stack.match){ ++stack.index; }
+    if(stack.next && !stack.match){ ++stack.index; }
     stack.next = stack.argv[stack.index];
 
     util.asyncDone(function(){
+      stack.console(error, next);
       next.time = process.hrtime();
       stack.time = stack.time || process.hrtime();
       var result = next.handle.apply(stack.context || stack, next.args);
