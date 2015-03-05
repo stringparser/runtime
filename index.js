@@ -75,17 +75,20 @@ Runtime.prototype.stack = function(stack, error){
     next.result = stack.result;
     stack.pile = stack.pile.replace(next.match, '').trim();
 
-    if(next.depth && stack.next){
-      self.stack(stack);
-    } else if(stack.host && stack.host.next){
-      stack.host.pile = stack.host.pile.replace(stack.path, '').trim();
-      stack.host.args = stack.args;
-      self.stack(stack.host);
-    } else if(stack.host){
-      stack.host.pile = stack.host.pile.replace(stack.path, '').trim();
+    var the = stack;
+    while(!the.pile && the.host){
+      the.host.pile = the.host.pile.replace(the.path, '').trim();
+      the = the.host;
     }
 
-    stack.console(null, next);
+    if(next.depth && stack.next){
+      self.stack(stack);
+    } else if(next.wait && stack.host && stack.host.next){
+      stack.host.args = stack.args;
+      self.stack(stack.host);
+    }
+
+    stack.log(next);
     return next.result;
   }
 
@@ -102,30 +105,33 @@ Runtime.prototype.stack = function(stack, error){
     }
 
     next.wait = stack.wait || false;
-    next.args = stack.args.concat();
+    next.args = util.args(stack.args);
     var stem = stack.match || stack.next;
+    next.args[0] = next;
 
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
-        next.match = next.match || next.path;
         stack.match = next.path.substring(next.match.length).trim();
         next.handle = next.handle || stack.handle;
       break;
       case 'function':
-        if(typeof stem.path === 'string'){ self.get(stem.path, next); }
+        if(stem.stack instanceof Stack){
+          next.args[0] = stack;
+          next.match = stem.stack.path;
+        } else if(typeof stem.path === 'string'){
+          self.get(stem.path, next);
+        }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = (stem.stack instanceof Stack && stem.stack.path)
-          || next.match || stem.name || stem.displayName;
+        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
     }
 
+    stack.console(error, next);
     if(!stack.match){ ++stack.index; }
     stack.next = stack.argv[stack.index];
-    next.args[0] = stem.stack instanceof Stack ? stack : next;
-    stack.console(error, next);
 
     util.asyncDone(function(){
       next.time = process.hrtime();
@@ -133,10 +139,10 @@ Runtime.prototype.stack = function(stack, error){
       var result = next.handle.apply(stack.context || stack, next.args);
       stack.result = result || stack.result;
 
-      if(stack.next && !next.wait){
+      if(next.wait){ }
+      else if(stack.next){
         self.stack(stack);
-      } else if(stack.host && stack.host.next && !next.wait){
-        stack.host.args = stack.args;
+      } else if(stack.host && stack.host.next){
         self.stack(stack.host);
       }
 
