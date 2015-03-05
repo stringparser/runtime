@@ -6,12 +6,8 @@ var app = runtime.create('app');
 
 should.exists(app);
 
-app.set('series', function(next){
-  next.wait = true; next();
-});
-
 app.set(':handle(\\d+)', function(next){
   setTimeout(next, Math.random()*10);
 });
 
-app.stack('series 1 2 3')(1,2,3);
+app.stack(app.stack('1 2 3', {wait: true}), '4 5 6', {wait: true})(1,2,3);
