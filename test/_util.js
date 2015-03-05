@@ -7,12 +7,13 @@ module.exports = {
   testSuite : function(){
     var testSuite = fs.readdirSync(__dirname);
     // in case there is priority
-    var testFirst = [];
+    var testFirst = [
+      'stems.js',
+      'stack.js'
+    ];
     var exclude = [
       '_main.js',
-      '_util.js',
-      'stack.js',
-      'stems.js'
+      '_util.js'
     ];
 
     // use it also to omit _main & _util files

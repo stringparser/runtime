@@ -8,8 +8,9 @@ module.exports = function(runtime){
 
   it('should pass arguments around', function(done){
 
+    app.set({error: done});
+
     function one(next, foo, bar, baz){
-      next.wait = true;
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
@@ -34,6 +35,9 @@ module.exports = function(runtime){
   });
 
   it('should be able change arguments around', function(done){
+
+    app.set({error: done});
+
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
@@ -55,10 +59,13 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(one, two, three)(1, 2, 3);
+    app.stack(one, two, three, {wait: true})(1, 2, 3);
   });
 
   it('should not change arguments if length is less than 2', function(done){
+
+    app.set({error: done});
+
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
@@ -84,6 +91,9 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments around between stacks', function(done){
+
+    app.set({error: done});
+
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
@@ -103,12 +113,19 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(app.stack(one), app.stack(two), app.stack(three))(1, 2, 3);
+    app.stack(
+      app.stack(one),
+      app.stack(two),
+      app.stack(three)
+    )(1, 2, 3);
   });
 
   it('should pass arguments between stacks that wait', function(done){
 
+    app.set({error: done});
+
     function one(next, foo, bar, baz){
+      next.wait = true;
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
@@ -116,6 +133,7 @@ module.exports = function(runtime){
     }
 
     function two(next, foo, bar, baz){
+      next.wait = true;
       foo.should.be.eql(2);
       bar.should.be.eql(3);
       baz.should.be.eql(4);
@@ -123,13 +141,18 @@ module.exports = function(runtime){
     }
 
     function three(next, foo, bar, baz){
+      next.wait = true;
       foo.should.be.eql(3);
       bar.should.be.eql(4);
       baz.should.be.eql(5);
       done();
     }
 
-    app.stack(app.stack(one), app.stack(two), app.stack(three),
-      {wait: true})(1,2,3);
+    app.stack(
+      app.stack(one),
+      app.stack(two),
+      app.stack(three),
+      {wait: true}
+    )(1,2,3);
   });
 };
