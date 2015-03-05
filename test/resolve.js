@@ -54,7 +54,7 @@ module.exports = function(runtime){
         next(null, dirls);
       });
 
-      return pc;
+      return pc.stdout;
     }
 
     function end(next, dirls){
