@@ -32,9 +32,11 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "gulp": "^3.x.x",
     "jshint": "*",
     "jshint-stylish": "*",
     "mocha": "*",
+    "rimraf": "^2.3.1",
     "should": "*"
   }
 }
