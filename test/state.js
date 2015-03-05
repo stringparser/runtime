@@ -79,7 +79,7 @@ module.exports = function(runtime){
     app.stack('0 1 2 3 4', {wait: true})();
   });
 
-  it('series & parallel stacks together', function(done){
+  it('should handle series & parallel stacks', function(done){
     app.set({error: done});
 
     var end = {series:[], parallel:[]};

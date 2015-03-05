@@ -9,9 +9,11 @@ module.exports = {
     // in case there is priority
     var testFirst = [
       'stems.js',
-      'stack.js'
+      'stack.js',
+      'state.js'
     ];
     var exclude = [
+      'dir',
       '_main.js',
       '_util.js'
     ];

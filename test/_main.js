@@ -1,11 +1,12 @@
 'use strict';
 
-
 var path = require('path');
 var packageName = require('../package').name;
 
 var pack = require('../');
 var util = require('./_util.js');
+
+process.chdir(path.join(__dirname));
 
 describe(packageName, function(){
 
