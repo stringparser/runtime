@@ -63,10 +63,4 @@ module.exports = function(runtime){
     }
     app.stack(ls, end)();
   });
-
-  after(function(done){
-    setTimeout(function(){
-      rimraf('dir', done);
-    }, 800);
-  });
 };
