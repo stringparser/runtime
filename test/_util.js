@@ -15,7 +15,8 @@ module.exports = {
     ];
     var exclude = [
       '_main.js',
-      '_util.js'
+      '_util.js',
+      'dir'
     ];
 
     // use it also to omit _main & _util files

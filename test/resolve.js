@@ -43,8 +43,8 @@ module.exports = function(runtime){
 
     function ls(next){
       next.wait = true;
-      var dirls = '';
-      var pc = cp.spawn('ls', ['dir']);
+
+      var dirls = '', pc = cp.spawn('ls', ['dir']);
 
       pc.stdout.on('data', function(chunk){
         dirls += chunk.toString();
@@ -64,9 +64,9 @@ module.exports = function(runtime){
     app.stack(ls, end)();
   });
 
-  // after(function(done){
-  //   setTimeout(function(){
-  //     rimraf('dir', done);
-  //   }, 600);
-  // });
+  after(function(done){
+    setTimeout(function(){
+      rimraf('dir', done);
+    }, 800);
+  });
 };
