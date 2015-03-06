@@ -132,7 +132,7 @@ Runtime.prototype.stack = function(stack){
 
     util.asyncDone(function(){
       next.time = process.hrtime();
-      var result = next.handle.apply(stack, next.args);
+      var result = next.handle.apply(stack.context || stack, next.args);
       next.result = result || next.result;
       if(next.wait){ return result; }
       if(stack.next || (stack.host && stack.host.next)){
