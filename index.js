@@ -149,3 +149,46 @@ Runtime.prototype.stack = function(stack){
     return tick;
   }
 };
+
+// ## Runtime.repl(options)
+// > create a repl for the given runtime
+//
+// arguments: options with non mandatory props below
+//  - input, repl's stream output, defaults to process.stdin
+//  - output, repl's stream output, defaults to process.stdout
+//
+// After its called, it will override the prototype
+// and becomes a property with a readline instance
+// --
+// PD: This was the very beginning of it all :D
+//
+Runtime.prototype.repl = function(o){
+  o = o || { };
+  this.repl = require('readline').createInterface({
+    input: util.type(o.input).match(/stream/) || process.stdin,
+    output: util.type(o.output).match(/stream/) || process.stdout,
+    completer: util.type(o.completer).function  ||
+      function(line, callback){
+        return util.completer(this, line, callback);
+      }
+  });
+
+  this.repl.on('line', function(line){
+    this.stack(line)();
+  });
+
+  if(!this.repl.terminal){ return this; }
+  this.repl.setPrompt(' '+this.store.name+' > ');
+
+  var self = this;
+  // keypress for SIGINT
+  this.repl.input.removeAllListeners('keypress');
+  this.repl.input.on('keypress', function (str, key){
+    if( key && key.ctrl && key.name === 'c'){
+      process.stdout.write('\n');
+      process.exit(0);
+    } else { self.repl._ttyWrite(str, key); }
+  });
+
+  return this;
+};
