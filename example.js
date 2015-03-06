@@ -14,4 +14,4 @@ app.set(':handle', function(next){
 //   {wait: true}),
 // {wait: true})(1,2,3);
 
-console.log(app);
+app.repl();

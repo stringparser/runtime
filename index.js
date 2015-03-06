@@ -163,24 +163,24 @@ Runtime.prototype.stack = function(stack){
 // PD: This was the very beginning of it all :D
 //
 Runtime.prototype.repl = function(o){
-  o = o || { };
+  var self = this; o = o || { };
   this.repl = require('readline').createInterface({
     input: util.type(o.input).match(/stream/) || process.stdin,
     output: util.type(o.output).match(/stream/) || process.stdout,
     completer: util.type(o.completer).function  ||
       function(line, callback){
-        return util.completer(this, line, callback);
+        return util.completer(self, line, callback);
       }
   });
 
   this.repl.on('line', function(line){
-    this.stack(line)();
+    if(!line.trim()){ return this.prompt(); }
+    self.stack(line)();
   });
 
   if(!this.repl.terminal){ return this; }
-  this.repl.setPrompt(' '+this.store.name+' > ');
+  this.repl.setPrompt(this.store.name + '> ');
 
-  var self = this;
   // keypress for SIGINT
   this.repl.input.removeAllListeners('keypress');
   this.repl.input.on('keypress', function (str, key){
@@ -190,5 +190,6 @@ Runtime.prototype.repl = function(o){
     } else { self.repl._ttyWrite(str, key); }
   });
 
+  this.repl.prompt();
   return this;
 };
