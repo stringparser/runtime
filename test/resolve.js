@@ -38,22 +38,17 @@ module.exports = function(runtime){
   });
 
   it('can wait to child processes', function(done){
-
     app.set({error: done});
 
     function ls(next){
       next.wait = true;
-
       var dirls = '', pc = cp.spawn('ls', ['dir']);
-
       pc.stdout.on('data', function(chunk){
         dirls += chunk.toString();
       });
-
       pc.stdout.once('end', function(){
         next(null, dirls);
       });
-
       return pc.stdout;
     }
 
@@ -61,6 +56,7 @@ module.exports = function(runtime){
       dirls.should.be.eql('dest\nsrc\n');
       done();
     }
+
     app.stack(ls, end)();
   });
 };
