@@ -64,16 +64,16 @@ Runtime.prototype.stack = function(stack){
   var stackArgs = arguments;
 
   function next(err){
-    if(err){ stack.console(err, next); }
+    if(err){ stack.onError(err, next); }
     if(next.end) { return next.result; }
-    if(next.wait && arguments.length > 1){
+    if(arguments.length > 1){
       stack.args = util.args(arguments);
     }
 
     next.end = true;
     stack.wait = next.wait;
-    if(stack.onNext){ stack.onNext(next); }
-    
+    if(stack.onEnd){ stack.onEnd(next); }
+
     if(next.depth && stack.next){
       self.stack(stack);
     } else if(next.wait && stack.host && stack.host.next){
@@ -93,7 +93,9 @@ Runtime.prototype.stack = function(stack){
       stack = new Stack(stackArgs, self);
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
-      if(arg && arg instanceof Error){ stack.onError(arg, next); }
+      if(arg instanceof Error){ stack.onError(arg, next); }
+      if(stack.onCall){ stack.onCall(next); }
+      stack.time = process.hrtime();
       return self.stack(stack);
     }
 
@@ -106,7 +108,7 @@ Runtime.prototype.stack = function(stack){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.substring(next.match.length).trim();
-        next.handle = next.handle || stack.handle;
+        next.handle = next.handle || stack.onNotFound;
       break;
       case 'function':
         if(stem.stack instanceof Stack){
@@ -122,18 +124,19 @@ Runtime.prototype.stack = function(stack){
         throw new TypeError('argument should be `string` or `function`');
     }
 
-    if(stack.next && !stack.match){ ++stack.index; }
-    stack.next = stack.argv[stack.index];
+    if(stack.next && !stack.match){
+      stack.next = stack.argv[++stack.index];
+    }
+
+    if(stack.onCall){ stack.onCall(next); }
 
     util.asyncDone(function(){
-      if(stack.onHandle){ stack.onHandle(next); }
-      var result = next.handle.apply(stack.context || stack, next.args);
+      next.time = process.hrtime();
+      var result = next.handle.apply(stack, next.args);
       next.result = result || next.result;
-      if(next.wait){ }
-      else if(stack.next){
-        self.stack(stack);
-      } else if(stack.host && stack.host.next){
-        self.stack(stack.host);
+      if(next.wait){ return result; }
+      if(stack.next || (stack.host && stack.host.next)){
+        self.stack(stack.host || stack);
       }
       return result;
     }, function(err, result){
@@ -142,9 +145,7 @@ Runtime.prototype.stack = function(stack){
     });
   }
 
-  if(stack instanceof Stack){
-    return tick();
-  } else {
+  if(stack instanceof Stack){ tick(); } else {
     tick.stack = new Stack(stackArgs);
     return tick;
   }
