@@ -5,8 +5,8 @@ var util = require('./lib/util');
 //
 // ## module.exports
 //
-// - get: obtain a Runtime instance from cache
-// - create: instantiate a Runtime instance and cache it
+// - repl: make a repl out of the Runtime Interface
+// - create: obtain/create a Runtime instance from cache
 // - Runtime: the runtime constructor
 //
 
@@ -58,7 +58,7 @@ util.inherits(Runtime, util.Manifold);
 
 var Stack = util.Stack;
 
-Runtime.prototype.stack = function(stack, error){
+Runtime.prototype.stack = function(stack){
 
   var self = this;
   var stackArgs = arguments;
@@ -72,16 +72,8 @@ Runtime.prototype.stack = function(stack, error){
 
     next.end = true;
     stack.wait = next.wait;
-    next.result = stack.result;
-    stack.pile = stack.pile.replace(next.match, '').trim();
-
-    var the = stack;
-    while(!the.pile && the.host){
-      the.host.pile = the.host.pile.replace(the.path, '').trim();
-      the = the.host;
-    }
-    stack.log(next);
-
+    if(stack.onNext){ stack.onNext(next); }
+    
     if(next.depth && stack.next){
       self.stack(stack);
     } else if(next.wait && stack.host && stack.host.next){
@@ -101,7 +93,8 @@ Runtime.prototype.stack = function(stack, error){
       stack = new Stack(stackArgs, self);
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
-      return self.stack(stack, arg);
+      if(arg && arg instanceof Error){ stack.onError(arg, next); }
+      return self.stack(stack);
     }
 
     next.wait = stack.wait || false;
@@ -133,21 +126,20 @@ Runtime.prototype.stack = function(stack, error){
     stack.next = stack.argv[stack.index];
 
     util.asyncDone(function(){
-      stack.console(error, next);
-      next.time = process.hrtime();
-      stack.time = stack.time || process.hrtime();
+      if(stack.onHandle){ stack.onHandle(next); }
       var result = next.handle.apply(stack.context || stack, next.args);
-      stack.result = result || stack.result;
-
+      next.result = result || next.result;
       if(next.wait){ }
       else if(stack.next){
         self.stack(stack);
       } else if(stack.host && stack.host.next){
         self.stack(stack.host);
       }
-
       return result;
-    }, function(err){ next(err); });
+    }, function(err, result){
+      next.result = result;
+      next(err);
+    });
   }
 
   if(stack instanceof Stack){
