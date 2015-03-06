@@ -25,6 +25,7 @@
     "async-done": "^1.0.0",
     "inherits": "^2.0.1",
     "lodash.clone": "^3.0.0",
+    "lodash.has": "^3.0.0",
     "manifold": "^2.x.x",
     "pretty-hrtime": "0.2.x",
     "utils-merge": "^1.0.0",
