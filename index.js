@@ -76,11 +76,10 @@ Runtime.prototype.stack = function(stack){
 
     if(next.depth && stack.next){
       self.stack(stack);
-    } else if(next.wait && stack.host && stack.host.next){
+    } else if(stack.host && stack.host.next){
       stack.host.args = stack.args;
       self.stack(stack.host);
     }
-
     return next.result;
   }
 
