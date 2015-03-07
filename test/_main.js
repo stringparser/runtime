@@ -2,8 +2,8 @@
 
 var pack = require('../');
 var path = require('path');
-var cage = require('../package');
 var util = require('./_util.js');
+var cage = require('../package.json');
 
 process.chdir(path.join(__dirname));
 
