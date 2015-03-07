@@ -1,13 +1,9 @@
 'use strict';
 
-var should = require('should');
-
 module.exports = function(runtime){
-  should.exists(runtime);
   var app = runtime.create('args', {log: false});
 
   it('should pass arguments around', function(done){
-
     app.set({onError: done});
 
     function one(next, foo, bar, baz){
@@ -35,7 +31,6 @@ module.exports = function(runtime){
   });
 
   it('should be able change arguments around', function(done){
-
     app.set({onError: done});
 
     function one(next, foo, bar, baz){
@@ -63,7 +58,6 @@ module.exports = function(runtime){
   });
 
   it('should not change arguments if length is less than 2', function(done){
-
     app.set({onError: done});
 
     function one(next, foo, bar, baz){
@@ -91,7 +85,6 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments around between stacks', function(done){
-
     app.set({onError: done});
 
     function one(next, foo, bar, baz){
@@ -121,7 +114,6 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments between stacks that wait', function(done){
-
     app.set({onError: done});
 
     function one(next, foo, bar, baz){

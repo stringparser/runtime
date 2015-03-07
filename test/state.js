@@ -1,8 +1,6 @@
 'use strict';
-var should = require('should');
 
 module.exports = function(runtime){
-  should.exists(runtime);
   var app = runtime.create('dispatch', {log: false});
 
   it('can be changed on demand', function(done){

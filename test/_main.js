@@ -1,19 +1,16 @@
 'use strict';
 
-var path = require('path');
-var packageName = require('../package').name;
-
 var pack = require('../');
+var path = require('path');
+var cage = require('../package');
 var util = require('./_util.js');
 
 process.chdir(path.join(__dirname));
 
-describe(packageName, function(){
-
-  util.testSuite().forEach(function(file){
+describe(cage.name, function(){
+  util.suite().forEach(function(file){
     var suite = path.basename(file, path.extname(file));
     describe(suite, function(){
-      // the actual suite code
       require('./'+file)(pack, util);
     });
   });

@@ -1,10 +1,11 @@
 
 'use strict';
 
+require('should');
 var fs = require('fs');
 
 module.exports = {
-  testSuite : function(){
+  suite : function testFiles(){
     var suite = fs.readdirSync(__dirname);
     // priority
     var first = [
@@ -28,5 +29,9 @@ module.exports = {
 
     suite.unshift.apply(suite, first);
     return suite;
-  }
+  },
+  gulp: require('gulp'),
+  mkdirp: require('mkdirp'),
+  rimraf: require('rimraf'),
+  through: require('through2')
 };

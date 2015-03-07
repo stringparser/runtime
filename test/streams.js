@@ -1,22 +1,15 @@
 'use strict';
 
 var fs = require('fs');
-var cp = require('child_process');
 var path = require('path');
-var gulp = require('gulp');
-var mkdirp = require('mkdirp');
-var rimraf = require('rimraf');
-var should = require('should');
-var through = require('through2');
 
-module.exports = function(runtime){
-  should.exists(runtime);
+module.exports = function(runtime, util){
   var app = runtime.create('resolve', {log: false});
 
   before(function(done){
     app.set({onError: done});
-    rimraf('dir', function(){
-      mkdirp('dir/src', function(){
+    util.rimraf('dir', function(){
+      util.mkdirp('dir/src', function(){
         fs.open('dir/src/file.js', 'w', done);
       });
     });
@@ -31,6 +24,7 @@ module.exports = function(runtime){
         return path.resolve(__dirname, dest);
       }
 
+      var gulp = util.gulp;
       return gulp.src(src)
        .pipe(gulp.dest(destFolder))
        .on('error', next);
@@ -42,7 +36,7 @@ module.exports = function(runtime){
 
   it('repl.input can be used to wait', function(done){
     app.set({onError: done});
-    app.repl({input: through.obj()});
+    app.repl({input: util.through.obj()});
 
     function wait(next){
       next.wait = true;
