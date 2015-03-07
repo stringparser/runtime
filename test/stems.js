@@ -7,7 +7,7 @@ module.exports = function(runtime){
   var app = runtime.create('stems', {log: false});
 
   it('should accept (separated, strings)', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     app.set('1', function(next){
       next.match.should.be.eql('1');
@@ -24,7 +24,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (join strings argument)', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     app.set('1', function(next){
       next.match.should.be.eql('1');
@@ -41,7 +41,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (function, function)', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next){
       next.match.should.be.eql('one');
@@ -56,7 +56,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (string, function)', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     app.set('a :string', function(next){
       next.match.should.be.eql('a word');

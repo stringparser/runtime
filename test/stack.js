@@ -8,7 +8,7 @@ module.exports = function(runtime){
 
   it('should pass arguments around', function(done){
 
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -36,7 +36,7 @@ module.exports = function(runtime){
 
   it('should be able change arguments around', function(done){
 
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -64,7 +64,7 @@ module.exports = function(runtime){
 
   it('should not change arguments if length is less than 2', function(done){
 
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -92,7 +92,7 @@ module.exports = function(runtime){
 
   it('should pass arguments around between stacks', function(done){
 
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -122,7 +122,7 @@ module.exports = function(runtime){
 
   it('should pass arguments between stacks that wait', function(done){
 
-    app.set({error: done});
+    app.set({onError: done});
 
     function one(next, foo, bar, baz){
       next.wait = true;

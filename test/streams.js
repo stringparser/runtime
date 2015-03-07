@@ -14,7 +14,7 @@ module.exports = function(runtime){
   var app = runtime.create('resolve', {log: false});
 
   before(function(done){
-    app.set({error: done});
+    app.set({onError: done});
     rimraf('dir', function(){
       mkdirp('dir/src', function(){
         fs.open('dir/src/file.js', 'w', done);
@@ -23,7 +23,7 @@ module.exports = function(runtime){
   });
 
   it('can wait to gulp streams', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     function src(next, src, dest){
       next.wait = true;
@@ -43,7 +43,7 @@ module.exports = function(runtime){
   });
 
   it('can wait to child processes', function(done){
-    app.set({error: done});
+    app.set({onError: done});
 
     function ls(next){
       next.wait = true;
@@ -66,7 +66,7 @@ module.exports = function(runtime){
   });
 
   it('repl.input stream can be used to wait', function(done){
-    app.set({error: done});
+    app.set({onError: done});
     app.repl({input: through.obj()});
 
     function wait(next){
