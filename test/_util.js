@@ -5,25 +5,28 @@ var fs = require('fs');
 
 module.exports = {
   testSuite : function(){
-    var testSuite = fs.readdirSync(__dirname);
-    // in case there is priority
-    var testFirst = [
+    var suite = fs.readdirSync(__dirname);
+    // priority
+    var first = [
       'stems.js',
       'stack.js',
       'state.js',
-      'resolve.js'
+      'streams.js'
     ];
+
+    // take out
     var exclude = [
       '_main.js',
       '_util.js',
       'dir'
     ];
 
-    // use it also to omit _main & _util files
-    testFirst.concat(exclude).forEach(function(file){
-      testSuite.splice(testSuite.indexOf(file), 1);
+    // files starting with _ and without extension _main & _util files
+    first.concat(exclude).forEach(function(file){
+      suite.splice(suite.indexOf(file), 1);
     });
-    testSuite.unshift.apply(testSuite, testFirst);
-    return testSuite;
+
+    suite.unshift.apply(suite, first);
+    return suite;
   }
 };
