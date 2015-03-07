@@ -29,16 +29,17 @@
     "manifold": "^2.x.x",
     "pretty-hrtime": "0.2.x",
     "utils-merge": "^1.0.0",
-    "utils-type": "0.8.x"
+    "utils-type": "^0.x.x"
   },
   "license": "MIT",
   "devDependencies": {
-    "gulp": "^3.x.x",
+    "mocha": "*",
+    "should": "*",
     "jshint": "*",
     "jshint-stylish": "*",
+    "gulp": "^3.x.x",
     "mkdirp": "^0.5.0",
-    "mocha": "*",
     "rimraf": "^2.3.1",
-    "should": "*"
+    "through2": "^0.6.3"
   }
 }
