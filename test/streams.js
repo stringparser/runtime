@@ -36,7 +36,7 @@ module.exports = function(runtime){
        .on('error', next);
     }
 
-    function end(){ fs.stat('dir/dest', done); }    
+    function end(){ fs.stat('dir/dest', done); }
     app.stack(src, end)('dir/src/*.js', 'dir/dest');
   });
 
