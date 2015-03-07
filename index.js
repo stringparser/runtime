@@ -171,9 +171,7 @@ Runtime.prototype.repl = function(o){
       function(line, callback){
         return util.completer(self, line, callback);
       }
-  });
-
-  this.repl.on('line', function(line){
+  }).on('line', function(line){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
   });
@@ -190,6 +188,5 @@ Runtime.prototype.repl = function(o){
     } else { self.repl._ttyWrite(str, key); }
   });
 
-  this.repl.prompt();
   return this;
 };
