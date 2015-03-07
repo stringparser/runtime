@@ -30,42 +30,17 @@ module.exports = function(runtime){
       function destFolder(){
         return path.resolve(__dirname, dest);
       }
+
       return gulp.src(src)
        .pipe(gulp.dest(destFolder))
        .on('error', next);
     }
 
-    function end(){
-      fs.stat('dir/dest', done);
-    }
-
+    function end(){ fs.stat('dir/dest', done); }    
     app.stack(src, end)('dir/src/*.js', 'dir/dest');
   });
 
-  it('can wait to child processes', function(done){
-    app.set({onError: done});
-
-    function ls(next){
-      next.wait = true;
-      var dirls = '', pc = cp.spawn('ls', ['dir']);
-      pc.stdout.on('data', function(chunk){
-        dirls += chunk.toString();
-      });
-      pc.stdout.once('end', function(){
-        next(null, dirls);
-      });
-      return pc.stdout;
-    }
-
-    function end(next, dirls){
-      dirls.should.be.eql('dest\nsrc\n');
-      done();
-    }
-
-    app.stack(ls, end)();
-  });
-
-  it('repl.input stream can be used to wait', function(done){
+  it('repl.input can be used to wait', function(done){
     app.set({onError: done});
     app.repl({input: through.obj()});
 
