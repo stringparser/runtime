@@ -3,7 +3,7 @@
 var runtime = require('./.');
 var app = runtime.create('app');
 
-app.set(':handle', function(next){
+app.set('handle', function(next){
   setTimeout(next, Math.random()*10);
 });
 
@@ -15,3 +15,7 @@ app.set(':handle', function(next){
 // {wait: true})(1,2,3);
 
 app.repl();
+
+console.log(
+  require('through2').obj().constructor.super_.super_.super_.super_.super_.super_
+);
