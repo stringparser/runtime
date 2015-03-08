@@ -15,7 +15,4 @@ app.set('handle', function(next){
 // {wait: true})(1,2,3);
 
 app.repl();
-
-console.log(
-  require('through2').obj().constructor.super_.super_.super_.super_.super_.super_
-);
+console.log(Object.keys(require));

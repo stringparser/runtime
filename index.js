@@ -11,7 +11,6 @@ var util = require('./lib/util');
 //
 
 exports = module.exports = {
-  repl: util.repl,
   create: create,
   Runtime: Runtime
 };
