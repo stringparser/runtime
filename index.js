@@ -163,15 +163,14 @@ Runtime.prototype.stack = function(stack){
 //
 Runtime.prototype.repl = function(o){
   var self = this; o = o || { };
+
   this.repl = require('readline').createInterface({
     input: util.type(o.input).stream && o.input || process.stdin,
     output: util.type(o.output).stream && o.output || process.stdout,
-    completer: o.output && o.output.isTTY && (
-      util.type(o.completer).function
+    completer: util.type(o.completer).function
       || function defautlCompleter(line, callback){
         return util.completer(self, line, callback);
       }
-    )
   }).on('line', function(line){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
