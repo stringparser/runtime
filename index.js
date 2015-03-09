@@ -159,17 +159,19 @@ Runtime.prototype.stack = function(stack){
 // After its called, it will override the prototype
 // and becomes a property with a readline instance
 // --
-// PD: This was the very beginning of it all :D
+// PD: :) this was the very beginning of it all.
 //
 Runtime.prototype.repl = function(o){
   var self = this; o = o || { };
   this.repl = require('readline').createInterface({
-    input: util.type(o.input).match(/stream/) || process.stdin,
-    output: util.type(o.output).match(/stream/) || process.stdout,
-    completer: util.type(o.completer).function  ||
-      function(line, callback){
+    input: util.type(o.input).stream && o.input || process.stdin,
+    output: util.type(o.output).stream && o.output || process.stdout,
+    completer: o.output && o.output.isTTY && (
+      util.type(o.completer).function
+      || function defautlCompleter(line, callback){
         return util.completer(self, line, callback);
       }
+    )
   }).on('line', function(line){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
