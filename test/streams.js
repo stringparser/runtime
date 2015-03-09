@@ -24,9 +24,8 @@ module.exports = function(runtime, util){
         return path.resolve(__dirname, dest);
       }
 
-      var gulp = util.gulp;
-      return gulp.src(src)
-       .pipe(gulp.dest(destFolder))
+      return util.gulp.src(src)
+       .pipe(util.gulp.dest(destFolder))
        .on('error', next);
     }
 

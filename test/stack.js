@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(runtime){
-  var app = runtime.create('args', {log: false});
+  var app = runtime.create('stack', {log: false});
 
   it('should pass arguments around', function(done){
     app.set({onError: done});
