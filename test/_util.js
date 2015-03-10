@@ -9,10 +9,10 @@ module.exports = {
     var suite = fs.readdirSync(__dirname);
     // priority
     var first = [
-      'stems.js',
       'stack.js',
       'state.js',
-      'streams.js'
+      'repl.js',
+      'integration.js'
     ];
 
     // take out
