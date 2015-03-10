@@ -188,5 +188,5 @@ Runtime.prototype.repl = function(o){
 
   this.repl.setPrompt(this.store.name + '> ');
   this.repl.prompt();
-  return this;
+  return this.repl;
 };
