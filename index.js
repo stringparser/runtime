@@ -62,7 +62,7 @@ Runtime.prototype.stack = function(stack){
   var stackArgs = arguments;
 
   function next(err){
-    if(err){ stack.onHandleError(err, next); }
+    if(err){ stack.onError(err, next); }
     if(next.end) { return next.result; }
     if(arguments.length > 1){
       stack.args = util.args(arguments);
@@ -77,7 +77,7 @@ Runtime.prototype.stack = function(stack){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    if(stack.onHandleEnd){ stack.onHandleEnd(next); }
+    if(stack.onEnd){ stack.onEnd(next); }
 
     if(next.depth && stack.next){
       self.stack(stack);
@@ -99,7 +99,7 @@ Runtime.prototype.stack = function(stack){
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
-      if(stack.onHandleCall){ stack.onHandleCall(next); }
+      if(stack.onCall){ stack.onCall(next); }
       stack.time = process.hrtime();
       return self.stack(stack);
     }
@@ -113,7 +113,7 @@ Runtime.prototype.stack = function(stack){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.substring(next.match.length).trim();
-        next.handle = next.handle || stack.onHandleNotFound;
+        next.handle = next.handle || stack.onNotFound;
       break;
       case 'function':
         if(stem.stack instanceof Stack){
@@ -133,7 +133,7 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    if(stack.onHandleCall){ stack.onHandleCall(next); }
+    if(stack.onCall){ stack.onCall(next); }
 
     util.asyncDone(function(){
       next.time = process.hrtime();
