@@ -23,7 +23,7 @@ function create(name, opt){
 create.cache = { };
 
 // ## Runtime([name, opts])
-//  runtime constructor
+//  runtime co8nstructor
 //
 // arguments
 //  - name: type `string`, name for the runtime
@@ -163,7 +163,6 @@ Runtime.prototype.stack = function(stack){
 //
 Runtime.prototype.repl = function(o){
   var self = this; o = o || { };
-
   this.repl = require('readline').createInterface({
     input: util.type(o.input).stream && o.input || process.stdin,
     output: util.type(o.output).stream && o.output || process.stdout,
@@ -174,19 +173,14 @@ Runtime.prototype.repl = function(o){
   }).on('line', function(line){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
+  }).once('close', function(){
+    self.repl = Runtime.prototype.repl; // undo override
+  }).once('SIGINT', function(){
+    this.output.write('\n');
+    this.output.write(new Date().toString() + '\n');
+    process.exit(0);
   });
 
-  if(!this.repl.terminal){ return this; }
   this.repl.setPrompt(this.store.name + '> ');
-
-  // keypress for SIGINT
-  this.repl.input.removeAllListeners('keypress');
-  this.repl.input.on('keypress', function (str, key){
-    if( key && key.ctrl && key.name === 'c'){
-      process.stdout.write('\n');
-      process.exit(0);
-    } else { self.repl._ttyWrite(str, key); }
-  });
-
   return this;
 };
