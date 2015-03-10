@@ -62,7 +62,7 @@ Runtime.prototype.stack = function(stack){
   var stackArgs = arguments;
 
   function next(err){
-    if(err){ stack.onError(err, next); }
+    if(err){ stack.onHandleError(err, next); }
     if(next.end) { return next.result; }
     if(arguments.length > 1){
       stack.args = util.args(arguments);
@@ -70,12 +70,6 @@ Runtime.prototype.stack = function(stack){
 
     next.end = true;
     stack.wait = next.wait;
-    if(next.depth && stack.next){
-      self.stack(stack);
-    } else if(stack.host && stack.host.next){
-      stack.host.args = stack.args;
-      self.stack(stack.host);
-    }
 
     var that = stack;
     stack.pile = stack.pile.replace(next.match, '').trim();
@@ -83,7 +77,14 @@ Runtime.prototype.stack = function(stack){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    if(stack.onEnd){ stack.onEnd(next); }
+    if(stack.onHandleEnd){ stack.onHandleEnd(next); }
+
+    if(next.depth && stack.next){
+      self.stack(stack);
+    } else if(stack.host && stack.host.next){
+      stack.host.args = stack.args;
+      self.stack(stack.host);
+    }
 
     return next.result;
   }
@@ -98,7 +99,7 @@ Runtime.prototype.stack = function(stack){
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
-      if(stack.onCall){ stack.onCall(next); }
+      if(stack.onHandleCall){ stack.onHandleCall(next); }
       stack.time = process.hrtime();
       return self.stack(stack);
     }
@@ -112,7 +113,7 @@ Runtime.prototype.stack = function(stack){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.substring(next.match.length).trim();
-        next.handle = next.handle || stack.onNotFound;
+        next.handle = next.handle || stack.onHandleNotFound;
       break;
       case 'function':
         if(stem.stack instanceof Stack){
@@ -132,17 +133,16 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    if(stack.onCall){ stack.onCall(next); }
+    if(stack.onHandleCall){ stack.onHandleCall(next); }
 
     util.asyncDone(function(){
       next.time = process.hrtime();
-      var result = next.handle.apply(stack, next.args);
-      next.result = result || next.result;
-      if(next.wait){ return result; }
+      next.result = next.handle.apply(stack, next.args);
+      if(next.wait){ return next.result; }
       if(stack.next || (stack.host && stack.host.next)){
         self.stack(stack.host || stack);
       }
-      return result;
+      return next.result;
     }, function(err, result){
       next.result = result;
       next(err);
