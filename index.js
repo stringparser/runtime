@@ -64,8 +64,8 @@ Runtime.prototype.stack = function(stack){
   function next(err){
     if(err){ stack.onError(err, next); }
     if(next.end) { return next.result; }
-    if(arguments.length > 1){
-      stack.args = util.args(arguments);
+    if(arguments.length){
+      util.args.map(stack.args, arguments);
     }
 
     next.end = true;
@@ -77,7 +77,7 @@ Runtime.prototype.stack = function(stack){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    if(stack.onNext){ stack.onNext(next); }
+    if(stack.onEnd){ stack.onEnd(next); }
 
     if(stack.next){
       self.stack(stack);
