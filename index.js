@@ -5,7 +5,6 @@ var util = require('./lib/util');
 //
 // ## module.exports
 //
-// - repl: make a repl out of the Runtime Interface
 // - create: obtain/create a Runtime instance from cache
 // - Runtime: the runtime constructor
 //
@@ -23,7 +22,7 @@ function create(name, opt){
 create.cache = { };
 
 // ## Runtime([name, opts])
-//  runtime co8nstructor
+//  runtime constructor
 //
 // arguments
 //  - name: type `string`, name for the runtime
@@ -40,7 +39,7 @@ function Runtime(name, opt){
 
   opt = opt || name || { };
   util.Manifold.call(this, opt);
-  this.set({log: opt.log === void 0});
+  this.set({log: opt.log === void 0 || util.type(opt.log).function});
 }
 util.inherits(Runtime, util.Manifold);
 
@@ -71,14 +70,21 @@ Runtime.prototype.stack = function(stack){
 
     next.end = true;
     stack.wait = next.wait;
-    if(stack.onEnd){ stack.onEnd(next); }
-
     if(next.depth && stack.next){
       self.stack(stack);
     } else if(stack.host && stack.host.next){
       stack.host.args = stack.args;
       self.stack(stack.host);
     }
+
+    var that = stack;
+    stack.pile = stack.pile.replace(next.match, '').trim();
+    while(!that.pile && that.host){
+      that.host.pile = that.host.pile.replace(that.path, '').trim();
+      that = that.host;
+    }
+    if(stack.onEnd){ stack.onEnd(next); }
+
     return next.result;
   }
 
@@ -119,7 +125,7 @@ Runtime.prototype.stack = function(stack){
         next.match = next.match || stem.name || stem.displayName;
       break;
       default:
-        throw new TypeError('argument should be `string` or `function`');
+        throw new TypeError('arguments should be `string` or `function`');
     }
 
     if(stack.next && !stack.match){
@@ -130,7 +136,7 @@ Runtime.prototype.stack = function(stack){
 
     util.asyncDone(function(){
       next.time = process.hrtime();
-      var result = next.handle.apply(stack.context || stack, next.args);
+      var result = next.handle.apply(stack, next.args);
       next.result = result || next.result;
       if(next.wait){ return result; }
       if(stack.next || (stack.host && stack.host.next)){
