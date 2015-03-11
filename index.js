@@ -37,7 +37,9 @@ function Runtime(name, opt){
     return new Runtime(name, opt);
   }
 
-  opt = opt || name || { };
+  opt = util.type(opt || name).plainObject || {};
+  opt.name = opt.name || name;
+
   util.Manifold.call(this, opt);
   this.set({log: opt.log === void 0 || util.type(opt.log).function});
 }
@@ -182,7 +184,9 @@ Runtime.prototype.repl = function(o){
   }).once('close', function(){
     self.repl = Runtime.prototype.repl; // undo override
   }).once('SIGINT', function(){
-    this.output.write('\n' + new Date().toString() + '\n');
+    if(!this._sawReturn){ this.output.write('\n'); }
+    this.output.write(self.store.name + ' repl closed - ');
+    this.output.write(new Date().toString() + '\n');
     process.exit(0);
   });
 
