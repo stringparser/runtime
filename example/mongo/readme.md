@@ -2,7 +2,8 @@
 
 To run this example you should have [mongodb installed](x-install-mongo). When you have this installed run
 
-    mongod localhost:27017
+    mkdir db
+    mongod --dbpath db
     node index.js
 
 
