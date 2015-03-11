@@ -63,7 +63,7 @@ Runtime.prototype.stack = function(stack){
   var self = this, stackArgs;
 
   function next(err){
-    if(err){ stack.onError(err, next); }
+    if(err){ stack.onHandleError(err, next); }
     if(next.end) { return next.result; }
     if(arguments.length){
       util.args.map(stack.args, arguments);
@@ -71,14 +71,15 @@ Runtime.prototype.stack = function(stack){
 
     next.end = true;
     stack.wait = next.wait;
-    
+
     var that = stack;
     stack.pile = stack.pile.replace(next.match, '').trim();
     while(!that.pile && that.host){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    stack.onCall(next);
+
+    stack.onHandleEnd(next);
 
     if(stack.next){
       self.stack(stack);
@@ -133,7 +134,8 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    stack.onCall(next);
+    stack.onHandleCall(next);
+
     util.asyncDone(function(){
       next.time = util.hrtime();
       next.result = next.handle.apply(stack.context, next.args);
