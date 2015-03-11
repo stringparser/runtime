@@ -79,6 +79,7 @@ Runtime.prototype.stack = function(stack){
       that = that.host;
     }
 
+    if(stack.log){ stack.log(next); }
     stack.onHandleEnd(next);
 
     if(stack.next){
@@ -130,9 +131,8 @@ Runtime.prototype.stack = function(stack){
         throw new TypeError('arguments should be `string` or `function`');
     }
 
-    if(!stack.match){
-      stack.next = stack.argv[++stack.index];
-    }
+    if(!stack.match){ stack.next = stack.argv[++stack.index]; }
+    if(stack.log){ stack.log(next); }
 
     stack.onHandleCall(next);
 
