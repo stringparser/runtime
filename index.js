@@ -71,7 +71,7 @@ Runtime.prototype.stack = function(stack){
 
     next.end = true;
     stack.wait = next.wait;
-
+    
     var that = stack;
     stack.pile = stack.pile.replace(next.match, '').trim();
     while(!that.pile && that.host){
@@ -100,7 +100,7 @@ Runtime.prototype.stack = function(stack){
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
-      stack.onCall(next); stack.time = util.hrtime();
+      stack.time = util.hrtime();
       return self.stack(stack);
     }
 
