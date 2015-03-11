@@ -137,7 +137,7 @@ Runtime.prototype.stack = function(stack){
     stack.onCall(next);
     util.asyncDone(function(){
       next.time = process.hrtime();
-      next.result = next.handle.apply(stack, next.args);
+      next.result = next.handle.apply(stack.context, next.args);
       if(!next.wait && (stack.next || (stack.host && stack.host.next))){
         self.stack(stack.host || stack);
       }
