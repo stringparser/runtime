@@ -1,4 +1,3 @@
+test/dir/*
+example/**/db
 node_modules
-next.js
-test/dir/dest
-test/dir/src
