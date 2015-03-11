@@ -60,8 +60,7 @@ var Stack = util.Stack;
 
 Runtime.prototype.stack = function(stack){
 
-  var self = this;
-  var stackArgs = arguments;
+  var self = this, stackArgs;
 
   function next(err){
     if(err){ stack.onError(err, next); }
@@ -140,8 +139,7 @@ Runtime.prototype.stack = function(stack){
     util.asyncDone(function(){
       next.time = process.hrtime();
       next.result = next.handle.apply(stack, next.args);
-      if(next.wait){ return next.result; }
-      if(stack.next || (stack.host && stack.host.next)){
+      if(!next.wait && (stack.next || (stack.host && stack.host.next))){
         self.stack(stack.host || stack);
       }
       return next.result;
@@ -152,6 +150,7 @@ Runtime.prototype.stack = function(stack){
   }
 
   if(stack instanceof Stack){ tick(); } else {
+    stackArgs = arguments;
     tick.stack = new Stack(stackArgs);
     return tick;
   }
