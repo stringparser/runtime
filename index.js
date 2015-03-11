@@ -78,7 +78,7 @@ Runtime.prototype.stack = function(stack){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    if(stack.onCall){ stack.onCall(next); }
+    stack.onCall(next);
 
     if(stack.next){
       self.stack(stack);
@@ -134,8 +134,7 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    if(stack.onCall){ stack.onCall(next); }
-
+    stack.onCall(next);
     util.asyncDone(function(){
       next.time = process.hrtime();
       next.result = next.handle.apply(stack, next.args);
