@@ -45,7 +45,7 @@ module.exports = function(runtime){
       var stack = this;
       setTimeout(function(){
         end.push(next.params.handle);
-        next(); if(stack.pile){ return ; }
+        next(); if(stack.queue){ return ; }
 
         end.length.should.be.eql(5);
         end.should.not.be.eql([0,1,2,3,4]);
@@ -65,7 +65,7 @@ module.exports = function(runtime){
       var stack = this;
       setTimeout(function(){
         end.push(next.params.handle);
-        next(); if(stack.pile){ return ; }
+        next(); if(stack.queue){ return ; }
 
         end.should.have.property('length', 6);
         end.should.be.eql([0,1,2,3,4,5]);
@@ -90,7 +90,7 @@ module.exports = function(runtime){
           end.parallel.push(next.params.handle);
         }
         next();
-        if(stack.pile){ return ; }
+        if(stack.queue){ return ; }
 
         end.series.should.be.eql([0,1,2,3]);
         end.parallel.length.should.be.eql(5);
@@ -112,7 +112,7 @@ module.exports = function(runtime){
       var stack = this;
       setTimeout(function(){
         end.push(next.params.handle); next();
-        if(stack.host.pile){ return ; }
+        if(stack.host.queue){ return ; }
         end.should.be.eql([0,1,2,3,4,5]);
         done();
       }, Math.random()*10+1);
@@ -134,7 +134,7 @@ module.exports = function(runtime){
       var stack = this;
       setTimeout(function(){
         end.push(next.params.handle); next();
-        if(stack.host.pile){ return ; }
+        if(stack.host.queue){ return ; }
         end.should.be.eql([0,1,2,3,4,5]);
         done();
       }, Math.random()*10+1);

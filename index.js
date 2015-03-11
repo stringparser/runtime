@@ -73,9 +73,9 @@ Runtime.prototype.stack = function(stack){
     stack.wait = next.wait;
 
     var that = stack;
-    stack.pile = stack.pile.replace(next.match, '').trim();
-    while(!that.pile && that.host){
-      that.host.pile = that.host.pile.replace(that.path, '').trim();
+    stack.queue = stack.queue.replace(next.match, '').trim();
+    while(!that.queue && that.host){
+      that.host.queue = that.host.queue.replace(that.path, '').trim();
       that = that.host;
     }
 
