@@ -3,15 +3,7 @@
 var runtime = require('./.');
 var app = runtime.create('app');
 
-app.set(':handle', function(next){
-  setTimeout(next, Math.random()*10);
-});
+process.hrtime = require('browser-process-hrtime');
 
-;['one', 'two', 'three', 'four']
-  .forEach(function(item){
-    app.set(item, function(next){
-      setTimeout(next, Math.random()*10);
-    });
-  });
-
-app.repl();
+window.require = require;
+window.runtime = runtime;
