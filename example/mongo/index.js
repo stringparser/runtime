@@ -5,7 +5,7 @@ var db = mongodb('db', ['users']);
 var app = require('../../.').create('mongo-example');
 
 function remove(next){
-  db.users.remove({}, next);
+  db.users.remove(next);
 }
 
 function count(next){
@@ -28,7 +28,7 @@ var query = app.stack(remove, count, insert, find, {
       name: next.match,
       result: this.args.slice(1)
     });
-    if(this.pile){ return ; }
+    if(this.queue){ return ; }
     console.log('-------------');
     this.results.forEach(function(stack){
       console.log(stack.name);
