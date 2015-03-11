@@ -1,9 +1,15 @@
 'use strict';
 
-var runtime = require('./.');
+var runtime = require('../.');
 var app = runtime.create('app');
 
-process.hrtime = require('browser-process-hrtime');
+app.set(':handle', function(next){
+  setTimeout(next, Math.random()*10);
+});
 
-window.require = require;
-window.runtime = runtime;
+
+app.stack(
+  '1 2 3',
+  app.stack('4 5 6', app.stack('7 8 9', {wait: true}), {wait: true}),
+  {wait: true}
+)();
