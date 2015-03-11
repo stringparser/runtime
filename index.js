@@ -100,8 +100,7 @@ Runtime.prototype.stack = function(stack){
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
-      if(stack.onCall){ stack.onCall(next); }
-      stack.time = process.hrtime();
+      stack.onCall(next); stack.time = process.hrtime();
       return self.stack(stack);
     }
 
