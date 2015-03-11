@@ -77,7 +77,7 @@ Runtime.prototype.stack = function(stack){
       that.host.pile = that.host.pile.replace(that.path, '').trim();
       that = that.host;
     }
-    if(stack.onNext){ stack.onNext(next); }
+    if(stack.onCall){ stack.onCall(next); }
 
     if(stack.next){
       self.stack(stack);
