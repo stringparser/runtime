@@ -100,7 +100,7 @@ Runtime.prototype.stack = function(stack){
       stack.host = arg instanceof Stack && arg;
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
-      stack.onCall(next); stack.time = process.hrtime();
+      stack.onCall(next); stack.time = util.hrtime();
       return self.stack(stack);
     }
 
@@ -135,7 +135,7 @@ Runtime.prototype.stack = function(stack){
 
     stack.onCall(next);
     util.asyncDone(function(){
-      next.time = process.hrtime();
+      next.time = util.hrtime();
       next.result = next.handle.apply(stack.context, next.args);
       if(!next.wait && (stack.next || (stack.host && stack.host.next))){
         self.stack(stack.host || stack);
