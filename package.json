@@ -1,5 +1,6 @@
 {
   "name": "runtime",
+  "license": "MIT",
   "version": "0.7.2",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
@@ -22,26 +23,28 @@
     "local"
   ],
   "dependencies": {
-    "async-done": "^1.0.0",
     "browser-process-hrtime": "^0.1.1",
-    "global": "^4.3.0",
-    "inherits": "^2.0.1",
-    "lodash.clone": "^3.0.0",
-    "lodash.has": "^3.0.0",
-    "manifold": "^2.x.x",
+    "readline-browserify": "0.0.4",
     "pretty-hrtime": "0.2.x",
     "utils-merge": "^1.0.0",
-    "utils-type": "^0.x.x"
+    "async-done": "^1.0.0",
+    "lodash.has": "^3.0.0",
+    "utils-type": "^0.x.x",
+    "inherits": "^2.0.1",
+    "manifold": "^2.x.x"
   },
-  "license": "MIT",
   "devDependencies": {
-    "mocha": "*",
-    "should": "*",
-    "jshint": "*",
     "jshint-stylish": "*",
-    "gulp": "^3.x.x",
+    "through2": "^0.6.3",
+    "jshint": "*",
     "mkdirp": "^0.5.0",
     "rimraf": "^2.3.1",
-    "through2": "^0.6.3"
+    "should": "*",
+    "mocha": "*",
+    "gulp": "^3.x.x"
+  },
+  "browser": {
+    "readline": "readline-browserify",
+    "./lib/hrtime": "browser-process-hrtime"
   }
 }
