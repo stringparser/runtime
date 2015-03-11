@@ -131,7 +131,7 @@ Runtime.prototype.stack = function(stack){
         throw new TypeError('arguments should be `string` or `function`');
     }
 
-    if(stack.next && !stack.match){
+    if(!stack.match){
       stack.next = stack.argv[++stack.index];
     }
 
