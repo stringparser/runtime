@@ -43,6 +43,13 @@ function Runtime(name, opt){
   util.Manifold.call(this, opt);
   opt.log = opt.log === void 0 || opt.log;
   this.set(opt);
+
+  function app(stem, opt){
+    app.set(stem, opt);
+    return app;
+  }
+  util.merge(app, this);
+  return app;
 }
 util.inherits(Runtime, util.Manifold);
 
@@ -81,8 +88,8 @@ Runtime.prototype.stack = function(stack){
       that = that.host;
     }
 
-    stack.onHandle(next);
-    stack.onHandleEnd(next);
+    stack.onHandle.apply(stack, next.args);
+    stack.onHandleEnd.apply(stack, next.args);
 
     if(stack.next){
       self.stack(stack);
@@ -101,33 +108,31 @@ Runtime.prototype.stack = function(stack){
   function tick(arg){
     if(tick.stack instanceof Stack){
       stack = new Stack(stackArgs, self);
-      stack.host = arg instanceof Stack && arg;
+      if(arg && arg.stack instanceof Stack){ stack.host = arg.stack; }
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
       stack.time = util.hrtime();
       return self.stack(stack);
     }
 
+    stack.args[0] = next;
     next.wait = stack.wait || false;
     next.args = util.args(stack.args);
     var stem = stack.match || stack.next;
-    next.args[0] = next;
 
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
         stack.match = next.path.substring(next.match.length).trim();
-        next.handle = next.handle || stack.onNotFound;
+        next.handle = next.handle || stack.onHandleNotFound;
       break;
       case 'function':
-        if(stem.stack instanceof Stack){
-          next.args[0] = stack;
-          next.match = stem.stack.path;
-        } else if(typeof stem.path === 'string'){
+        if(typeof stem.path === 'string'){
           self.get(stem.path, next);
         }
         next.handle = stem; next.depth = next.depth || 1;
-        next.match = next.match || stem.name || stem.displayName;
+        next.match = (stem.stack instanceof Stack && stem.stack.path)
+         || next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('arguments should be `string` or `function`');
@@ -137,8 +142,8 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    stack.onHandle(next);
-    stack.onHandleCall(next);
+    stack.onHandle.apply(stack, next.args);
+    stack.onHandleCall.apply(stack, next.args);
 
     util.asyncDone(function(){
       next.time = util.hrtime();
@@ -157,6 +162,7 @@ Runtime.prototype.stack = function(stack){
   }
 
 
+  next.stack = stack;
   if(stack instanceof Stack){ tick(); } else {
     stackArgs = arguments;
     tick.stack = new Stack(stackArgs);
