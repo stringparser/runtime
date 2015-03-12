@@ -10,12 +10,20 @@
 The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces` that being a `Router`, `CLI`, `REPL` or something completely different.
 
 ````js
+var http = require('http');
 var mongodb = require('mongojs');
 var app = require('runtime').create('myAppName');
 
-app.set('get /this/:route', function(next, user){
+app.set('get /user/:profile([a-z]+)', function(next, req, res){
 
 });
+
+var db = mongodb('db', ['users']);
+function getUser(next, req, res){
+  return db.users.findOne({_id: req.params.profile});
+}
+
+
 
 
 ````
