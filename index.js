@@ -41,7 +41,7 @@ function Runtime(name, opt){
   opt.name = opt.name || name;
 
   util.Manifold.call(this, opt);
-  this.set({log: opt.log === void 0 || util.type(opt.log).function});
+  this.set({log: opt.log === void 0 || opt.log});
 }
 util.inherits(Runtime, util.Manifold);
 
@@ -60,7 +60,8 @@ var Stack = util.Stack;
 
 Runtime.prototype.stack = function(stack){
 
-  var self = this, stackArgs;
+  var stackArgs;
+  var self = this;
 
   function next(err){
     if(err){ stack.onHandleError(err, next); }
@@ -79,7 +80,7 @@ Runtime.prototype.stack = function(stack){
       that = that.host;
     }
 
-    if(stack.log){ stack.log(next); }
+    stack.onHandle(next);
     stack.onHandleEnd(next);
 
     if(stack.next){
@@ -131,16 +132,21 @@ Runtime.prototype.stack = function(stack){
         throw new TypeError('arguments should be `string` or `function`');
     }
 
-    if(!stack.match){ stack.next = stack.argv[++stack.index]; }
-    if(stack.log){ stack.log(next); }
+    if(!stack.match){
+      stack.next = stack.argv[++stack.index];
+    }
 
+    stack.onHandle(next);
     stack.onHandleCall(next);
 
     util.asyncDone(function(){
       next.time = util.hrtime();
       next.result = next.handle.apply(stack.context, next.args);
-      if(!next.wait && (stack.next || (stack.host && stack.host.next))){
-        self.stack(stack.host || stack);
+      if(next.wait){ return next.result; }
+      if(stack.next){
+        self.stack(stack);
+      } else if(stack.host && stack.host.next){
+        self.stack(stack.host);
       }
       return next.result;
     }, function(err, result){
@@ -148,6 +154,7 @@ Runtime.prototype.stack = function(stack){
       next(err);
     });
   }
+
 
   if(stack instanceof Stack){ tick(); } else {
     stackArgs = arguments;
