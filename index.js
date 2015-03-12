@@ -41,7 +41,8 @@ function Runtime(name, opt){
   opt.name = opt.name || name;
 
   util.Manifold.call(this, opt);
-  this.set({log: opt.log === void 0 || opt.log});
+  opt.log = opt.log === void 0 || opt.log;
+  this.set(opt);
 }
 util.inherits(Runtime, util.Manifold);
 
