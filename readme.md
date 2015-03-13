@@ -1,33 +1,30 @@
-## its runtime!
+## runtime ![travis-build][travis-build]![npm version][npm-version]
+> **implementation status**: growing a beard, has listened to punk... no way back.
 
-[<img alt="NPM version" src="http://img.shields.io/npm/v/runtime.svg?style=flat-square" />](http://www.npmjs.org/package/runtime)
-[<img alt="build" src="http://img.shields.io/travis/stringparser/runtime/1.0.svg?style=flat-square"/>](https://travis-ci.org/stringparser/runtime/builds)
+The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces` that being a `Router`, `CLI`, `REPL` or something completely different. For that, the main **focus** of the library is **async function composition**.
 
-> **implementation state**: has grown a beard, has discovered punk...
+**
+[install](#install) -
+[documentation](#documentation) -
+[examples](#examples) -
+[todo](#todo)
+**
 
-#### [install](#install) - [documentation](#documentation) - [examples](#examples) - [todo](#todo)
+## Sample
 
-The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces` that being a `Router`, `CLI`, `REPL` or something completely different.
+## Install
 
-````js
-var http = require('http');
-var mongodb = require('mongojs');
-var app = require('runtime').create('myAppName');
+With [npm][x-npm]
 
-app.set('get /user/:profile([a-z]+)', function(next, req, res){
+    npm install runtime --save
 
-});
+## Examples
 
-var db = mongodb('db', ['users']);
-function getUser(next, req, res){
-  return db.users.findOne({_id: req.params.profile});
-}
-
-
-
-
-````
+Go to the [examples](./examples) folder.
 
 ## License
-
 [<img alt="LICENSE" src="http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square"/>](http://opensource.org/licenses/MIT)
+
+[x-npm]: http://npmjs.org
+[npm-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
+[travis-build]: http://img.shields.io/travis/stringparser/runtime/1.0.svg?style=flat-square
