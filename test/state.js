@@ -19,7 +19,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(one, two, three, {wait: true})();
+    app.tick(one, two, three, {wait: true})();
   });
 
   it('does not propagate between stacks', function(done){
@@ -34,7 +34,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(app.stack(foo), bar, {wait: true})();
+    app.tick(app.tick(foo), bar, {wait: true})();
   });
 
   it('the default should be parallel', function(done){
@@ -54,7 +54,7 @@ module.exports = function(runtime){
       }, Math.random()*10+1);
     });
 
-    app.stack('0 1 2 3 4')();
+    app.tick('0 1 2 3 4')();
   });
 
   it('for series indicate wait in options', function(done){
@@ -74,7 +74,7 @@ module.exports = function(runtime){
       }, Math.random()*10);
     });
 
-    app.stack('0 1 2 3 4 5', {wait: true})();
+    app.tick('0 1 2 3 4 5', {wait: true})();
   });
 
   it('should handle series & parallel stacks', function(done){
@@ -101,7 +101,7 @@ module.exports = function(runtime){
       }, Math.random()*10+1);
     });
 
-    app.stack('4 5 6 7 8', app.stack('0 1 2 3', {wait: true}))();
+    app.tick('4 5 6 7 8', app.tick('0 1 2 3', {wait: true}))();
   });
 
   it('full series stack should have them all wait', function(done){
@@ -118,9 +118,9 @@ module.exports = function(runtime){
       }, Math.random()*10+1);
     });
 
-    app.stack(
-      app.stack('0 1 2', {wait: true}),
-      app.stack('3 4 5', {wait: true}),
+    app.tick(
+      app.tick('0 1 2', {wait: true}),
+      app.tick('3 4 5', {wait: true}),
       {wait: true}
     )();
 
@@ -140,9 +140,9 @@ module.exports = function(runtime){
       }, Math.random()*10+1);
     });
 
-    app.stack(
-      app.stack('0 1', {wait: true}),
-      app.stack('2 3', app.stack('4 5', {wait: true}), {wait: true}),
+    app.tick(
+      app.tick('0 1', {wait: true}),
+      app.tick('2 3', app.tick('4 5', {wait: true}), {wait: true}),
       {wait: true}
     )();
 

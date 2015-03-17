@@ -30,7 +30,7 @@ module.exports = function(runtime, util){
     }
 
     function end(){ fs.stat('dir/dest', done); }
-    app.stack(src, end)('dir/src/*.js', 'dir/dest');
+    app.tick(src, end)('dir/src/*.js', 'dir/dest');
   });
 
   it('async-done enables waiting to through streams', function(done){
@@ -45,6 +45,6 @@ module.exports = function(runtime, util){
 
     function end(){ done(); }
 
-    app.stack(wait, end)();
+    app.tick(wait, end)();
   });
 };

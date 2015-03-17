@@ -53,7 +53,7 @@ function Runtime(name, opt){
 }
 util.inherits(Runtime, util.Manifold);
 
-// ## Runtime.stack(/* arguments */)
+// ## Runtime.tick(/* arguments */)
 // > dispatch next element of a stack
 //
 // arguments can be `strings` and/or `functions`
@@ -66,7 +66,7 @@ util.inherits(Runtime, util.Manifold);
 
 var Stack = util.Stack;
 
-Runtime.prototype.stack = function(stack){
+Runtime.prototype.tick = function(stack){
 
   var stackArgs;
   var self = this;
@@ -92,10 +92,10 @@ Runtime.prototype.stack = function(stack){
     stack.onHandleEnd.apply(stack, next.args);
 
     if(stack.next){
-      self.stack(stack);
+      self.tick(stack);
     } else if(stack.host && stack.host.next){
       stack.host.args = stack.args;
-      self.stack(stack.host);
+      self.tick(stack.host);
     }
 
     return next.result;
@@ -112,7 +112,7 @@ Runtime.prototype.stack = function(stack){
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onError(arg, next); }
       stack.time = util.hrtime();
-      return self.stack(stack);
+      return self.tick(stack);
     }
 
     stack.args[0] = next;
@@ -150,9 +150,9 @@ Runtime.prototype.stack = function(stack){
       next.result = next.handle.apply(stack.context, next.args);
       if(next.wait){ return next.result; }
       if(stack.next){
-        self.stack(stack);
+        self.tick(stack);
       } else if(stack.host && stack.host.next){
-        self.stack(stack.host);
+        self.tick(stack.host);
       }
       return next.result;
     }, function(err, result){

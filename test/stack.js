@@ -17,7 +17,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.stack('1', '2')();
+    app.tick('1', '2')();
   });
 
   it('should accept (join strings argument)', function(done){
@@ -34,7 +34,7 @@ module.exports = function(runtime){
       done();
     });
 
-    app.stack('1 2')();
+    app.tick('1 2')();
   });
 
   it('should accept (function, function)', function(done){
@@ -49,7 +49,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(one, two)();
+    app.tick(one, two)();
   });
 
   it('should accept (string, function)', function(done){
@@ -64,9 +64,9 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack('a word', two)();
+    app.tick('a word', two)();
   });
-  
+
   it('should pass arguments around', function(done){
     app.set({onError: done});
 
@@ -91,7 +91,7 @@ module.exports = function(runtime){
       next(); done();
     }
 
-    app.stack(one, two, three)(1, 2, 3);
+    app.tick(one, two, three)(1, 2, 3);
   });
 
   it('should be able change arguments around', function(done){
@@ -118,7 +118,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(one, two, three, {wait: true})(1, 2, 3);
+    app.tick(one, two, three, {wait: true})(1, 2, 3);
   });
 
   it('should not change arguments if length is less than 2', function(done){
@@ -145,7 +145,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(one, two, three)(1, 2, 3);
+    app.tick(one, two, three)(1, 2, 3);
   });
 
   it('should pass arguments around between stacks', function(done){
@@ -170,10 +170,10 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(
-      app.stack(one),
-      app.stack(two),
-      app.stack(three)
+    app.tick(
+      app.tick(one),
+      app.tick(two),
+      app.tick(three)
     )(1, 2, 3);
   });
 
@@ -204,10 +204,10 @@ module.exports = function(runtime){
       done();
     }
 
-    app.stack(
-      app.stack(one),
-      app.stack(two),
-      app.stack(three),
+    app.tick(
+      app.tick(one),
+      app.tick(two),
+      app.tick(three),
       {wait: true}
     )(1,2,3);
   });
