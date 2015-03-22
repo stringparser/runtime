@@ -2,74 +2,85 @@
 
 var util = require('./lib/util');
 
-//
-// ## module.exports
-//
-// - create: obtain/create a Runtime instance from cache
-// - Runtime: the runtime constructor
-//
+/* ## top-level API
+
+The `module.exports` two methods
+
+- create: create a Runtime instance
+- Runtime: the runtime constructor
+
+`create` purpose is to be a key-value store for `Runtime`
+instances so you can use the same code in different modules
+without needing to do that yourself
+*/
 
 exports = module.exports = {
   create: create,
   Runtime: Runtime
 };
 
-function create(name, opt){
+function create(name, props){
   name = util.type(name).string || '#root';
-  create.cache[name] = create.cache[name] || new Runtime(name, opt);
+  create.cache[name] = create.cache[name] || new Runtime(props);
   return create.cache[name];
 }
 create.cache = { };
 
-// ## Runtime([name, opts])
-//  runtime constructor
-//
-// arguments
-//  - name: type `string`, name for the runtime
-//  - opt: options passed to the Manifold constructor
+/* ## Runtime([options])
 
-// returns the runtime instance
-//
+_inherits from_ [Manifold][x-manifold]
 
-function Runtime(name, opt){
+_argument_ `options`, type object, are
+the properties be set at `runtime.store` on instantiation
+
+_returns_ a runtime instance
+
+_options_ properties default to
+ - `options.log = true`, type boolean, wheter to log or not by default
+ - `options.name = #root`, type string, label for the instance if cached
+
+*/
+
+function Runtime(o){
 
   if( !(this instanceof Runtime) ){
-    return new Runtime(name, opt);
+    return new Runtime(o);
   }
 
-  opt = util.type(opt || name).plainObject || {};
-  opt.name = opt.name || name;
+  o = o || {};
+  util.Manifold.call(this);
 
-  util.Manifold.call(this, opt);
-  opt.log = opt.log === void 0 || opt.log;
-  this.set(opt);
-
-  function app(stem, opt){
-    app.set(stem, opt);
-    return app;
-  }
-  util.merge(app, this);
-  return app;
+  this.set({
+    log: o.log === void 0 || o.log,
+    name: util.type(o.name).string || '#root'
+  });
 }
 util.inherits(Runtime, util.Manifold);
 
-// ## Runtime.tick(/* arguments */)
-// > dispatch next element of a stack
-//
-// arguments can be `strings` and/or `functions`
-//  - string: will correspond to handlers set with runtime.set
-//  - function: will be run as written
-//
-// returns a `tick` function, this function can be called
-// in order to execute the next element of the given stack.
-//
+/*
+## Runtime.stack(...arguments[, props])
+> constructs a consumable stack object which will be used to
+call and give context to the registered handlers with runtime.set or
+invoke functions given as an argument.
+
+_...arguments_
+- string, handlers set with runtime.set(path, props)
+- function, to be invoke whe the time comes
+
+-[, props]_
+- properties to be added to the stack which may or may-not override methods
+of the stack
+
+_returns_
+ - a `tick` function, which, upon call will execute the stack arguments
+*/
 
 var Stack = util.Stack;
 
-Runtime.prototype.tick = function(stack){
+Runtime.prototype.stack = function(stack){
 
-  var stackArgs;
   var self = this;
+  var stackArguments;
 
   function next(err){
     if(err){ stack.onHandleError(err, next); }
@@ -92,10 +103,10 @@ Runtime.prototype.tick = function(stack){
     stack.onHandleEnd.apply(stack, next.args);
 
     if(stack.next){
-      self.tick(stack);
+      self.stack(stack);
     } else if(stack.host && stack.host.next){
       stack.host.args = stack.args;
-      self.tick(stack.host);
+      self.stack(stack.host);
     }
 
     return next.result;
@@ -106,42 +117,45 @@ Runtime.prototype.tick = function(stack){
   //
 
   function tick(arg){
-    if(tick.stack instanceof Stack){
-      stack = new Stack(stackArgs, self);
-      if(arg && arg.stack instanceof Stack){ stack.host = arg.stack; }
+    if(stackArguments){
+      stack = new Stack(stackArguments, self);
+      if(arg instanceof Stack){ stack.host = arg; }
       stack.args = util.args(arguments, stack.host ? 0 : -1);
-      if(arg instanceof Error){ stack.onError(arg, next); }
+      if(arg instanceof Error){ stack.onHandleError(arg, next); }
       stack.time = util.hrtime();
-      return self.tick(stack);
+      return self.stack(stack);
     }
 
-    stack.args[0] = next;
     next.wait = stack.wait || false;
-    next.args = util.args(stack.args);
     var stem = stack.match || stack.next;
 
     switch(typeof stem){
       case 'string':
         self.get(stem, next);
-        stack.match = next.path.substring(next.match.length).trim();
+        next.match = next.match || next.path;
         next.handle = next.handle || stack.onHandleNotFound;
+        stack.match = next.path.substring(next.match.length).trim();
       break;
       case 'function':
-        if(typeof stem.path === 'string'){
-          self.get(stem.path, next);
-        }
-        next.handle = stem; next.depth = next.depth || 1;
-        next.match = (stem.stack instanceof Stack && stem.stack.path)
-         || next.match || stem.name || stem.displayName;
+        next.handle = stem;
+        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
-        throw new TypeError('arguments should be `string` or `function`');
+        throw new TypeError('argument should be `string` or `function`');
+    }
+
+    if(next.handle.stack instanceof Stack){
+      next.match = next.handle.stack.path;
+      stack.args[0] = stack;
+    } else {
+      stack.args[0] = next;
     }
 
     if(!stack.match){
       stack.next = stack.argv[++stack.index];
     }
 
+    next.args = util.args(stack.args);
     stack.onHandle.apply(stack, next.args);
     stack.onHandleCall.apply(stack, next.args);
 
@@ -150,9 +164,9 @@ Runtime.prototype.tick = function(stack){
       next.result = next.handle.apply(stack.context, next.args);
       if(next.wait){ return next.result; }
       if(stack.next){
-        self.tick(stack);
+        self.stack(stack);
       } else if(stack.host && stack.host.next){
-        self.tick(stack.host);
+        self.stack(stack.host);
       }
       return next.result;
     }, function(err, result){
@@ -161,27 +175,26 @@ Runtime.prototype.tick = function(stack){
     });
   }
 
-
-  next.stack = stack;
   if(stack instanceof Stack){ tick(); } else {
-    stackArgs = arguments;
-    tick.stack = new Stack(stackArgs);
+    stackArguments = arguments;
+    tick.stack = new Stack(stackArguments);
     return tick;
   }
 };
 
-// ## Runtime.repl(options)
-// > create a repl for the given runtime
-//
-// arguments: options with non mandatory props below
-//  - input, repl's stream output, defaults to process.stdin
-//  - output, repl's stream output, defaults to process.stdout
-//
-// After its called, it will override the prototype
-// and becomes a property with a readline instance
-// --
-// PD: :) this was the very beginning of it all.
-//
+/*
+## Runtime.repl(options)
+> create a repl for the given runtime
+
+arguments: options with non mandatory props below
+- input, repl's stream output, defaults to process.stdin
+- output, repl's stream output, defaults to process.stdout
+
+After its called, it will override the prototype
+and becomes a property with a readline instance
+--
+PD: this was the very beginning of it all :)
+*/
 Runtime.prototype.repl = function(o){
   var self = this; o = o || { };
   this.repl = require('readline').createInterface({
