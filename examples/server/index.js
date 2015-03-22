@@ -3,7 +3,15 @@
 var http = require('http');
 var app = require('../../.').create('myAppName');
 
-app('get /', app.stack(index, query, end));
+app.set({
+  onHandleNotFound: function(next, req, res){
+    res.writeHead(404);
+    res.end('404: There is no url=\''+req.url+'\' defined');
+    next();
+  }
+});
+
+app.set('get /', app.stack(index, query, end));
 
 function index(next, req, res){
   res.write('Hello there ');
@@ -22,14 +30,8 @@ function end(next, req, res){
 }
 
 function router(req, res){
-  var path = req.method.toLowerCase() + ' ' + req.url;
-  app.stack(path, {
-    onHandleNotFound: function(next, req, res){
-      res.writeHead(404);
-      res.end('404: Cannot find '+req.url);
-      next();
-    }
-  })(req, res);
+  var method = req.method.toLowerCase();
+  app.stack(method + ' '+ req.url)(req, res);
 }
 
 http.createServer(router).listen(8000, function(){
