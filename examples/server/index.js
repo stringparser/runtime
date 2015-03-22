@@ -3,7 +3,7 @@
 var http = require('http');
 var app = require('../../.').create('myAppName');
 
-app('get /$', app.stack(index, query, end));
+app('get /', app.stack(index, query, end));
 
 function index(next, req, res){
   res.write('Hello there ');
