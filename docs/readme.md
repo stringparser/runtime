@@ -1,86 +1,109 @@
-# Thy runtime docs
 
- - [runtime API](api.md)
- - [Example: repl](example/repl.md)
- - [Example: server](example/server.md)
- - [Library utils](use-the-utils.md)
+# documentation
 
-## What is this for
+**
+[top-level API](#methods) -
+[Stack API](./api/stack.md)
+**
 
-The aim of the project is to provide an easy and non opinionated container to develop `runtime interfaces`. That being a `CLI`, a `REPL` or something completely different. Thus far the interface is made of a command constructor and an event emitter. The approach is to consume commands in the same way one does on a terminal: line by line. The glue is made by associating commands to functions.
+The `module.exports` two methods
 
-The command constructor supports aliasing and has 4 methods: set, get, config and parse. The event emitter job is to handle all flow control. Has input and output streams, 2 main events and 4 methods added to the [readline.Interface](nodejs.org/api/readline.html) prototype: lexer, parser, consumer and completer.
+- `create`: create a Runtime instance
+- `Runtime`: the runtime constructor
 
-Only one use-case is and will be built in by default: a REPL. This REPL can be transformed on a CLI with ease.
+`create`'s purpose is to be a key-value store for `Runtime` instances so you can use the same code in different modules without needing to do that yourself.
 
-## Show me the code
+## Runtime([options])
 
-As a dumb example, this is how one would use `stdin` and `stdout` to make a REPL with a command that will create a server and another that will log the request url and the response status.
+_inherits from_ [Manifold][x-manifold]
+
+_argument_ `options`, type object, are the properties be set at `runtime.store` on instantiation
+
+_returns_ a runtime instance
+
+_options_ properties default to
+ - `options.log = true`, type boolean, wheter to log or not by default
+ - `options.name = #root`, type string, label for the instance if cached
 
 ```js
-'use strict';
-
-var http = require('http');
-var runtime = require('runtime')
-  .create('http.createServer', {
-     input : process.stdin,
-    output : process.stdout
-  });
-
-runtime.config('port', 3000);
-
-// any non defined command will end up here
-runtime.set(function rootHandle(argv){
-  if( argv[0] ){
-    console.log(' (press tab to see completion)');
-    console.log(' type `createServer` <port> to create a server');
-    console.log(' Note: default port is', this.config('port'));
-  }
-  this.prompt();
-});
-
-// the dummest logger ever made
-runtime.set('logger', function loggerHandle(req, res){
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello there\n');
-  runtime.output.write('\n');
-  console.log('req.url = %s', req.url);
-  console.log('res.statusCode = %s', res.statusCode);
-});
-
-// we'll call this after the server is created
-runtime.set('server on port', function(argv, args){
-  // take the argument passed by next on `createServer`
-  var port = args._.slice(-1)[0];
-  console.log('\n server listening on port ' + port);
-  console.log('\n run `curl http://localhost:' + port + '`');
-  console.log(' on another terminal and come back here to see whats going on');
-  console.log();
-});
-
-var server;
-// lets do that server
-runtime.set('createServer', function(argv, args, next){
-  var port = this.config('port');
-  var logger = this.get('logger').handle;
-  if(!server){
-    port = parseInt(args._[1]) || port;
-    this.config('port', port);
-    server = http.createServer(logger)
-      .listen(port, function(){
-        next('server on port ' + port);
-      });
-  } else {
-    port = this.config('port');
-    this.output.write('already a server running on port '+port);
-  }
-});
-
-// All set! We'll emit a non defined command
-// so it will end up in the `rootHandle` set previously
-runtime.emit('next', 'start');
+var runtime = require('runtime').create(/*{name: '#root', log: true}*/);
 ```
 
-As you can see there was no necessity to create any layer to dispatch, resolve not found commands or anything. All we are doing here is associate functions with object keys and be able to find those accordingly via their name.
+## top-level API
+### runtime.stack(...arguments[, props]) => [tick callback]
+> constructs a consumable stack object which, upon call, will be used to
+invoke and give context to `...arguments`
 
-Look at the [runtime API](api.md) to get more insight on how this works.
+_...arguments_
+- `string`, handlers set with `runtime.set(path, props)`
+- `function`, to be invoke when the time comes
+
+_props_
+- type object, properties for the stack after instantiation.
+
+_returns_
+- a `tick` callback, which, upon call will execute the stack arguments
+
+_depends on_ [async-done](http://github.com/phated/async-done) which is mainly used to trap errors in a domain and resolve completion for the usual async constructs we have today: _streams_, _Promises_ and _Observables_. _Callbacks_ are handled separately.
+
+`app.stack` returns a function so composition is simply achieved by passing the returned callback as argument of the method.
+
+```js
+app.set('get :thing', function getThingHandle(){});
+function one(){}
+function two(){}
+function three(){}
+
+var tick = app.stack('get :thing', one, app.stack(two, app.stack(three)), {
+  onHandle: function(next[, stackArguments]){
+    // Each handle call and handle end
+  },
+  onHandleCall: function(next[, stackArguments]){
+    // Just before each handle has been called
+  },
+  onHandleEnd: function(next[, stackArguments]){
+    // When the handle has completed
+  },
+  onHandleError: function(error, next){
+    // It can happen in two places for each stack:
+    //  - once if the tick function was called with an error
+    //  - any time an error happens
+  },
+  onHandleNotFound: function(next[, stackArguments]){
+    // For string paths, since we are using regexes,
+    // it can happen that either they are not defined
+    // or the match wasn't complete
+  }
+});
+```
+
+By default all the elements of each stack will be run in parallel.
+
+Read more about the [Stack api](#stak-api)
+
+## runtime.repl([options])
+> create a `repl` for the given runtime
+
+This method uses the [readline](http://nodejs.org/api/readline.html) module to create a repl. It serves to make a REPL or CLI with the same ease.
+
+_arguments_ options
+- `input`, type stream, defaults to `process.stdin`
+- `output`, type stream, defaults to `process.stdout`
+- `completer`, type function, defaults to [built in completer][x-completer]
+
+After its called, it will override the prototype
+and become a property with a `readline` instance.
+
+When the `readline` instance fires its `close` event, it restores the method to the prototype.
+
+[x-manifold]: http://github.com/stringparser/manifold
+[x-completer]: http://github.com/stringparser/runtime/tree/master/lib/completer.js
+
+## Stack API
+
+`app.stack` returns a callback. For each of those we should decide what to do with:
+ - Errors
+ - Context
+ - Arguments
+ - Completion
+ - NotFounds
