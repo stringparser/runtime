@@ -3,13 +3,15 @@
 var http = require('http');
 var app = require('../../.').create('myAppName');
 
-app.set('get /', app.stack(index, query, end, {
+app.set({
   onHandleNotFound: function(next, req, res){
     res.writeHead(404);
     res.end('404: There is no url=\''+req.url+'\' defined');
     next();
   }
-}));
+});
+
+app.set('get /', app.stack(index, query, end));
 
 function index(next, req, res){
   res.write('Hello there ');
