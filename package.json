@@ -26,9 +26,7 @@
     "browser-process-hrtime": "^0.1.1",
     "readline-browserify": "0.0.4",
     "pretty-hrtime": "0.2.x",
-    "utils-merge": "^1.0.0",
     "async-done": "^1.0.0",
-    "lodash.has": "^3.0.0",
     "utils-type": "^0.x.x",
     "inherits": "^2.0.1",
     "manifold": "^2.x.x"
