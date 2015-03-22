@@ -19,7 +19,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.tick(one, two, three, {wait: true})();
+    app.stack(one, two, three, {wait: true})();
   });
 
   it('does not propagate between stacks', function(done){
@@ -34,7 +34,7 @@ module.exports = function(runtime){
       done();
     }
 
-    app.tick(app.tick(foo), bar, {wait: true})();
+    app.stack(app.stack(foo), bar, {wait: true})();
   });
 
   it('the default should be parallel', function(done){
@@ -54,7 +54,7 @@ module.exports = function(runtime){
       }, Math.random()*10+1);
     });
 
-    app.tick('0 1 2 3 4')();
+    app.stack('0 1 2 3 4')();
   });
 
   it('for series indicate wait in options', function(done){
@@ -68,13 +68,13 @@ module.exports = function(runtime){
         next(); if(stack.queue){ return ; }
 
         end.should.have.property('length', 6);
-        end.should.be.eql([0,1,2,3,4,5]);
+        end.map(Number).should.be.eql([0,1,2,3,4,5]);
 
         done();
       }, Math.random()*10);
     });
 
-    app.tick('0 1 2 3 4 5', {wait: true})();
+    app.stack('0 1 2 3 4 5', {wait: true})();
   });
 
   it('should handle series & parallel stacks', function(done){
@@ -92,16 +92,16 @@ module.exports = function(runtime){
         next();
         if(stack.queue){ return ; }
 
-        end.series.should.be.eql([0,1,2,3]);
+        end.series.map(Number).should.be.eql([0,1,2,3]);
         end.parallel.length.should.be.eql(5);
-        end.parallel.should.not.be.eql([4,5,6,7,8]);
+        end.parallel.map(Number).should.not.be.eql([4,5,6,7,8]);
 
         done();
 
       }, Math.random()*10+1);
     });
 
-    app.tick('4 5 6 7 8', app.tick('0 1 2 3', {wait: true}))();
+    app.stack('4 5 6 7 8', app.stack('0 1 2 3', {wait: true}))();
   });
 
   it('full series stack should have them all wait', function(done){
@@ -113,14 +113,14 @@ module.exports = function(runtime){
       setTimeout(function(){
         end.push(next.params.handle); next();
         if(stack.host.queue){ return ; }
-        end.should.be.eql([0,1,2,3,4,5]);
+        end.map(Number).should.be.eql([0,1,2,3,4,5]);
         done();
       }, Math.random()*10+1);
     });
 
-    app.tick(
-      app.tick('0 1 2', {wait: true}),
-      app.tick('3 4 5', {wait: true}),
+    app.stack(
+      app.stack('0 1 2', {wait: true}),
+      app.stack('3 4 5', {wait: true}),
       {wait: true}
     )();
 
@@ -135,14 +135,14 @@ module.exports = function(runtime){
       setTimeout(function(){
         end.push(next.params.handle); next();
         if(stack.host.queue){ return ; }
-        end.should.be.eql([0,1,2,3,4,5]);
+        end.map(Number).should.be.eql([0,1,2,3,4,5]);
         done();
       }, Math.random()*10+1);
     });
 
-    app.tick(
-      app.tick('0 1', {wait: true}),
-      app.tick('2 3', app.tick('4 5', {wait: true}), {wait: true}),
+    app.stack(
+      app.stack('0 1', {wait: true}),
+      app.stack('2 3', app.stack('4 5', {wait: true}), {wait: true}),
       {wait: true}
     )();
 
