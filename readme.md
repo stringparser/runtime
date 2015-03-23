@@ -1,13 +1,14 @@
 ## runtime ![travis-build][travis-build]![npm version][npm-version]
 
-**
 [documentation](./docs/README.md) -
 [examples](#examples) -
 [install](#install) -
 [implementation status](#implementation-status)
-**
 
-The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. That meaning: `Router`, `CLI`, `REPL` or something completely different. For that, the main **focus** of the library is **async function composition**.
+The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. That meaning: `Router`, `CLI`, `REPL` a `Server` or other things. For that, the main **focus** of the library is **async function composition** via common patterns.
+
+Only 5 methods included with each instance:
+ `set`, `get`, `parse`, `stack` and `repl`.
 
 ## sample
 
