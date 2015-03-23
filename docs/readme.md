@@ -2,7 +2,7 @@
 
 The simplest way to start is to see some code. I'll leave here some snippets.
 
-Feel free to [come and chat in gitter](https://gitter.im/stringparser/gulp-runtime). If I'm around and have time I wouldn't mind at all.
+Feel free to [come and chat in gitter](https://gitter.im/stringparser/runtime). If I'm around and have time I wouldn't mind at all.
 
 ## Snippets
 

@@ -21,6 +21,7 @@ Last, but not least, async completion for each handle is achieved using [async-d
 Anyway, enough babbling.
 
 ## sample
+> The implementation has nothing to do with `http`.
 
 ```js
 var http = require('http');
