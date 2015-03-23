@@ -4,26 +4,47 @@ The simplest way to start is to see some code, or better play with it. I'll leav
 
 ##### stacking functions
 
-The simplest example is to run some functions and see what happens.
+A simple example about how easy is to compose different modes of execution.
 
 ```js
 var app = require('runtime').create();
 
-function foo(next){
+function a(next){
   setTimeout(next, Math.random()*10);
 }
 
-function bar(next){
+function b(next){
+  setTimeout(next, Math.random()*2);
+}
+
+function c(next){
   setTimeout(next, Math.random()*10);
 }
 
-function baz(next){
+app.set(':handle(\\d+)', function(next){
   setTimeout(next, Math.random()*10);
-}
+});
 
-var tick = app.stack(foo, bar, baz);
-var tack = app.stack(foo, bar, baz, tick, {wait: true});
-var teck = app.stack(foo, app.stack(teck));
+var pile = [];
+pile.push(app.stack('1 2 3'));
+pile.push(app.stack(a, b, c));
+pile.push(app.stack('1 2 3', {wait: true}));
+pile.push(app.stack(a, b, c, {wait: true}));
+pile.push(app.stack(pile[2], pile[3], {wait: true}));
+
+app.set({
+  onHandleEnd: function(){
+    if(this.queue || this.host){ return; }
+    var mode = this.wait ? 'series' : 'parallel';
+    console.log('\ndone with %s in %s\n', this.path, mode);
+    if(pile.length){
+      var stack = pile.shift();
+      setTimeout(stack, 1000);
+    }
+  }
+});
+
+pile.shift()();
 ```
 
 #### CRUD file
