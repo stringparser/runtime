@@ -8,10 +8,6 @@ The `module.exports` two methods
 
 - create: create a Runtime instance
 - Runtime: the runtime constructor
-
-`create` purpose is to be a key-value store for `Runtime`
-instances so you can use the same code in different modules
-without needing to do that yourself
 */
 
 exports = module.exports = {
@@ -19,12 +15,33 @@ exports = module.exports = {
   Runtime: Runtime
 };
 
-function create(name, props){
-  name = util.type(name).string || '#root';
-  create.cache[name] = create.cache[name] || new Runtime(props);
-  return create.cache[name];
+/*
+## create([name, options])
+
+Key-value store for `Runtime` instances.
+
+_arguments_
+- `name` type string, label for the instance
+- `options` type object, options to be passed to the `Runtime` constructor
+
+_defaults_
+ - `name` to `#root`
+ - `options.log` defaults to `true`
+
+_returns_
+ - a new `Runtime` instance if wasn't there stored
+ - a previous instance `name` if it did
+*/
+
+function create(name, o){
+  o = o || {};
+  o.name = util.type(o.name || name).string || '#root';
+  if(!create.cache[o.name]){
+    create.cache[o.name] = new Runtime(o);
+  }
+  return create.cache[o.name];
 }
-create.cache = { };
+create.cache = {};
 
 /* ## Runtime([options])
 
@@ -220,6 +237,5 @@ Runtime.prototype.repl = function(o){
   });
 
   this.repl.setPrompt(this.store.name + '> ');
-  this.repl.prompt();
-  return this.repl;
+  return this;
 };
