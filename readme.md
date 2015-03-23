@@ -1,6 +1,6 @@
-## runtime ![travis-build][travis-build]![npm version][npm-version]
+## runtime [![build][badge-build]][x-travis][![NPM version][badge-version]][x-npm]
 
-[documentation](./docs/README.md) -
+[documentation](./docs) -
 [examples](#examples) -
 [install](#install) -
 [implementation status](#implementation-status)
@@ -58,7 +58,7 @@ Getting started looking at [thy docs](./docs)
 
 ## examples
 
-Go to the [examples](./examples) folder.
+In the [examples](./examples) folder you can find some use-cases.
 
 ## install
 
@@ -69,7 +69,7 @@ With [npm][x-npm]
 ## implementation status
 > growing a beard feels goood
 
-The library needs polishing and much better documentation and examples. It has some rough edges I'm working on but is tested and more than usable. I want to make some changes for places I feel are pain points but the [top level API](./docs/api) should not suffer any change.
+The library needs polishing and much better documentation and examples. It has some rough edges I'm working on but is tested and usable. I want to make some changes for places I feel are pain points but the [top level API](./docs/api/runtime.md) should not suffer any change.
 
 I'll be using it everywhere so the first user involved here is me.
 
@@ -78,6 +78,7 @@ I'll be using it everywhere so the first user involved here is me.
 ## license
 [<img alt="LICENSE" src="http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square"/>](http://opensource.org/licenses/MIT)
 
-[x-npm]: http://npmjs.org
-[npm-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
-[travis-build]: http://img.shields.io/travis/stringparser/runtime/1.0.svg?style=flat-square
+[x-npm]: https://npmjs.org/package/runtime
+[x-travis]: https://travis-ci.org/stringparser/runtime/builds
+[badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
+[badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
