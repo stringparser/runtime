@@ -7,43 +7,34 @@ function a(next){
 }
 
 function b(next){
-  setTimeout(next, Math.random()*10);
+  setTimeout(next, Math.random()*2);
 }
 
 function c(next){
   setTimeout(next, Math.random()*10);
 }
 
-function d(next){
+app.set(':handle(\\d+)', function(next){
   setTimeout(next, Math.random()*10);
-}
+});
 
-function e(next){
-  setTimeout(next, Math.random()*10);
-}
+var pile = [];
+pile.push(app.stack('1 2 3'));
+pile.push(app.stack(a, b, c));
+pile.push(app.stack('1 2 3', {wait: true}));
+pile.push(app.stack(a, b, c, {wait: true}));
+pile.push(app.stack(pile[2], pile[3], {wait: true}));
 
-function f(next){
-  setTimeout(next, Math.random()*10);
-}
+app.set({
+  onHandleEnd: function(){
+    if(this.queue || this.host){ return; }
+    var mode = this.wait ? 'series' : 'parallel';
+    console.log('\ndone with %s in %s\n', this.path, mode);
+    if(pile.length){
+      var stack = pile.shift();
+      setTimeout(stack, 1000);
+    }
+  }
+});
 
-var tick = app.stack(a, b, c);
-var tack = app.stack(d, e, f, {wait: true});
-var teck = app.stack(tick, tack);
-var tock = app.stack(tick, tack, {wait: true});
-
-tick();
-
-setTimeout(function(){
-  console.log('\ntick should be done, starting tack\n');
-  setTimeout(function(){
-    tack();
-    setTimeout(function(){
-      console.log('\ntack have be done, starting teck\n');
-      teck();
-      setTimeout(function(){
-        console.log('\nteck should be done, starting tock\n');
-        setTimeout(tock, 1000);
-      }, 1000);
-    }, 1000);
-  }, 1000);
-}, 1000);
+pile.shift()();
