@@ -1,6 +1,5 @@
-## runtime [![build][badge-build]][x-travis][![NPM version][badge-version]][x-npm]
+## runtime [![build][badge-build]][x-travis][![NPM version][badge-version]][x-npm] [![Gitter][badge-gitter]][x-gitter]
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stringparser/runtime?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -
 [documentation](./docs) -
 [examples](#examples) -
 [install](#install) -
@@ -17,7 +16,7 @@ Although maybe just with `set` and `stack` you can be done.
 
 I may split the repl (based on [readline](http://nodejs.org/readline.html) and mainly because I want this to work the browser without too much overhead) into another module, but the others will stay.
 
-Last, but not least, async completion for each handle is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. Though callbacks are handled separately, mainly because async-done wraps functions in a domain I error Handling is a big part here.
+Last, but not least, async completion for each handle is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. Though callbacks are handled separately, mainly because async-done wraps functions in a domain and error handling is a big part here.
 
 Anyway, enough babbling.
 
@@ -87,9 +86,19 @@ I'll be using it everywhere so the first user involved here is me.
 > Meaning: I **do not** want to rewrite all again and again.
 
 ## license
-[<img alt="LICENSE" src="http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square"/>](http://opensource.org/licenses/MIT)
+[![License][badge-license]][x-license]
+
+<!--
+  x-: is for just a link
+  t-: is for doc's toc
+-->
 
 [x-npm]: https://npmjs.org/package/runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime/builds
+[x-gitter]: https://gitter.im/stringparser/runtime
+[x-license]: http://opensource.org/licenses/MIT
+
 [badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
+[badge-gitter]: https://badges.gitter.im/Join%20Chat.svg
 [badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
+[badge-license]: http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square
