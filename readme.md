@@ -69,7 +69,7 @@ With [npm][x-npm]
 ## implementation status
 > growing a beard feels goood
 
-The library needs polishing and much better documentation and examples. It has some rough edges I'm working on but is tested and usable. I want to make some changes for places I feel are pain points but the [top level API](./docs/api/runtime.md) should not suffer any change.
+The library needs polishing, much better documentation and examples. It has some rough edges I'm working on but is tested and usable. I want to fix some stuff I'm not really proud about, but the [top level API](./docs/api/runtime.md) should not suffer any change.
 
 I'll be using it everywhere so the first user involved here is me.
 
