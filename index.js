@@ -175,10 +175,13 @@ Runtime.prototype.stack = function(stack){
     });
   }
 
-  if(stack instanceof Stack){ tick(); } else {
+  if(stack instanceof Stack){ tick(); } else
+  if(arguments.length){
     stackArguments = arguments;
     tick.stack = new Stack(stackArguments);
     return tick;
+  } else {
+    throw new Error('cannot construct a stack without arguments');
   }
 };
 
