@@ -11,19 +11,42 @@ The `module.exports` two methods
 - `create`: create a Runtime instance
 - `Runtime`: the runtime constructor
 
-`create`'s purpose is to be a key-value store for `Runtime` instances so you can use the same code in different modules without needing to do that yourself.
+## create([name, options])
+
+Key-value store for `Runtime` instances so you can use the same code in different modules without needing to do that yourself.
+
+_arguments_
+- `name`, type string, a label for the instance
+- `options`, type object, options to be passed to the `Runtime` constructor.
+ - `options.log`, type boolean, wether to log or not
+
+_returns_
+ - a new `Runtime` instance if wasn't there stored
+ - a previous instance `name` if it did.
+
+_defaults_
+ - `name` to `#root`
+ - `options.log` defaults to `true`
 
 ## Runtime([options])
 
-_inherits from_ [Manifold][x-manifold]
+_arguments_
+  - `options`, type object, are the properties to be set at `runtime.store` on instantiation
 
-_argument_ `options`, type object, are the properties be set at `runtime.store` on instantiation
+_returns_
+ - a runtime instance
 
-_returns_ a runtime instance
-
-_options_ properties default to
+_defaults_
  - `options.log = true`, type boolean, wheter to log or not by default
  - `options.name = #root`, type string, label for the instance if cached
+
+
+The constructor _inherits from_ [Manifold][x-manifold]
+  - [set(path[, props])][x-manifold-set], set a path-to-regexp with props for lookup
+  - [get(path[, options])][x-manifold-get], get one of the path set with with its properties cloned
+  - [parse(prop[, parser])][x-manifold-parse], parse properties before they are set
+
+ Click on the links above for their corresponding documentation.
 
 ```js
 var runtime = require('runtime').create(/*{name: '#root', log: true}*/);
@@ -96,9 +119,6 @@ and become a property with a `readline` instance.
 
 When the `readline` instance fires its `close` event, it restores the method to the prototype.
 
-[x-manifold]: http://github.com/stringparser/manifold
-[x-completer]: http://github.com/stringparser/runtime/tree/master/lib/completer.js
-
 ## stack API
 
 So how does the library deal with _errors_, _context_, _arguments_, _completion_, _notFounds_ for each of the handles? Before it was said that
@@ -107,3 +127,17 @@ So how does the library deal with _errors_, _context_, _arguments_, _completion_
 
 
 Well... the library by itself doesn't. It keeps an eye on the return value of each handle, gives a callback and adds a declarative API for you to use in each of the stacks you declare. But you are in charge.
+
+<!--
+  x-: is for just a link
+  -->
+
+[x-manifold]: http://github.com/stringparser/manifold
+
+[x-manifold-set]: https://github.com/stringparser/manifold#manifoldsetpath-props
+
+[x-manifold-get]: https://github.com/stringparser/manifold#manifoldgetpath-options-mod
+
+[x-manifold-parse]: https://github.com/stringparser/manifold#manifoldparseprop-parser
+
+[x-completer]: http://github.com/stringparser/runtime/tree/master/lib/completer.js
