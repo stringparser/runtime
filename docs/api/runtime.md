@@ -15,7 +15,7 @@ We'll only cover `set` here, you can look at the others on the links above.
 **NOTE**: In all of the following `node` refers to an object mapping a regular expression match to an object.
 
 ## runtime.set
-> Sets a path to RegExp mapping between string and object
+> Sets a path to RegExp mapping between a string and object
 
 _arguments of_ `runtime.set(path[, props])`
 - `path` type string, to be parsed as a regular expression

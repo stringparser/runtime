@@ -1,54 +1,52 @@
 ##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
-## module.exports
+- `create`: key-value store for `Runtime` instances
+- `Runtime`: class representing a runtime Interface
 
-The `module.exports` two methods
+## create
 
-- `create`: create a Runtime instance
-- `Runtime`: a constructor
+```js
+function create(name[, object options])
+```
 
-## create([name, options])
-
-Key-value store for `Runtime` instances so you can use the same code in different modules without needing to do that yourself.
+Key-value store for `Runtime` instances.
 
 _arguments_
-- `name`, type string, a label for the instance
-- `options`, type object, options to be passed to the `Runtime` constructor
+- `name` type string, label of the instance
+- `options` type object, options to be passed to the `Runtime` constructor
 
 _defaults_
  - `name` to `#root`
  - `options.log` defaults to `true`
 
 _returns_
- - a new `Runtime` instance if wasn't there stored
- - a previous instance `name` if it did
+ - a previous instance `name` if was stored
+ - a new `Runtime` instance if wasn't there
 
-## Runtime([options])
+## Runtime
 
 ```js
-var Runtime = require('runtime').Runtime;
-var runtime = new Runtime(/*[options]*/);
+function Runtime([object options])
 ```
 
+Constructor representing a `runtime` Interface.
+
 _arguments_
- - `options`, type object, are the properties to be set
+ - `options` type object, properties to be set on the `rootNode`
 
 _returns_
-- a runtime instance
+ - a runtime instance
 
 _defaults_
 - `options.log = true`, type boolean, flags whether to log or not
 - `options.name = #root`, type string, label for the instance
 
+_Inherits from_ the [Manifold][x-manifold] class making it a key-value store that can map strings to objects via regular expressions. The store starts with a `rootNode` at `instance.store` and builds up all its children at `instance.store.children` in a flat manner.
 
-_Methods inherited from_ the [Manifold][x-manifold] constructor
-- [set(path[, props])][x-runtime-set], set a path-to-regexp with props for lookup
-- [get(path[, options])][x-runtime-get], get the object associated to that path
-- [parse(prop[, parser])][x-runtime-parse], parse properties before they are set
+For more information about runtime `nodes` see the [Runtime API](./runtime.md).
 
-Click on the links above for their corresponding documentation.
-
-
+<br>
+---
 ##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
 <!--
