@@ -16,6 +16,14 @@ Only 5 methods are included with each instance:
 var http = require('http');
 var app = require('runtime').create();
 
+app.set({
+  onHandleNotFound: function(next, req, res){
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.end('404: There is no path \''+req.url+'\' defined yet.');
+    next();
+  }
+});
+
 app.set('get /', app.stack(index, query, end));
 
 function index(next, req, res){
@@ -25,7 +33,7 @@ function index(next, req, res){
 
 function query(next, req, res){
   var name = req.url.match(/\?name=([^&]+)/);
-  var user = name ? '<i>' + name[1] + '</i>' : '"anonymous"';
+  var user = name ? name[1] : '"anonymous"';
   res.write(user);
   return res;
 }
@@ -38,20 +46,6 @@ function router(req, res){
   var method = req.method.toLowerCase();
   app.stack(method + ' '+ req.url)(req, res);
 }
-
-app.set({
-  onHandleCall: function(next, req, res){
-    res.write('<!DOCTYPE html><html>');
-  },
-  onHandleNotFound: function(next, req, res){
-    res.writeHead(404);
-    res.end('404: There is no \''+req.url+'\' path defined yet.');
-    next();
-  },
-  onHandleEnd: function(next, req, res){
-    res.end('</html>');
-  }
-});
 
 http.createServer(router).listen(8000, function(){
   console.log('http server running on port 8000');
