@@ -29,7 +29,7 @@
     "async-done": "^1.0.0",
     "utils-type": "^0.x.x",
     "inherits": "^2.0.1",
-    "manifold": "^2.x.x"
+    "manifold": "^3.x.x"
   },
   "devDependencies": {
     "jshint-stylish": "*",
