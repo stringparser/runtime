@@ -13,17 +13,9 @@ A simple example about how easy is to compose different modes of execution.
 ```js
 var app = require('runtime').create();
 
-function a(next){
-  setTimeout(next, Math.random()*10);
-}
-
-function b(next){
-  setTimeout(next, Math.random()*2);
-}
-
-function c(next){
-  setTimeout(next, Math.random()*10);
-}
+function a(next){ setTimeout(next, Math.random()*10); }
+function b(next){ setTimeout(next, Math.random()*2);  }
+function c(next){ setTimeout(next, Math.random()*10); }
 
 app.set(':handle(\\d+)', function(next){
   setTimeout(next, Math.random()*10);
@@ -61,12 +53,20 @@ Lets do now something more interesting.
 1. And when its done print a goodbye message
 
 ```js
+process.chdir(__dirname);
+
 var fs = require('fs');
 var path = require('path');
 var cp = require('child_process');
 var app = require('runtime').create('writePipeRemove').repl();
 
-process.chdir(__dirname);
+app.stack(wipe, create, write, update, remove, bye, {
+  wait: true,
+  onHandleError: function(err){
+    console.log('ups, there was an error');
+    throw err;
+  }
+})('dirname', 'fileName');
 
 function wipe(next, dirname){
   return cp.spawn('rm', ['-rf', dirname]);
@@ -77,7 +77,8 @@ function create(next, dirname){
 }
 
 function write(next, dirname, filename){
-  next(null, dirname, fs.createWriteStream(path.join(dirname, filename)));
+  var stream = fs.createWriteStream(path.join(dirname, filename));
+  next(null, dirname, stream);
 }
 
 function update(next, dirname, stream){
@@ -93,8 +94,8 @@ function update(next, dirname, stream){
 }
 
 function remove(next, dirname, stream){
-  var question = 'Ok! file is in `'+ stream.path + '`';
-  app.repl.question(question + 'remove directory? (Y/N) ', function(answer){
+  var message = 'Ok! file is in `'+ stream.path + '`';
+  app.repl.question(message + '. Remove directory? (Y/N) ', function(answer){
     if(/^Y/i.test(answer)){
       next(null, cp.spawn('rm', ['-rf', dirname]));
     } else {
@@ -105,7 +106,7 @@ function remove(next, dirname, stream){
 }
 
 function bye(next, rm){
-  var message = 'you take care ha?';
+  var message = 'you, take care ha?';
 
   if(rm){
     rm.stdin.once('end', function(){
@@ -119,14 +120,6 @@ function bye(next, rm){
 
   app.repl.close();
 }
-
-app.stack(wipe, create, write, update, remove, bye, {
-  wait: true,
-  onHandleError: function(err){
-    console.log('ups, there was an error');
-    throw err;
-  }
-})('dirname', 'fileName');
 ```
 
 
