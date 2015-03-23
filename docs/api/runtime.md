@@ -15,15 +15,15 @@ We'll only cover `set` here, you can look at the others on the links above.
 **NOTE**: In all of the following `node` refers to an object mapping a regular expression match to an object.
 
 ## runtime.set
-Sets a path to RegExp mapping between string and object
+> Sets a path to RegExp mapping between string and object
 
 _arguments of_ `runtime.set(path[, props])`
 - `path` type string, to be parsed as a regular expression
 - `props` type function or plainObject
 
 _when props is a_
-- function: is assigned to the `props.handle`
-- plainObject: properties are passed to [a `parser`][x-runtime-parse] if there is one for it and, if not, the property is cloned and merged with that `node.prop` if the property does not exists an empty object is created.
+- function: is assigned to `props.handle`
+- plainObject: its properties are passed to [a parser][x-runtime-parse] if there is one and, if not, the property is cloned and merged with that `node.prop` if the property.
 
 _returns_
  - this, the runtime instance
@@ -63,13 +63,14 @@ runtime.parse('number', function(node, number, key, props){
   }
 });
 
-runtime.set({number: 5});
+runtime.set({number: 5, thing: 'here'});
 runtime.get();
 // =>
 {
   notFound: true,
   name: 'myBinaryThing',
-  number: 101
+  number: 101,
+  thing: 'here'
 }
 ```
 
