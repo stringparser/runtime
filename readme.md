@@ -5,9 +5,9 @@
 [install](#install) -
 [implementation status](#implementation-status)
 
-The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. That meaning: `Router`, `CLI`, `REPL` a `Server` or other things. For that, the main **focus** of the library is **async function composition** via common patterns.
+The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. For that, the main **focus** of the library is **async function composition** via common patterns such as path-to-regex handle mapping and async completion with _streams_, _promises_, _observables_ and _callbacks_.
 
-Only 5 methods included with each instance:
+Only 5 methods are included with each instance:
  `set`, `get`, `parse`, `stack` and `repl`.
 
 ## sample
