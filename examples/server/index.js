@@ -6,7 +6,7 @@ var app = require('../../.').create('myAppName');
 app.set({
   onHandleNotFound: function(next, req, res){
     res.writeHead(404);
-    res.end('404: There is no url=\''+req.url+'\' defined');
+    res.end('404: There is no \''+req.url+'\' path defined yet.');
     next();
   }
 });
@@ -20,7 +20,7 @@ function index(next, req, res){
 
 function query(next, req, res){
   var name = req.url.match(/\?name=([^&]+)/);
-  var user = name ? name[1] : '"anonymous"';
+  var user = name ? '<i>' + name[1] + '</i>' : '"anonymous"';
   res.write(user);
   return res;
 }
