@@ -5,10 +5,18 @@
 [install](#install) -
 [implementation status](#implementation-status)
 
-The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. For that, the main **focus** of the library is **async function composition** via common patterns such as path-to-regex handle mapping and async completion with _streams_, _promises_, _observables_ and _callbacks_.
+The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. For that, the main focus of the library is to abstract any **async function composition** into a single callback/function representing part of a stack.
+
+In order to be pleasant a lot of work has been done for it to be simple. After that, though composing functions was good enough, in order to be expressive two features were added: path-to-regex mapping (to find functions from strings) and a little declarative API on top of the stack.
 
 Only 5 methods are included with each instance:
  `set`, `get`, `parse`, `stack` and `repl`.
+
+I may split the repl (based on [readline](http://nodejs.org/readline.html)), but the others will stay.
+
+Last, but not least, async completion is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. But callbacks are handled separately.
+
+Anyway, enough babbling.
 
 ## sample
 
