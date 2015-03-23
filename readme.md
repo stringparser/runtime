@@ -1,5 +1,6 @@
 ## runtime [![build][badge-build]][x-travis][![NPM version][badge-version]][x-npm]
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stringparser/runtime?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -
 [documentation](./docs) -
 [examples](#examples) -
 [install](#install) -
@@ -9,12 +10,14 @@ The aim of the project is to provide an easy an non opinionated container to dev
 
 In order to be pleasant a lot of work has been done for it to be simple. After that, though composing functions was good enough, in order to be expressive two features were added: path-to-regex mapping (to find functions from strings) and a little declarative API on top of the stack.
 
-Only 5 methods are included with each instance:
+Only 5 methods to understand:
  `set`, `get`, `parse`, `stack` and `repl`.
 
-I may split the repl (based on [readline](http://nodejs.org/readline.html)), but the others will stay.
+Although maybe just with `set` and `stack` you can be done.
 
-Last, but not least, async completion is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. But callbacks are handled separately.
+I may split the repl (based on [readline](http://nodejs.org/readline.html) and mainly because I want this to work the browser without too much overhead) into another module, but the others will stay.
+
+Last, but not least, async completion for each handle is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. Though callbacks are handled separately, mainly because async-done wraps functions in a domain I error Handling is a big part here.
 
 Anyway, enough babbling.
 
@@ -62,7 +65,7 @@ http.createServer(router).listen(8000, function(){
 
 ## documentation
 
-Getting started looking at [thy docs](./docs)
+Get started looking at [thy docs](./docs).
 
 ## examples
 
