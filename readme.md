@@ -15,14 +15,6 @@ The aim of the project is to provide an easy an non opinionated container to dev
 var http = require('http');
 var app = require('runtime').create();
 
-app.set({
-  onHandleNotFound: function(next, req, res){
-    res.writeHead(404);
-    res.end('404: There is no \''+req.url+'\' path defined yet.');
-    next();
-  }
-});
-
 app.set('get /', app.stack(index, query, end));
 
 function index(next, req, res){
@@ -46,6 +38,20 @@ function router(req, res){
   app.stack(method + ' '+ req.url)(req, res);
 }
 
+app.set({
+  onHandleCall: function(next, req, res){
+    res.write('<!DOCTYPE html><html>');
+  },
+  onHandleNotFound: function(next, req, res){
+    res.writeHead(404);
+    res.end('404: There is no \''+req.url+'\' path defined yet.');
+    next();
+  },
+  onHandleEnd: function(next, req, res){
+    res.end('</html>');
+  }
+});
+
 http.createServer(router).listen(8000, function(){
   console.log('http server running on port 8000');
 });
@@ -68,7 +74,7 @@ With [npm][x-npm]
 ## implementation status
 > growing a beard feels goood
 
-The library needs polishing and much better documentation and examples. It has some rough edges I'm working on but is tested and more than usable. I want to make some changes for places I feel are pain points but the [top level API](docs/api/top-level.md) should not suffer any change.
+The library needs polishing and much better documentation and examples. It has some rough edges I'm working on but is tested and more than usable. I want to make some changes for places I feel are pain points but the [top level API](./docs/api) should not suffer any change.
 
 I'll be using it everywhere so the first user involved here is me.
 
