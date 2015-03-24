@@ -1,132 +1,28 @@
-##### Getting started - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+<p align="center">
+  <img src="./artwork/runtime_gear.png" height="200"/>
+</p>
 
-The simplest way to start is to see some code. I'll leave here some snippets.
+<br>
+---
 
-Feel free to [come and chat in gitter](https://gitter.im/stringparser/runtime). If I'm around and have time I wouldn't mind at all.
+### Getting started
 
-## Snippets
+To get a feel of the library play with code at [examples directory](./examples).
 
-##### stacking functions
+Then look at the documentation for more insight.
+<br>
+##### [`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
-A simple example about how easy is to compose different modes of execution.
-
-```js
-var app = require('runtime').create();
-
-function a(next){ setTimeout(next, Math.random()*10); }
-function b(next){ setTimeout(next, Math.random()*2);  }
-function c(next){ setTimeout(next, Math.random()*10); }
-
-app.set(':handle(\\d+)', function(next){
-  setTimeout(next, Math.random()*10);
-});
-
-var pile = [];
-pile.push(app.stack('1 2 3'));
-pile.push(app.stack(a, b, c));
-pile.push(app.stack('1 2 3', {wait: true}));
-pile.push(app.stack(a, b, c, {wait: true}));
-pile.push(app.stack(pile[2], pile[3], {wait: true}));
-
-app.set({
-  onHandleEnd: function(){
-    if(this.queue || this.host){ return; }
-    var mode = this.wait ? 'series' : 'parallel';
-    console.log('\ndone with %s in %s\n', this.path, mode);
-    if(pile.length){
-      var stack = pile.shift();
-      setTimeout(stack, 1000);
-    }
-  }
-});
-
-pile.shift()();
-```
-
-#### CRUD file
-
-Lets do now something more interesting.
-
-1. Create a directory (wipe it first if was there so watch out)
-1. Write a count from 0 to 5 in it
-1. Ask user for removal afterwards
-1. And when its done print a goodbye message
-
-```js
-process.chdir(__dirname);
-
-var fs = require('fs');
-var path = require('path');
-var cp = require('child_process');
-var app = require('runtime').create('writePipeRemove').repl();
-
-app.stack(wipe, create, write, update, remove, bye, {
-  wait: true,
-  onHandleError: function(err){
-    console.log('ups, there was an error');
-    throw err;
-  }
-})('dirname', 'fileName');
-
-function wipe(next, dirname){
-  return cp.spawn('rm', ['-rf', dirname]);
-}
-
-function create(next, dirname){
-  fs.mkdir(dirname, next);
-}
-
-function write(next, dirname, filename){
-  var stream = fs.createWriteStream(path.join(dirname, filename));
-  next(null, dirname, stream);
-}
-
-function update(next, dirname, stream){
-  var count = 0;
-  setInterval(function(){
-    stream.write(++count + '\n');
-    if(count > 5){
-      stream.end();
-      clearInterval(this);
-    }
-  });
-  return stream;
-}
-
-function remove(next, dirname, stream){
-  var message = 'Ok! file is in `'+ stream.path + '`';
-  app.repl.question(message + '. Remove directory? (Y/N) ', function(answer){
-    if(/^Y/i.test(answer)){
-      next(null, cp.spawn('rm', ['-rf', dirname]));
-    } else {
-      console.log('Leaving the directory there then.');
-      next(null, null);
-    }
-  });
-}
-
-function bye(next, rm){
-  var message = 'you, take care ha?';
-
-  if(rm){
-    rm.stdin.once('end', function(){
-      app.repl.close();
-    });
-  }
-
-  app.repl.once('close', function(){
-    console.log(message);
-  });
-
-  app.repl.close();
-}
-```
-
+If you have something to ask, feel free to [open an issue][x-issues-new] or [come and chat in gitter][x-gitter] with any questions. I wouldn't mind at all.
 
 <!--
   x-: is for just a link
   t-: is for doc's toc
 -->
+
+[x-gitter]: https://gitter.im/stringparser/runtime
+[x-issues]: http://github.com/stringparser/runtime/issues
+[x-issues-new]: https://github.com/stringparser/runtime/issues/new
 
 [t-docs]: http://github.com/stringparser/runtime/tree/master/docs
 

@@ -1,33 +1,27 @@
 ##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - Stack API
 
-## Stack API
+The entry point for the stack API is through `runtime.stack`
 
-Code is worth a thousand words
+## runtime.stack
+> construct a consumable stack object which, upon call, will be used to
+invoke and give context to its `...arguments`
 
-```js
-var app = require('runtime').create();
+_arguments_ of `runtime.stack(...arguments[, props])`
+- `...arguments`, type string or function:
+  - string handlers are get from those set with [`runtime.set(path[, props)]`][x-runtime-set]
+  - functions, taken as they are
+- `props`, type object, properties of stack (see the [stack API][t-stack-api])
 
-function foo(next){ next(); /* or return stream, promise or observable */ }
-function bar(next){ next(); /* or return stream, promise or observable */ }
-function baz(next){ next(); /* or return stream, promise or observable */ }
+**_throws_**
+ - when no arguments are given
 
-var tack = app.stack(foo, bar, baz);
-tack(); // runs foo, bar baz in parallel
+_returns_
+- a `tick` callback, which, upon call will execute the stack arguments
 
-var teck = app.stack(foo, bar, baz, {wait: true});
-teck(); // runs foo, bar, baz in series
+_depends on_
+- [async-done](http://github.com/phated/async-done) which is mainly used to trap errors in a domain and resolve completion for the usual async constructs we have today: _Streams_, _Promises_ and _Observables_. _Callbacks_ are handled separately.
 
-var tick = app.stack(foo, app.stack(bar, baz), {wait: true});
-tick(); // runs foo in series with bar, baz which is run in parallel
-
-var tock = app.stack(foo, app.stack(bar, baz), {wait: true});
-tock(); // runs foo in series with bar, baz wich is run in parallel
-
-var tuck = app.stack(foo, app.stack(bar, baz, {wait: true}), {wait: true});
-tuck(); // runs foo in series with bar, baz wich is run in series
-```
-
-[`app.stack(...arguments[, props])`][t-runtime-api-stack] returns a callback and constructs a consumable stack object which, upon call, will be used to invoke and give context to `...arguments`. As
+`app.stack` returns a function so it can be composed.
 
 ##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 

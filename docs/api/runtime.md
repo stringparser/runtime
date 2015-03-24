@@ -1,32 +1,30 @@
 ##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack-api]
 
-## Runtime API
-
 Here is where all the interesting stuff starts to happen.
 
-Methods inherited from the [Manifold][x-manifold] constructor
+> Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which
+no path was given.
 
-- [set(path[, props])][x-runtime-set], set a path-to-regexp with props for lookup
-- [get(path[, options])][x-runtime-get], get the object associated to that path
-- [parse(prop[, parser])][x-runtime-parse], parse properties before they are set
+## runtime.stack
 
-We'll only cover `set` here, you can look at the others on the links above.
-
-**NOTE**: In all of the following `node` refers to an object mapping a regular expression match to an object.
+Is the main entry point for the [Stack API][t-stack-api], see that document.
 
 ## runtime.set
-> Sets a path to RegExp mapping between a string and object
+> Sets `nodes` and their properties
 
-_arguments of_ `runtime.set(path[, props])`
+_arguments for_ `runtime.set([path, props])`
 - `path` type string, to be parsed as a regular expression
 - `props` type function or plainObject
 
-_when props is a_
-- function: is assigned to `props.handle`
-- plainObject: its properties are passed to [a parser][x-runtime-parse] if there is one and, if not, the property is cloned and merged with that `node.prop` if the property.
+_when_
+- no `path` is given all properties will be parsed for the `rootNode`
+- `props` is a function: is assigned to `props.handle`
+- `props` is a plainObject: each property is passed to [a parser][x-runtime-parse] if there is one for it. If there is no parser:
+  - When is **not** an object, is cloned and asigned to `node[prop]`
+  - When the property is an object, it is cloned and merged with `node[prop]`.
 
 _returns_
- - this, the runtime instance
+- this, the runtime instance
 
 The path is taken as a regular expression using the  [parth](http://github.com/stringparser/parth) module, which uses the usual conventions on for path to regexp parsing. So you know... interesting things can happen.
 
@@ -52,69 +50,92 @@ runtime.get('get /user/10');
 }
 ```
 
-_simple property parser_
-```js
-var runtime = require('runtime').create('myBinaryThing');
+## runtime.get
+> gives an object matching the given path, cloning it by default
 
-runtime.parse('number', function(node, number, key, props){
-  var num = Number(number);
-  if(!Number.isNaN(num)){
-    node.number = Number(num.toString(2));
+_arguments for_ `runtime.set([path, options, mod])`_
+- `path`, type string, to match with those set previously
+- `options`, type object, with all extra information
+- `mod`, type object. If is a:
+  - plainObject with property ref, the node found will not be cloned
+  - regular expression, are the props to skip while cloning
+
+_returns_
+- the object `node` by reference if `mod.ref` was true
+- an object clone using `options` as a holder
+
+_when_
+- The `node` has a parent it will inherit its properties while cloning.
+
+_defaults_
+- to return a clone of the `rootNode` when no arguments are given
+
+> Note: parent and children properties are made non-enumerable by default so deep cloning is avoided.
+
+## runtime.parse
+> parse `node` properties _before_ they are set
+
+The method sets a `parser` for latter usage in [runtime.set][t-runtime-set], being invoked when a property key matches it on runtime set.
+
+_arguments for_ `runtime.set(prop[, parser])`
+ - `prop`, type string or object with one function per key
+ - `parser`, optional, type `function`
+
+_when_
+- `prop` is an object, a parser is expected for each value and each key is taken as a the property that is supposed to parse.
+
+_returns_
+ - `parser` for less than two arguments
+ - `this` for two arguments
+
+_sample_
+
+_simple property parser_
+
+```js
+runtime.parse({
+  number: function(node, value, key, props){
+    node.number = value + 2;
+  },
+  string: function(node, value, key, props){
+    node.string = value.trim();
   }
 });
 
-runtime.set({number: 5, thing: 'here'});
-runtime.get();
-// =>
-{
-  notFound: true,
-  name: 'myBinaryThing',
-  number: 101,
-  thing: 'here'
-}
+runtime
+   .set({number: 0, string: '  hello'})
+   .get(); // =>
+
+{ notFound: true, number: 2, string: 'hello' }
+
 ```
 
-#### runtime.stack
-> construct a consumable stack object which, upon call, will be used to
-invoke and give context to its `...arguments`
-
-_arguments_ of `runtime.stack(...arguments[, props])`
-- `...arguments`, type string or function:
-  - string handlers are get from those set with [`runtime.set(path[, props)]`][x-runtime-set]
-  - functions, taken as they are
-- `props`, type object, properties of stack (see the [stack API][t-stack-api])
-
-**_throws_**
- - when no arguments are given
-
-_returns_
-- a `tick` callback, which, upon call will execute the stack arguments
-
-_depends on_
-- [async-done](http://github.com/phated/async-done) which is mainly used to trap errors in a domain and resolve completion for the usual async constructs we have today: _Streams_, _Promises_ and _Observables_. _Callbacks_ are handled separately.
-
-`app.stack` returns a function so it can be composed.
-
+_a real world use-case for a parser_
 ```js
-var app = require('runtime').create();
-
-app.set('get :thing', function getThingHandle(next, one, two, three){
-  console.log(this.params.thing);
-  console.log(one, two, three);
-  next(); /* or return stream, promise or observable */
+var myLib = require('myLib');
+runtime.parse('handle', function(node, value, key, opt){
+  var handle = value;
+  node.handle = function (/* arguments*/){
+    return handle.apply(myLib, arguments);
+  }
 });
-
-function foo(next){ next(); /* or return stream, promise or observable */ }
-function bar(next){ next(); /* or return stream, promise or observable */ }
-function baz(next){ next(); /* or return stream, promise or observable */ }
-
-var tick = app.stack('get stuff', foo, app.stack(bar, app.stack(baz)));
-
-tick(1,2,3);
 ```
 
-By default all the elements of each stack will run in parallel.
+### `parser` arguments
 
+Arguments, passed from [manifold.set](#manifoldsetpath-props) to the parser are:
+ - `node`, type object, the current `node` being set
+ - `value`, type unkown, `options[prop]` of
+ - `key`, type string, property `name` being parsed (equal to `prop` at the moment)
+ - `opt`, the `options` object of `manifold.set`
+
+
+#### built-in: `parent` and `children` property parsers
+
+There are [default property parsers defined](./lib/defaultParsers.js). One for `options.parent` and another one for `options.children`. Both work together to help and define inheritance when using [`manifold.get`](#manifoldgetpath-options-mod) _only_ if so specified.
+
+
+<br>
 ----
 ##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
