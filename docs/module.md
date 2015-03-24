@@ -1,6 +1,8 @@
 ##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
-The `module.exports` are
+## module.exports
+
+The `module.exports` three properties
 
 - `Runtime`: class representing a runtime Interface
 - `create`: key-value store for `Runtime` instances
