@@ -57,7 +57,7 @@ Install `runtime` using [npm][x-npm]
 
     npm install runtime
 
-and then require it into any module
+and then require it into a module
 
 ```js
 var app = require('runtime').create();
