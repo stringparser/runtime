@@ -137,7 +137,7 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 
 <br>
 ----
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack-api]
 
 <!--
   x-: is for just a link

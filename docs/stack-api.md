@@ -23,7 +23,7 @@ _depends on_
 
 `app.stack` returns a function so it can be composed.
 
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - Stack API
 
 <!--
   x-: is for just a link
