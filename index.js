@@ -17,16 +17,15 @@ exports = module.exports = {
 };
 
 /*
-## create([name, options])
+## create([options])
 
 Key-value store for `Runtime` instances.
 
 _arguments_
-- `name` type string, label for the instance
 - `options` type object, options to be passed to the `Runtime` constructor
 
 _defaults_
- - `name` to `#root`
+ - `options.name`
  - `options.log` defaults to `true`
 
 _returns_
@@ -34,9 +33,9 @@ _returns_
  - a previous instance `name` if it did
 */
 
-function create(name, o){
+function create(o){
   o = o || {};
-  o.name = util.type(name || o.name).string || '#root';
+  o.name = util.type(o.name).string || '#root';
   if(!create.cache[o.name]){
     create.cache[o.name] = new Runtime(o);
   }
