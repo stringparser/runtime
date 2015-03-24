@@ -8,7 +8,7 @@ The `module.exports` three properties
 - `create`: key-value store for `Runtime` instances
 - `Stack`: class for consumable stack instances
 
-> Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which no path was given.
+> Note: on all that follows, `node` refers to an object mapping from a  string (or path) via regular expressions. Being the `rootNode` that for which no path was given.
 
 ## Runtime
 

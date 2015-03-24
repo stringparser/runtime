@@ -1,9 +1,10 @@
 ##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack-api]
 
+### Runtime API
+
 Here is where all the interesting stuff starts to happen.
 
-> Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which
-no path was given.
+> Note: on all that follows, `node` refers to an object mapping from a  string (or path) via regular expressions. Being the `rootNode` that for which no path was given.
 
 ## runtime.set
 ```js
@@ -256,5 +257,6 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 [t-runtime-set]: ./runtime-api.md#set
 [t-runtime-get]: ./runtime-api.md#get
 [t-runtime-parse]: ./runtime-api.md#parse
+[t-runtime-stack]: ./runtime-api.md#stack
 
 [x-manifold]: http://github.com/stringparser/manifold
