@@ -6,23 +6,25 @@ Here is where all the interesting stuff starts to happen.
 no path was given.
 
 ## runtime.set
-> Sets `nodes` and their properties
+```js
+function set([string path, object props])
+```
 
-_arguments for_ `runtime.set([path, props])`
-- `path` type string, to be parsed as a regular expression
+_arguments_
+- `path` type string to be parsed as a regular expression
 - `props` type function or plainObject
 
 _when_
 - no `path` is given all properties will be parsed for the `rootNode`
-- `props` is a function: is assigned to `props.handle`
-- `props` is a plainObject: each property is passed to [a parser][x-runtime-parse] if there is one for it. If there is no parser:
-  - When is **not** an object, is cloned and asigned to `node[prop]`
+- `props` is a function it is assigned to `props.handle`
+- `props` is a plainObject each property is passed to [a parser][t-runtime-parse] if there is one for it. If there is no parser:
+  - When is **not** an object, is cloned and assigned to `node[prop]`
   - When the property is an object, it is cloned and merged with `node[prop]`.
 
 _returns_
 - this, the runtime instance
 
-The path is taken as a regular expression using the  [parth](http://github.com/stringparser/parth) module, which uses the usual conventions on for path to regexp parsing. So you know... interesting things can happen.
+`path` is parsed to a regular expression using the  [parth][m-parth] module, which uses the [usual conventions][m-path-to-regex] on for path to regexp parsing. So you know... interesting things can happen.
 
 ### samples
 
@@ -46,15 +48,84 @@ runtime.get('get /user/10');
 }
 ```
 
-## runtime.stack
-> construct a consumable stack object which, upon call, will be used to
-invoke and give context to its `...arguments`
+> Note: `parent` and `children` properties are made non-enumerable by default so deep cloning is avoided.
 
-_arguments_ of `runtime.stack(...arguments[, props])`
-- `...arguments`, type string or function:
-  - string handlers are get from those set with [`runtime.set(path[, props)]`][x-runtime-set]
-  - functions, taken as they are
-- `props`, type object, properties of stack (see the [stack API][t-stack-api])
+## runtime.get
+```js
+function get([string path, object options, object mod])
+```
+
+Obtains an object matching the given path, cloning it by default.
+
+_arguments_
+- `path`, type string, to match with paths previously set
+- `options`, type object, with with the object `node` found
+- `mod`, type plainObject or regular expression
+  - when is a regex, property keys matching it will be skipped
+
+**_throws_**
+ - when arguments do not match the type
+
+_returns_
+- the object `node` by reference when `mod.ref` is true
+- the `rootNode` object if path wasn't a string
+- a `node` clone using `options` as a holder
+
+If the node has a property parent properties of the parent
+
+sample
+```js
+app.set('get /profile', {
+  picture: function getProfilePicture(){},
+  render: function getMarkup(){}
+});
+
+app.set('get /profile/:url', {
+  parent: 'get /profile',
+  handle: function getProfile(){}
+});
+
+app.get('get /profile/page'); // =>
+{
+  notFound: false,
+  path: 'get /profile/page',
+  url: '/profile/page',
+  params: {
+    _: ['url'],
+    url: 'page'
+  },
+  picture: [Function: getProfilePicture],
+  render: [Function: getMarkup]
+}
+
+app.get('get /profile/page', {ref: true}) // =>
+{
+  notFound: false,
+  path: 'get /profile/page',
+  handle: [Function: getProfile]
+}
+
+app.get('get /profile/page', /path/, {ref: true}) // =>
+{
+  notFound: false,
+  url: '/profile/page',
+  handle: [Function: getProfile]
+}
+```
+
+## runtime.stack
+```js
+function stack(...arguments[, object props])
+```
+Constructs a consumable stack object which, upon call, will be used to
+invoke and give context to its `...arguments`.
+
+_arguments_
+- `...arguments`, type string or function
+- `props`, type object, properties of stack of the [stack API][t-stack-api]. Look at its documentation for more details
+
+_when_
+ - an `...arguments` element is a string its handle will be obtained from the corresponding `node` set using [`runtime.get`][t-runtime-get]
 
 **_throws_**
  - when no arguments are given
@@ -62,77 +133,89 @@ _arguments_ of `runtime.stack(...arguments[, props])`
 _returns_
 - a `tick` callback, which, upon call will execute the stack arguments
 
-_depends on_
-- [async-done](http://github.com/phated/async-done) which is mainly used to trap errors in a domain and resolve completion for the usual async constructs we have today: _Streams_, _Promises_ and _Observables_. _Callbacks_ are handled separately.
+_sample_
 
-`app.stack` returns a function so it can be composed.
+```js
+app.set(':handle(\\d+)', function handleNumbers(next){
+  console.log('number was', next.params.handle);
+  setTimeout(next, Math.random()*10);
+});
 
-This method is the main entry point for the [Stack API][t-stack-api]. Go to that document for details about it.
+app.get('1'); // =>
+{
+  notFound: false,
+  path: '1',
+  handle: [Function: handleNumbers]
+}
 
-## runtime.get
-> gives an object matching the given path, cloning it by default
+function end(next){
+  console.log('end');
+  next();
+}
 
-_arguments for_ `runtime.set([path, options, mod])`_
-- `path`, type string, to match with those set previously
-- `options`, type object, with all extra information
-- `mod`, type object. If is a:
-  - plainObject with property ref, the node found will not be cloned
-  - regular expression, are the props to skip while cloning
+app.stack('1', end, {wait: true})();
+// =>
+// number was 1
+// end
 
-_returns_
-- the object `node` by reference if `mod.ref` was true
-- an object clone using `options` as a holder
+app.stack('1 2', app.stack('3 4', end, {wait: true}), {wait: true})();
+// =>
+// number was 1
+// number was 2
+// number was 3
+// number was 4
+// end
 
-_when_
-- The `node` has a parent it will inherit its properties while cloning.
-
-_defaults_
-- to return a clone of the `rootNode` when no arguments are given
-
-> Note: parent and children properties are made non-enumerable by default so deep cloning is avoided.
+```
 
 ## runtime.parse
-> parse `node` properties _before_ they are set
+```js
+function parse(string key|object props[, function parser])
+```
 
-The method sets a `parser` for latter usage in [runtime.set][t-runtime-set], being invoked when a property key matches it on runtime set.
+This method sets a `parser` for latter usage in [runtime.set][t-runtime-set] which will be invoked when a property key matches `prop`.
 
-_arguments for_ `runtime.set(prop[, parser])`
- - `prop`, type string or object with one function per key
+_arguments_
+ - `key`, type string or object with one function per key
  - `parser`, optional, type `function`
 
 _when_
-- `prop` is an object, a parser is expected for each value and each key is taken as a the property that is supposed to parse.
+- `key` is an object, it makes the method recursive. Each key is taken as a the property that is supposed to parse and each value its `parser`.
 
 _returns_
- - `parser` for less than two arguments
  - `this` for two arguments
+ - `parser` for less than two arguments
 
-_sample_
+_samples_
 
 _simple property parser_
 
 ```js
 runtime.parse({
-  number: function(node, value, key, props){
+  number: function(node, value, props){
     node.number = value + 2;
   },
-  string: function(node, value, key, props){
+  string: function(node, value, props){
     node.string = value.trim();
   }
 });
 
 runtime
-   .set({number: 0, string: '  hello'})
+   .set({number: 0, string: '  hello '})
    .get(); // =>
 
-{ notFound: true, number: 2, string: 'hello' }
+{
+  notFound: true,
+  number: 2,
+  string: 'hello'
+}
 
 ```
 
-_a real world use-case for a parser_
+_real use-case for a parser_
 ```js
 var myLib = require('myLib');
-runtime.parse('handle', function(node, value, key, opt){
+runtime.parse('handle', function(node, value, props){
   var handle = value;
   node.handle = function (/* arguments*/){
     return handle.apply(myLib, arguments);
@@ -142,11 +225,10 @@ runtime.parse('handle', function(node, value, key, opt){
 
 ### `parser` arguments
 
-Arguments, passed from [manifold.set](#manifoldsetpath-props) to the parser are:
+The arguments are passed from [runtime.set][t-runtime-set]:
  - `node`, type object, the current `node` being set
- - `value`, type unkown, `options[prop]` of
- - `key`, type string, property `name` being parsed (equal to `prop` at the moment)
- - `opt`, the `options` object of `manifold.set`
+ - `value`, type unknown, `props[key]`
+ - `props`, the `props` argument of `manifold.set`
 
 
 #### built-in: `parent` and `children` property parsers
@@ -163,12 +245,16 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
   t-: is for doc's toc
 -->
 
+[m-parth]: http://github.com/stringparser/parth
+[m-async-done]: http://github.com/phated/async-done
+[m-path-to-regex]: https://github.com/pillarjs/path-to-regexp
+
 [t-docs]: ./readme.md
 [t-module]: ./module.md
 [t-stack-api]: ./stack-api.md
 [t-runtime-api]: ./runtime-api.md
+[t-runtime-set]: ./runtime-api.md#set
+[t-runtime-get]: ./runtime-api.md#get
+[t-runtime-parse]: ./runtime-api.md#parse
 
 [x-manifold]: http://github.com/stringparser/manifold
-[x-runtime-set]: http://github.com/stringparser/manifold
-[x-runtime-get]: http://github.com/stringparser/manifold#manifoldgetpath-options-mod
-[x-runtime-parse]: http://github.com/stringparser/manifold#manifoldparseprop-parser
