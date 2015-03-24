@@ -2,146 +2,122 @@
   <img src="./docs/artwork/runtime_gear.png" height="245"/>
 </p>
 
+## [![build][b-build]][x-travis][![NPM version][b-version]][x-npm] [![Gitter][b-gitter]][x-gitter]
+
+[getting started](#getting-started) -
 [documentation](./docs) -
 [examples](#examples) -
-[install](#install) -
-[inspirated by](#inspirated-by) -
 [implementation status](#implementation-status)
 
-[![build][badge-build]][x-travis]
-[![NPM version][badge-version]][x-npm]
-[![Gitter][badge-gitter]][x-gitter]
+The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces` being the _main_ focus of the library to abstract async function composition into one function. In addition, and to make it expressive, some features were added:
 
-The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces`. For that, the main focus of the library is to abstract any **async function composition** into a single callback/function representing part of a stack. Though composing functions was good enough, in order to be expressive two more features were added: [path-to-regex mapping][x-manifold] (to find functions from strings) and a little declarative API.
+ - [path-to-regex mapping][p-manifold]
+ - a small declarative [Stack API][t-stack-api] for each stack
+ - completion with a callback, always on the 1st argument, that is in charge of passing arguments down to other functions on the same stack. Completion using the return value with [async-done][p-async-done] that supports completion when returning a _stream_, _promise_ or an _observable_.
 
-Last, but not least, async completion for each handle is achieved using [async-done](http://github.com/phated/async-done) which supports _streams_, _promises_, _observables_ and _callbacks_. Though callbacks are handled separately: to pass arguments around and take advantadge of error handling done  by async-done since it wraps functions in a domain.
+Changing from this
 
-Anyway, enough babbling.
+```js
+handleOne(function(err, value){
+  if(err){ throw err; }
+  handleTwo(function (err, value2){
+    // etc.
+  })
+})
+```
+
+to this
+
+```js
+var app = require('runtime').create();
+
+function one(next, input){
+  next(null, input, 'value');
+}
+
+function two(next, input, value){
+  console.log(input, value);
+  next();
+}
+
+var handle = app.stack(one, two, {
+  wait: true
+  onHandleNotFound: function(err, next){
+    throw err;
+  }
+});
+
+handle('input');
+```
+
+## getting started
+
+Install `runtime` using [npm][x-npm]
+
+    npm install runtime
+
+and then require it into any module
+
+```js
+var app = require('runtime').create();
+
+app.set(':handle', function(next){
+  setTimeout(next, Math.random()*10);
+})
+
+app.stack('1 2 3 4 5 6')();
+app.stack('one two three four five six', {wait: true})();
+```
+
+### browser
+
+At the moment is not tested in browsers but it should work. Use it at your own risk though :). Either a browserify or webpack `bundle.js` should do the trick.
 
 ## documentation
 
-Get started looking at [thy docs](./docs).
+[`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
-## samples
+If you have something to ask, feel free to [open an issue][x-issues-new] or [come and chat in gitter][x-gitter] with any questions. I wouldn't mind at all.
 
-#### server
-```js
-var http = require('http');
-var app = require('runtime').create();
+## examples
 
-app.set({
-  onHandleNotFound: function(next, req, res){
-    res.writeHead(404, {'Content-Type': 'text/plain'});
-    res.end('404: There is no path \''+req.url+'\' defined yet.');
-    next();
-  }
-});
+There are some use cases you can find at [the examples directory](./examples).
 
-app.set('get /', app.stack(index, query, end));
-
-function index(next, req, res){
-  res.write('Hello there ');
-  return res;
-}
-
-function query(next, req, res){
-  var name = req.url.match(/\?name=([^&]+)/);
-  var user = name ? name[1] : '"anonymous"';
-  res.write(user);
-  return res;
-}
-
-function end(next, req, res){
-  res.end(); next();
-}
-
-function router(req, res){
-  var method = req.method.toLowerCase();
-  app.stack(method + ' '+ req.url)(req, res);
-}
-
-http.createServer(router).listen(8000, function(){
-  console.log('http server running on port 8000');
-});
-```
-
-#### query
-```js
-'use strict';
-
-var mongodb = require('mongojs');
-var db = mongodb('db', ['users']);
-var app = require('../../.').create('mongo-example');
-
-function remove(next){
-  db.users.remove(next);
-}
-
-function count(next){
-  db.users.count(next);
-}
-
-function insert(next, result, user){
-  db.users.insert(user, next);
-}
-
-function find(next){
-  db.users.find(next);
-}
-
-var query = app.stack(remove, count, insert, find, {
-  wait: true,
-  onHandleEnd: function(next){
-    this.results = this.results || [ ];
-    this.results.push({
-      name: next.match,
-      result: this.args.slice(1)
-    });
-    if(this.queue){ return ; }
-    console.log('-------------');
-    this.results.forEach(function(stack){
-      console.log(stack.name);
-      console.log(' ',stack.result[0], stack.result[1]);
-    });
-  }
-});
-
-query(null, {name: 'johnny'});
-```
-
-## more ex-samples
-
-In the [examples](./examples) folder you can find some use-cases.
-
-## install
-
-With [npm][x-npm]
-
-    npm install runtime --save
-
-#### implementation status: unstable
+## implementation status: unstable
 > growing a beard feels goood
 
-The library needs polishing. It has some rough edges I'm working on but is tested and usable. I want to fix some stuff I'm not really proud about, but the [top level API](./docs/api/runtime.md) should not suffer any change.
+It's been a while since the project started and finally is getting there. At the moment, the library needs polishing since it has some rough edges I'm working. Is tested and usable but I want to fix some stuff I'm not really proud about. The [top level API][t-runtime-api] should not suffer any change.
 
 I'll be using it everywhere so the first user involved here is me.
 
 ## license
-[![License][badge-license]][x-license]
+[![License][b-license]][x-license]
 
 <!--
-  x-: is for just a link
+  b-: is for badges
+  p-: is for package
   t-: is for doc's toc
+  x-: is for just a link
 -->
 
-[x-npm]: https://npmjs.org/package/runtime
-[x-travis]: https://travis-ci.org/stringparser/runtime/builds
+
+[x-npm]: https://npmjs.org
+[p-domain]: http://github.com/package/domain
+[p-manifold]: http://npmjs.org/package/manifold
+[p-next-tick]: http://npmjs.org/package/next-tick
+[p-async-done]: http://npmjs.org/package/async-done
+
+[t-docs]: ./docs
+[t-module]: ./docs/module.md
+[t-stack-api]: ./docs/stack.md
+[t-runtime-api]: ./docs/runtime.md
+
 [x-gitter]: https://gitter.im/stringparser/runtime
+[x-travis]: https://travis-ci.org/stringparser/runtime/builds
 [x-license]: http://opensource.org/licenses/MIT
+[x-issues-new]: https://github.com/stringparser/runtime/issues/new
 
-[x-manifold]: http://github.com/stringparser/manifold
-
-[badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
-[badge-gitter]: https://badges.gitter.im/Join%20Chat.svg
-[badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
-[badge-license]: http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square
+[b-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
+[b-gitter]: https://badges.gitter.im/Join%20Chat.svg
+[b-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
+[b-license]: http://img.shields.io/npm/l/gulp-runtime.svg?style=flat-square
