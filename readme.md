@@ -4,10 +4,11 @@
 
 ## [![build][b-build]][x-travis][![NPM version][b-version]][x-npm] [![Gitter][b-gitter]][x-gitter]
 
-[getting started](#getting-started) -
-[documentation](./docs) -
-[examples](#examples) -
-[implementation status](#implementation-status)
+[Getting started](#getting-started) -
+[Documentation](./docs) -
+[Examples](#examples) -
+[Implementation status](#implementation-status) -
+[License](#license)
 
 The aim of the project is to provide an easy an non opinionated container to develop `Runtime Interfaces` being the _main_ focus of the library to abstract async function composition into one function. In addition, and to make it expressive, some features were added:
 
@@ -83,7 +84,7 @@ If you have something to ask, feel free to [open an issue][x-issues-new] or [com
 
 There are some use cases you can find at [the examples directory](./examples).
 
-## implementation status
+## Implementation status
 > growing a beard feels goood
 
     status: unstable
@@ -92,7 +93,7 @@ It's been a while since the project started and finally is getting there. At the
 
 I'll be using it everywhere so the first user involved here is me.
 
-## license
+## License
 [![License][b-license]][x-license]
 
 <!--
