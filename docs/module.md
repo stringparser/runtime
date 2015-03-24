@@ -8,8 +8,7 @@ The `module.exports` three properties
 - `create`: key-value store for `Runtime` instances
 - `Stack`: class for consumable stack instances
 
-> Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which
-no path was given.
+> Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which no path was given.
 
 ## Runtime
 
@@ -42,34 +41,30 @@ function create([name, object options])
 Key-value store for `Runtime` instances.
 
 _arguments_
-- `name` type string, label of the instance
 - `options` type object, options to be passed to the `Runtime` constructor
 
 _defaults_
- - `name` to `#root`
+ - `options.name` to `#root`
  - `options.log` defaults to `true`
 
 _returns_
- - a previous instance `name` if was stored
- - a new `Runtime` instance if wasn't there
+ - a new `Runtime` instance if was stored
+ - a previously stored `options.name` instance
 
 ## Stack
 ```js
-function Stack(args [, app])
+function Stack(array|arguments args [, Runtime app])
 ```
 Class for consumable stack instances
 
 _arguments_
 - `app` a runtime instance
-- `args` type arguments or array, elements of the stack which should be string or function
-
-_defaults_
-- `name` to `#root`
-- `options.log` defaults to `true`
+- `args` type arguments or array, each element should be a string or function
 
 _returns_
-- a previous instance `name` if was stored
-- a new `Runtime` instance if wasn't there
+- a stack instance
+
+For more details, read about the [stack API][t-stack-api].
 
 <br>
 ---
