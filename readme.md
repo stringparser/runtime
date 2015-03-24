@@ -50,7 +50,7 @@ var handle = app.stack(one, two, {
 handle('input');
 ```
 
-## getting started
+## Getting started
 
 Install `runtime` using [npm][x-npm]
 
@@ -69,24 +69,26 @@ app.stack('1 2 3 4 5 6')();
 app.stack('one two three four five six', {wait: true})();
 ```
 
-### browser
+## Browser
 
 At the moment is not tested in browsers but it should work. Use it at your own risk though :). Either a browserify or webpack `bundle.js` should do the trick.
 
-## documentation
+## Documentation
 
 [`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
 
 If you have something to ask, feel free to [open an issue][x-issues-new] or [come and chat in gitter][x-gitter] with any questions. I wouldn't mind at all.
 
-## examples
+## Examples
 
 There are some use cases you can find at [the examples directory](./examples).
 
-## implementation status: unstable
+## implementation status
 > growing a beard feels goood
 
-It's been a while since the project started and finally is getting there. At the moment, the library needs polishing since it has some rough edges I'm working. Is tested and usable but I want to fix some stuff I'm not really proud about. The [top level API][t-runtime-api] should not suffer any change.
+    status: unstable
+
+It's been a while since the project started and finally is getting there. At the moment, the library needs polishing since it has some rough edges I'm working on. Is tested and usable but I want to fix some stuff I'm not really proud about. In any case, the [top level API][t-runtime-api] should not suffer any change.
 
 I'll be using it everywhere so the first user involved here is me.
 

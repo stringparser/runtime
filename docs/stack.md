@@ -30,11 +30,7 @@ _depends on_
   t-: is for doc's toc
 -->
 
-[t-docs]: http://github.com/stringparser/runtime/tree/master/docs
-
-[t-module]: http://github.com/stringparser/runtime/tree/master/docs/api/readme.md
-
-[t-stack-api]: http://github.com/stringparser/runtime/tree/master/docs/api/stack.md
-
-[t-runtime-api]: http://github.com/stringparser/runtime/tree/master/docs/api/runtime.md
-[t-runtime-api-stack]: http://github.com/stringparser/runtime/tree/master/docs/api/runtime.md#stack
+[t-docs]: ./readme.md
+[t-module]: ./module.md
+[t-stack-api]: ./stack-api.md
+[t-runtime-api]: ./runtime-api.md

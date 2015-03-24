@@ -20,7 +20,7 @@ app.stack('1 2 3 4 5 6')();
 app.stack('one two three four five six', {wait: true})();
 ```
 
-### browser
+### Browser
 
 At the moment is not tested in browsers but it should work. Use it at your own risk though :). Either a browserify or webpack `bundle.js` should do the trick.
 
