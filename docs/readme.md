@@ -1,5 +1,6 @@
-## runtime documentation
 ##### Documentation - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+
+## runtime documentation
 
 ### Getting started
 
