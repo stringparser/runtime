@@ -5,10 +5,6 @@ Here is where all the interesting stuff starts to happen.
 > Note: on all that follows, `node` refers to an object mapping a string (or path) to an object via regular expressions. Being the `rootNode` that for which
 no path was given.
 
-## runtime.stack
-
-Is the main entry point for the [Stack API][t-stack-api], see that document.
-
 ## runtime.set
 > Sets `nodes` and their properties
 
@@ -70,6 +66,8 @@ _depends on_
 - [async-done](http://github.com/phated/async-done) which is mainly used to trap errors in a domain and resolve completion for the usual async constructs we have today: _Streams_, _Promises_ and _Observables_. _Callbacks_ are handled separately.
 
 `app.stack` returns a function so it can be composed.
+
+This method is the main entry point for the [Stack API][t-stack-api]. Go to that document for details about it.
 
 ## runtime.get
 > gives an object matching the given path, cloning it by default
