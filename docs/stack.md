@@ -50,7 +50,6 @@ _defaults_
 - to a function throwing an error if `runtime.repl` is not active
 - to a function that prints a warning when `runtime.repl` is active
 
-
 ### stack.onHandleCall
 ```js
 function onHandleCall(function next, ...stackArguments)
