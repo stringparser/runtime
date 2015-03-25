@@ -1,4 +1,4 @@
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime] - [Stack API][t-stack]
 
 ## module.exports
 
@@ -64,11 +64,11 @@ _arguments_
 _returns_
 - a stack instance
 
-For more details, read about the [stack API][t-stack-api].
+For more details, read about the [stack API][t-stack].
 
 <br>
 ---
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime] - [Stack API][t-stack]
 
 <!--
   x-: is for just a link
@@ -76,9 +76,9 @@ For more details, read about the [stack API][t-stack-api].
 -->
 
 [t-docs]: ./readme.md
+[t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-stack-api]: ./stack-api.md
-[t-runtime-api]: ./runtime-api.md
+[t-runtime]: ./runtime.md
 
 [x-manifold]: http://github.com/stringparser/manifold
 [x-runtime-set]: http://github.com/stringparser/manifold

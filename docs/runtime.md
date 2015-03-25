@@ -1,4 +1,4 @@
-##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack]
 
 ### Runtime API
 
@@ -127,7 +127,7 @@ invoke and give context to its `...arguments`.
 
 _arguments_
 - `...arguments`, type string or function
-- `props`, type object, properties of stack of the [stack API][t-stack-api]. Look at its documentation for more details
+- `props`, type object, properties of stack of the [stack API][t-stack]. Look at its documentation for more details
 
 _when_
  - an `...arguments` element is a string its handle will be obtained from the corresponding `node` set using [`runtime.get`][t-runtime-get]
@@ -243,7 +243,7 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 
 <br>
 ----
-##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack-api]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack]
 
 <!--
   x-: is for just a link
@@ -255,12 +255,12 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 [m-path-to-regex]: https://github.com/pillarjs/path-to-regexp
 
 [t-docs]: ./readme.md
+[t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-stack-api]: ./stack-api.md
-[t-runtime-api]: ./runtime-api.md
-[t-runtime-set]: ./runtime-api.md#set
-[t-runtime-get]: ./runtime-api.md#get
-[t-runtime-parse]: ./runtime-api.md#parse
-[t-runtime-stack]: ./runtime-api.md#stack
+[t-runtime]: ./runtime.md
+[t-runtime-set]: ./runtime.md#set
+[t-runtime-get]: ./runtime.md#get
+[t-runtime-parse]: ./runtime.md#parse
+[t-runtime-stack]: ./runtime.md#stack
 
 [x-manifold]: http://github.com/stringparser/manifold

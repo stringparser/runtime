@@ -1,4 +1,4 @@
-##### Documentation - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - [Stack API][t-stack-api]
+##### Documentation - [`module.exports`][t-module] - [Runtime API][t-runtime] - [Stack API][t-stack]
 
 ## runtime documentation
 
@@ -34,6 +34,6 @@ At the moment is not tested in browsers but it should work. Use it at your own r
 [x-npm]: https://npmjs.org
 
 [t-docs]: ./readme.md
+[t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-stack-api]: ./stack-api.md
-[t-runtime-api]: ./runtime-api.md
+[t-runtime]: ./runtime.md

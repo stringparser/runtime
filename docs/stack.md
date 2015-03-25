@@ -1,4 +1,4 @@
-##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - Stack API
+##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime] - Stack API
 
 ### Stack API
 
@@ -147,7 +147,7 @@ app.set(':handle(\\d+)', function(next){
 app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 ```
 
-##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - Stack API
+##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime] - Stack API
 
 <!--
   b-: is for badges
@@ -157,12 +157,12 @@ app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 -->
 
 [t-docs]: ./readme.md
+[t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-stack-api]: ./stack-api.md
-[t-runtime-api]: ./runtime-api.md
-[t-runtime-set]: ./runtime-api.md#set
-[t-runtime-get]: ./runtime-api.md#get
-[t-runtime-parse]: ./runtime-api.md#parse
-[t-runtime-stack]: ./runtime-api.md#stack
+[t-runtime]: ./runtime.md
+[t-runtime-set]: ./runtime.md#set
+[t-runtime-get]: ./runtime.md#get
+[t-runtime-parse]: ./runtime.md#parse
+[t-runtime-stack]: ./runtime.md#stack
 
 [p-async-done]: http://npmjs.org/package/async-done
