@@ -16,40 +16,50 @@ The aim of the project is to provide an easy an non opinionated container to dev
  - a small declarative [Stack API][t-stack-api] for each stack
  - completion with a callback, always on the 1st argument, that is in charge of passing arguments down to other functions on the same stack. Completion using the return value with [async-done][p-async-done] that supports completion when returning a _stream_, _promise_ or an _observable_.
 
-Changing from this
+## Samples
+
+_simple server using the `http` module_
 
 ```js
-handleOne(function(err, value){
-  if(err){ throw err; }
-  handleTwo(function (err, value2){
-    // etc.
-  })
-})
-```
-
-to this
-
-```js
+var http = require('http');
 var app = require('runtime').create();
 
-function one(next, input){
-  next(null, input, 'value');
-}
-
-function two(next, input, value){
-  console.log(input, value);
-  next();
-}
-
-var handle = app.stack(one, two, {
-  wait: true
-  onHandleNotFound: function(err, next){
-    throw err;
+app.set({
+  onHandleNotFound: function(next, req, res){
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.end('404: There is no path \''+req.url+'\' defined yet.');
+    next();
   }
 });
 
-handle('input');
+app.set('get /', app.stack(index, query, end));
+
+function index(next, req, res){
+  res.write('Hello there ');
+  return res;
+}
+
+function query(next, req, res){
+  var name = req.url.match(/\?name=([^&]+)/);
+  var user = name ? name[1] : '"anonymous"';
+  res.write(user);
+  return res;
+}
+
+function end(next, req, res){
+  res.end(); next();
+}
+
+function router(req, res){
+  var method = req.method.toLowerCase();
+  app.stack(method + ' '+ req.url)(req, res);
+}
+
+http.createServer(router).listen(8000, function(){
+  console.log('http server running on port 8000');
+});
 ```
+
 
 ## Getting started
 
