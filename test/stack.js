@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(runtime){
-  var app = runtime.create('stack', {log: false});
+  var app = runtime.create({log: false});
 
   it('should accept (separated, strings)', function(done){
     app.set({onHandleError: done});

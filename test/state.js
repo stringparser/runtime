@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(runtime){
-  var app = runtime.create('dispatch', {log: false});
+  var app = runtime.create({log: false});
 
   it('can be changed on demand', function(done){
     app.set({onHandleError: done});
