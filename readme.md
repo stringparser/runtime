@@ -2,7 +2,7 @@
   <img src="./docs/artwork/runtime_gear.png" height="245"/>
 </p>
 
-## [![build][b-build]][x-travis][![NPM version][b-version]][x-npm] [![Gitter][b-gitter]][x-gitter]
+## [![build][b-build]][x-travis][![NPM version][b-version]][p-runtime] [![Gitter][b-gitter]][x-gitter]
 
 [Getting started](#getting-started) -
 [Documentation](./docs) -
@@ -106,6 +106,7 @@ I'll be using it everywhere so the first user involved here is me.
 
 [x-npm]: https://npmjs.org
 [p-domain]: http://github.com/package/domain
+[p-runtime]: http://npmjs.org/package/runtime
 [p-manifold]: http://npmjs.org/package/manifold
 [p-next-tick]: http://npmjs.org/package/next-tick
 [p-async-done]: http://npmjs.org/package/async-done
