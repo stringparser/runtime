@@ -4,7 +4,7 @@ module.exports = function(runtime){
   var app = runtime.create('dispatch', {log: false});
 
   it('can be changed on demand', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next){
       next.wait.should.be.eql(true);
@@ -23,7 +23,7 @@ module.exports = function(runtime){
   });
 
   it('does not propagate between stacks', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function foo(next){
       next.wait = false;
@@ -38,7 +38,7 @@ module.exports = function(runtime){
   });
 
   it('the default should be parallel', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     var end = [];
     app.set(':handle(\\d+)', function(next){
@@ -58,7 +58,7 @@ module.exports = function(runtime){
   });
 
   it('for series indicate wait in options', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     var end = [];
     app.set(':handle(\\d+)', function(next){
@@ -78,7 +78,7 @@ module.exports = function(runtime){
   });
 
   it('should handle series & parallel stacks', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     var end = {series:[], parallel:[]};
     app.set(':handle(\\d+)', function seriesParallel(next){
@@ -105,7 +105,7 @@ module.exports = function(runtime){
   });
 
   it('full series stack should have them all wait', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     var end = [];
     app.set(':handle(\\d+)', function sequence(next){
@@ -127,7 +127,7 @@ module.exports = function(runtime){
   });
 
   it('full series stack can be nested, but all should wait', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     var end = [];
     app.set(':handle(\\d+)', function sequence(next){

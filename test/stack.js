@@ -4,7 +4,7 @@ module.exports = function(runtime){
   var app = runtime.create('stack', {log: false});
 
   it('should accept (separated, strings)', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     app.set('1', function(next){
       next.match.should.be.eql('1');
@@ -21,7 +21,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (join strings argument)', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     app.set('1', function(next){
       next.match.should.be.eql('1');
@@ -38,7 +38,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (function, function)', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next){
       next.match.should.be.eql('one');
@@ -53,7 +53,7 @@ module.exports = function(runtime){
   });
 
   it('should accept (string, function)', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     app.set('a :string', function(next){
       next.match.should.be.eql('a word');
@@ -68,7 +68,7 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments around', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -95,7 +95,7 @@ module.exports = function(runtime){
   });
 
   it('should be able change arguments around', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -122,7 +122,7 @@ module.exports = function(runtime){
   });
 
   it('should not change arguments if length is less than 2', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -149,7 +149,7 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments around between stacks', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next, foo, bar, baz){
       foo.should.be.eql(1);
@@ -178,7 +178,7 @@ module.exports = function(runtime){
   });
 
   it('should pass arguments between stacks that wait', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function one(next, foo, bar, baz){
       next.wait = true;

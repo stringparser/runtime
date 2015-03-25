@@ -7,7 +7,7 @@ module.exports = function(runtime, util){
   var app = runtime.create('resolve', {log: false});
 
   before(function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
     util.rimraf('dir', function(){
       util.mkdirp('dir/src', function(){
         fs.open('dir/src/file.js', 'w', done);
@@ -16,7 +16,7 @@ module.exports = function(runtime, util){
   });
 
   it('async-done enables waiting to gulp streams', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
 
     function src(next, src, dest){
       next.wait = true;
@@ -34,7 +34,7 @@ module.exports = function(runtime, util){
   });
 
   it('async-done enables waiting to through streams', function(done){
-    app.set({onError: done});
+    app.set({onHandleError: done});
     app.repl({input: util.through.obj()});
 
     function wait(next){
