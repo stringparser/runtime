@@ -3,6 +3,7 @@
 ### Stack API
 
 * [Stack methods](#stack-methods)
+* [Stack properties](#stack-properties)
 * [Stack entry points](#stack-entry-points)
 * [Stacks composition](#composing-stacks)
 
@@ -73,6 +74,13 @@ _arguments_
 _defaults_
  - to a logger if the `rootNode` has a property `log` set to true
 
+## Stack properties
+
+The only thing that is shared between stacks are their arguments, so properties can be safely attached to them and used without side effects.
+
+Special properties are
+ - `wait`: makes the next handle to wait for this to finish.
+
 ## Stack entry points
 
 There are two entry points for the Stack API:
@@ -123,6 +131,20 @@ function end(){
 app.stack('get /profile/page', end)()
 // =>
 // url was page
+```
+
+## Stack composition
+
+[`runtime.stack`][t-runtime-stack] returns a function so its possible to compose one stack with another. As is was said earlier in this same document, each stack only shares the arguments passed with another.
+
+```js
+var app = require('runtime').create();
+
+app.set(':handle(\\d+)', function(next){
+  setTimeout(next, Math.random());
+});
+
+app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 ```
 
 ##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime-api] - Stack API

@@ -4,6 +4,11 @@
 
 Here is where all the interesting stuff starts to happen.
 
+* [runtime.set](#runtimeset)
+* [runtime.get](#runtimeget)
+* [runtime.stack](#runtimestack)
+* [runtime.parse](#runtimeparse)
+
 > Note: on all that follows, `node` refers to an object mapping from a  string (or path) via regular expressions. Being the `rootNode` that for which no path was given.
 
 ## runtime.set
@@ -48,8 +53,6 @@ runtime.get('get /user/10');
   handle: [Function: getUserPage]
 }
 ```
-
-> Note: `parent` and `children` properties are made non-enumerable by default so deep cloning is avoided.
 
 ## runtime.get
 ```js
@@ -113,12 +116,13 @@ app.get('get /profile/page', /path/, {ref: true}) // =>
   handle: [Function: getProfile]
 }
 ```
+> Note: `parent` and `children` properties are made non-enumerable by default so deep cloning is avoided.
 
 ## runtime.stack
 ```js
 function stack(...arguments[, object props])
 ```
-Constructs a consumable stack object which, upon call, will be used to
+On first call constructs a consumable stack object which will be used to
 invoke and give context to its `...arguments`.
 
 _arguments_
