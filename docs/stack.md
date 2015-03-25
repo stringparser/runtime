@@ -32,6 +32,25 @@ _arguments_
 _defaults_
  - to a function that throws the error
 
+### stack.onHandleNotFound
+```js
+function onHandleNotFound(next, ...stackArguments)
+```
+
+Mainly used for missing function associated with a string to object mappings when [`runtime.get`][t-runtime-get] is called.
+
+Called when:
+- whenever the handle wasn't found
+
+_arguments_
+- `next` type function, callback passed to any of the functions of the stack
+- `stackArguments` type unknown, arguments passed down the stack
+
+_defaults_
+- to a function throwing an error if `runtime.repl` is not active
+- to a function that prints a warning when `runtime.repl` is active
+
+
 ### stack.onHandleCall
 ```js
 function onHandleCall(function next, ...stackArguments)
