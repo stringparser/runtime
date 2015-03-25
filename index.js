@@ -31,15 +31,9 @@ _returns_
  - a previous instance `name` if it did
 */
 
-function create(name, o){
-  o = o || {};
-  o.name = util.type(name || o.name).string || '#root';
-  if(!create.cache[o.name]){
-    create.cache[o.name] = new Runtime(o);
-  }
-  return create.cache[o.name];
+function create(o){
+  return new Runtime(o);
 }
-create.cache = {};
 
 /* ## Runtime([options])
 
@@ -64,11 +58,8 @@ function Runtime(o){
 
   o = o || {};
   util.Manifold.call(this);
-
-  this.set({
-    log: o.log === void 0 || o.log,
-    name: util.type(o.name).string || '#root'
-  });
+  o.log = o.log === void 0 || o.log;
+  this.set(o);
 }
 util.inherits(Runtime, util.Manifold);
 
@@ -93,41 +84,7 @@ _returns_
 Runtime.prototype.stack = function(stack){
 
   var self = this;
-  var stackArguments;
-
-  function next(err){
-    if(err){ stack.onHandleError(err, next); }
-    if(next.end) { return stack.args[0]; }
-    if(arguments.length){
-      util.args.map(stack.args, arguments);
-    }
-
-    next.end = true;
-    stack.wait = next.wait;
-
-    var that = stack;
-    stack.queue = stack.queue.replace(next.match, '').trim();
-    while(!that.queue && that.host){
-      that.host.queue = that.host.queue.replace(that.path, '').trim();
-      that = that.host;
-    }
-
-    stack.onHandle.apply(stack, next.args);
-    stack.onHandleEnd.apply(stack, next.args);
-
-    if(stack.next){
-      self.stack(stack);
-    } else if(stack.host && stack.host.next){
-      stack.host.args = stack.args;
-      self.stack(stack.host);
-    }
-
-    return next.result;
-  }
-
-  //
-  // ---------
-  //
+  var args, stackArguments;
 
   function tick(arg){
     if(stackArguments){
@@ -135,7 +92,6 @@ Runtime.prototype.stack = function(stack){
       if(arg instanceof Stack){ stack.host = arg; }
       stack.args = util.args(arguments, stack.host ? 0 : -1);
       if(arg instanceof Error){ stack.onHandleError(arg, next); }
-      stack.time = util.hrtime();
       return self.stack(stack);
     }
 
@@ -151,7 +107,7 @@ Runtime.prototype.stack = function(stack){
       break;
       case 'function':
         next.handle = stem;
-        next.match = next.match || stem.name || stem.displayName;
+        next.match = stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
@@ -168,13 +124,12 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index];
     }
 
-    next.args = util.args(stack.args);
-    stack.onHandle.apply(stack, next.args);
-    stack.onHandleCall.apply(stack, next.args);
+    args = util.args(stack.args);
+    stack.onHandle.apply(stack, args);
+    stack.onHandleCall.apply(stack, args);
 
     util.asyncDone(function(){
-      next.time = util.hrtime();
-      var result = next.handle.apply(stack.context, next.args);
+      var result = next.handle.apply(stack.context, args);
       if(next.wait){ return result; }
       if(stack.next){
         self.stack(stack);
@@ -183,6 +138,40 @@ Runtime.prototype.stack = function(stack){
       }
       return result;
     }, function(err){ next(err); });
+  }
+
+  //
+  // ---------
+  //
+
+  function next(err){
+    if(err){ stack.onHandleError(err, next); }
+    if(next.end) { return stack.args[1]; }
+    if(arguments.length){
+      util.args.map(stack.args, arguments);
+    }
+
+    next.end = true;
+    stack.wait = next.wait;
+
+    var that = stack;
+    stack.queue = stack.queue.replace(next.match, '').trim();
+    while(!that.queue && that.host){
+      that.host.queue = that.host.queue.replace(that.path, '').trim();
+      that = that.host;
+    }
+
+    stack.onHandle.apply(stack, args);
+    stack.onHandleEnd.apply(stack, args);
+
+    if(stack.next){
+      self.stack(stack);
+    } else if(stack.host && stack.host.next){
+      stack.host.args = stack.args;
+      self.stack(stack.host);
+    }
+
+    return next.result;
   }
 
   if(stack instanceof Stack){ tick(); }
@@ -213,7 +202,7 @@ Runtime.prototype.repl = function(o){
   this.repl = require('readline').createInterface({
     input: util.type(o.input).stream && o.input || process.stdin,
     output: util.type(o.output).stream && o.output || process.stdout,
-    completer: util.type(o.completer).function
+    completer: (typeof o.completer === 'function' && o.completer)
       || function defautlCompleter(line, callback){
         return util.completer(self, line, callback);
       }
@@ -223,13 +212,14 @@ Runtime.prototype.repl = function(o){
   }).once('close', function(){
     self.repl = Runtime.prototype.repl; // undo override
   }).once('SIGINT', function(){
-    if(!this._sawReturn){ this.output.write('\n'); }
-    this.output.write(self.store.name + ' repl closed - ');
+    if(!this._sawReturn){
+      this.output.write('\n');
+    }
     this.output.write(new Date().toString() + '\n');
     process.exit(0);
   });
 
-  this.repl.setPrompt(this.store.name + '> ');
+  this.repl.setPrompt((this.store.name || '') + '> ');
   return this;
 };
 
@@ -325,12 +315,17 @@ Stack.prototype.onHandle = function(next){
   var mode = this.wait ? 'series' : 'parallel';
   var time, status = next.time ? 'Finished' : 'Wait for';
 
-  if(!next.time && !this.path.indexOf(next.match)){
+  if(!this.time){
     var host = this.host ? 'from `'+this.host.path+'`' : '';
     console.log('Started `%s` in %s %s', this.path, mode, host);
-  } else if(next.handle && (next.time || !next.wait)){
+    this.time = util.hrtime();
+  } else {
     time = next.time ? 'in ' + util.prettyTime(process.hrtime(next.time)) : '';
     console.log('- %s `%s` %s', status, path, time);
+  }
+
+  if(!next.time){
+    next.time = util.hrtime();
   }
 
   var self = this;
