@@ -31,7 +31,6 @@ module.exports = {
     return suite;
   },
   gulp: require('gulp'),
-  Stack: require('../lib/stack'),
   mkdirp: require('mkdirp'),
   rimraf: require('rimraf'),
   through: require('through2')
