@@ -1,1 +1,3 @@
-require('./simple');
+'use strict';
+
+require('./repl');
