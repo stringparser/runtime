@@ -32,13 +32,14 @@ _returns_
 */
 
 function create(name, o){
+  o = o || name;
   name = typeof name === 'string' && name;
   if(name && create.cache[name]){
     return create.cache[name];
   }
 
   name = name || Math.random().toString(32);
-  create.cache[name] = new Runtime(o || name);
+  create.cache[name] = new Runtime(o);
 
   return create.cache[name];
 }
@@ -65,7 +66,8 @@ function Runtime(o){
     return new Runtime(o);
   }
 
-  o = o || {};
+  console.log(o);
+  o = util.type(o).plainObject || {};
   util.Manifold.call(this);
   o.log = o.log === void 0 || o.log;
   this.set(o);
