@@ -15,7 +15,7 @@ exports = module.exports = {
 };
 
 /*
-## create([options])
+## create([name, options])
 
 Key-value store for `Runtime` instances.
 
@@ -31,9 +31,18 @@ _returns_
  - a previous instance `name` if it did
 */
 
-function create(o){
-  return new Runtime(o);
+function create(name, o){
+  name = typeof name === 'string' && name;
+  if(name && create.cache[name]){
+    return create.cache[name];
+  }
+
+  name = name || Math.random().toString(32);
+  create.cache[name] = new Runtime(o || name);
+
+  return create.cache[name];
 }
+create.cache = {};
 
 /* ## Runtime([options])
 
@@ -84,7 +93,8 @@ _returns_
 Runtime.prototype.stack = function(stack){
 
   var self = this;
-  var args, stackArguments;
+  var args, result;
+  var stackArguments;
 
   function tick(arg){
     if(stackArguments){
@@ -106,8 +116,12 @@ Runtime.prototype.stack = function(stack){
         stack.match = next.path.substring(next.match.length).trim();
       break;
       case 'function':
+        if(typeof stem.path === 'string'){
+          self.get(self.path, next);
+          next.match = next.match || next.path;
+        }
         next.handle = stem;
-        next.match = stem.name || stem.displayName;
+        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
@@ -129,7 +143,7 @@ Runtime.prototype.stack = function(stack){
     stack.onHandleCall.apply(stack, args);
 
     util.asyncDone(function(){
-      var result = next.handle.apply(stack.context, args);
+      result = next.handle.apply(stack.context, args);
       if(next.wait){ return result; }
       if(stack.next){
         self.stack(stack);
@@ -146,7 +160,7 @@ Runtime.prototype.stack = function(stack){
 
   function next(err){
     if(err){ stack.onHandleError(err, next); }
-    if(next.end) { return stack.args[1]; }
+    if(next.end) { return result; }
     if(arguments.length){
       util.args.map(stack.args, arguments);
     }
@@ -171,7 +185,7 @@ Runtime.prototype.stack = function(stack){
       self.stack(stack.host);
     }
 
-    return next.result;
+    return result;
   }
 
   if(stack instanceof Stack){ tick(); }
@@ -402,7 +416,7 @@ api.public
 */
 Stack.prototype.onHandleNotFound = function(next){
   var path = next.match || next.path;
-  var message = 'no handle found for `'+path+'`.\n'+
+  var message = 'no handle found for '+path+'`.\n'+
     'Set one with `runtime.set('+ (path ? '\'' + path + '\', ' : path) +
     '[Function])`';
 
