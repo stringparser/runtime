@@ -3,29 +3,32 @@
 module.exports = function(runtime){
   var app = runtime.create({log: false});
 
-  it('can be changed on demand', function(done){
+  it('can be changed on demand but does not overwrite', function(done){
     app.set({onHandleError: done});
 
     function one(next){
-      next.wait.should.be.eql(true);
+      next.wait.should.be.eql(false);
       next();
     }
     function two(next){
-      next.wait = false;
       setTimeout(next, Math.random()*10);
+      next.wait.should.be.eql(false);
+      next.wait = true;
     }
 
     function three(next){
-      next.wait.should.be.eql(true);
-      next(); done();
+      next.wait.should.be.eql(false);
+      next();
     }
 
     app.stack(one, two, three, {
-      wait: true,
       onHandleCall: function(next){
-        if(next.match === 'three'){
-          this.queue.should.match(/two/);
+        if(next.match === 'two'){
+          this.queue.should.match(/three/);
         }
+      },
+      onHandleEnd: function(){
+        if(!this.queue){ done(); }
       }
     })();
   });
