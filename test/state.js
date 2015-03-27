@@ -105,15 +105,15 @@ module.exports = function(runtime){
         if(stack.queue){ return ; }
 
         end.series.map(Number).should.be.eql([0,1,2,3]);
-        end.parallel.length.should.be.eql(5);
-        end.parallel.map(Number).should.not.be.eql([4,5,6,7,8]);
+        end.parallel.length.should.be.eql(6);
+        end.parallel.map(Number).should.not.be.eql([4,5,6,7,8,9]);
 
         done();
 
-      }, Math.random()*10+1);
+      }, Math.random()*10);
     });
 
-    app.stack('4 5 6 7 8', app.stack('0 1 2 3', {wait: true}))();
+    app.stack('4 5 6 7 8 9', app.stack('0 1 2 3', {wait: true}))();
   });
 
   it('full series stack should have them all wait', function(done){
