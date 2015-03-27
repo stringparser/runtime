@@ -20,7 +20,7 @@ The aim of the project is to provide an easy an non opinionated container to dev
 
 _series and/or parallel_
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
 function one(next){
   setTimeout(next, Math.random()*10);
@@ -30,15 +30,15 @@ function two(next){
   setTimeout(next, Math.random()*10);
 }
 
-var series = app.stack(one, two, {wait: true})
-var parallel = app.stack(one, two);
+var series = runtime.stack(one, two, {wait: true})
+var parallel = runtime.stack(one, two);
 
 series(); parallel();
 ```
 
-_composition_
+_mixing_
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
 function one(next){
   setTimeout(next, Math.random()*10);
@@ -48,38 +48,43 @@ function two(next){
   setTimeout(next, Math.random()*10);
 }
 
-var series = app.stack(one, two, {wait: true})
-var composed = app.stack(one, two, series);
+function three(next){
+  setTimeout(next, Math.random()*10);
+}
 
-composed();
+var series = runtime.stack(one, two, {wait: true});
+var mixed = runtime.stack(series, three);
+// will not wait to series to run three
+
+mixed();
 ```
 
-_separated control_
+_change on demand_
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
+
+var onDemand = runtime.stack(one, two, {wait: true})
 
 function one(next){
   next.wait = false;
   setTimeout(next, Math.random()*10);
-  // so the next doesn't have for this to end to start
+  // so the next doesn't have to wait for this
 }
 
 function two(next){
   console.log(next.wait);
-  // => true (instead of false as it was changed before)
+  // => true
   // each function is independent
   // honors the stack props given
   setTimeout(next, Math.random()*10);
 }
 
-var notEntirelySeries = app.stack(one, two, {wait: true})
-
-notEntirely();
+onDemand();
 ```
 
-_lifecylce API_
+_small declarative API_
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
 function one(next){
   throw new Error('something broke!');
@@ -89,28 +94,28 @@ function two(next){
   setTimeout(next, Math.random()*10);
 }
 
-var lifeCycle = app.stack(one, two, {
-  wait: true,
+var stackAPI = runtime.stack(one, two, {
   onHandleError: function(err, next){
-    if(next.match === 'one' && err){
-      // errors coming from function `one` are not relevant
-      next();
+    if(next.match === 'one'){
+      next(); // say, errors coming from `one` are not relevant
     }
   },
   onHandleEnd: function(next){
-
+    if(!this.queue){
+      console.log('stack ended with %s', next.match);
+    }
   }
 });
 
-lifeCycle();
+stackAPI();
 ```
 
-_argument passing_
+_passing arguments_
 
 arguments can be passed from one handle to another and are only shared within the same stack
 
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
 function one(next, arg1, arg2){
   console.log('%s %s', arg1, arg2); // => 1 2
@@ -119,46 +124,44 @@ function one(next, arg1, arg2){
 
 function two(next, arg1, arg2){
   console.log('%s %s', arg1, arg2); // => 2 3
+  next(null, 3, 4);
 }
 
 function three(next){
   console.log('%s %s', arg1, arg2); // => 1 2
 }
 
-var passingArgs = app.stack(one, two, app.stack(three));
+var passArgs = runtime.stack(one, two, runtime.stack(three), {wait: true});
 
-passingArgs(1, 2);
+passArgs(1, 2); // give the initial arguments
 ```
 
 _path to regexp support_
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
-app.set(':method(get|post) /user/:page(\\d+)', function(next){
+runtime.set(':method(get|post) /user/:page(\\d+)', function(next){
   next();
 });
 
-app.get('post /user/10'); // =>
-{
-  notFound: false,
-  path: 'post /user/10',
-  url: '/user/10',
-  match: 'post /user/10',
-  params: {
-    _: ['method', 'page'],
-    method: 'get',
-    page: '10'
-  }
+function end(next){
+  next();
 }
+
+var handlesRE = runtime.stack('get /user/10', end);
+
+handlesRE();
 ```
+
+and to end here, a more real-life example
 
 _simple server using the `http` module_
 
 ```js
 var http = require('http');
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
-app.set({
+runtime.set({
   onHandleNotFound: function(next, req, res){
     res.writeHead(404, {'Content-Type': 'text/plain'});
     res.end('404: There is no path \''+req.url+'\' defined yet.');
@@ -166,7 +169,7 @@ app.set({
   }
 });
 
-app.set('get /', app.stack(index, query, end));
+runtime.set('get /', runtime.stack(index, query, end));
 
 function index(next, req, res){
   res.write('Hello there ');
@@ -186,14 +189,13 @@ function end(next, req, res){
 
 function router(req, res){
   var method = req.method.toLowerCase();
-  app.stack(method + ' '+ req.url)(req, res);
+  runtime.stack(method + ' '+ req.url)(req, res);
 }
 
 http.createServer(router).listen(8000, function(){
   console.log('http server running on port 8000');
 });
 ```
-
 
 ## Getting started
 
@@ -204,14 +206,15 @@ Install `runtime` using [npm][x-npm]
 and then require it into a module
 
 ```js
-var app = require('runtime').create();
+var runtime = require('runtime').create();
 
-app.set(':handle', function(next){
+runtime.set(':handle', function(next){
+  console.log('running %s', next.match);
   setTimeout(next, Math.random()*10);
 })
 
-app.stack('1 2 3 4 5 6')();
-app.stack('one two three four five six', {wait: true})();
+runtime.stack('1 2 3 4 5 6')();
+runtime.stack('one two three four five six', {wait: true})();
 ```
 
 ## Browser
