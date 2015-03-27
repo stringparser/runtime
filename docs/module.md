@@ -28,28 +28,28 @@ _defaults_
 - `options.log = true`, type boolean, flags whether to log or not
 - `options.name = #root`, type string, label for the instance
 
-_Inherits from_ the [Manifold][x-manifold] class making it a key-value store that can map strings to objects via regular expressions. The store starts with a `rootNode` at `instance.store` and builds up all its children at `instance.store.children` in a flat manner.
+_Inherits from_ the [Manifold][x-manifold] class making it a key-value store that can map strings to objects via regular expressions. The store starts with a `rootNode` object at `instance.store` and builds up all its children at `instance.store.children` in a flat manner.
 
-For more information about runtime `nodes` see the [Runtime API](./runtime.md).
+For more information see the [Runtime API](./runtime.md).
 
 ## create
 
 ```js
-function create([name, object options])
+function create([string name, object options])
 ```
 
 Key-value store for `Runtime` instances.
 
 _arguments_
+- `name` type string, name of the `Runtime` instance
 - `options` type object, options to be passed to the `Runtime` constructor
 
 _defaults_
- - `options.name` to `#root`
+ - `name` to random string
  - `options.log` defaults to `true`
 
 _returns_
- - a new `Runtime` instance if was stored
- - a previously stored `options.name` instance
+ - a `Runtime` instance
 
 ## Stack
 ```js
