@@ -93,9 +93,17 @@ _returns_
 
 Runtime.prototype.stack = function(stack){
 
-  var self = this;
-  var args, result;
   var stackArguments;
+  var result, self = this;
+  
+  if(stack instanceof Stack){ tick(); }
+  else if(arguments.length){
+    stackArguments = arguments;
+    tick.stack = new Stack(stackArguments);
+    return tick;
+  } else {
+    throw new Error('cannot construct a stack without arguments');
+  }
 
   function tick(arg){
     if(stackArguments){
@@ -139,12 +147,10 @@ Runtime.prototype.stack = function(stack){
       stack.next = stack.argv[++stack.index] || false;
     }
 
-    args = util.args(stack.args);
-
     util.asyncDone(function(){
-      stack.onHandle.apply(stack, args);
-      stack.onHandleCall.apply(stack, args);
-      result = next.handle.apply(stack.context, args);
+      stack.onHandle.apply(stack, stack.args);
+      stack.onHandleCall.apply(stack, stack.args);
+      result = next.handle.apply(stack.context, stack.args);
       if(next.wait){ return result; }
 
       if(stack.next){
@@ -177,8 +183,8 @@ Runtime.prototype.stack = function(stack){
       that = that.host;
     }
 
-    stack.onHandle.apply(stack, args);
-    stack.onHandleEnd.apply(stack, args);
+    stack.onHandle.apply(stack, stack.args);
+    stack.onHandleEnd.apply(stack, stack.args);
 
     if(stack.next){
       self.stack(stack);
@@ -188,15 +194,6 @@ Runtime.prototype.stack = function(stack){
     }
 
     return result;
-  }
-
-  if(stack instanceof Stack){ tick(); }
-  else if(arguments.length){
-    stackArguments = arguments;
-    tick.stack = new Stack(stackArguments);
-    return tick;
-  } else {
-    throw new Error('cannot construct a stack without arguments');
   }
 };
 
