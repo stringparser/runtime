@@ -95,7 +95,7 @@ Runtime.prototype.stack = function(stack){
 
   var stackArguments;
   var result, self = this;
-  
+
   if(stack instanceof Stack){ tick(); }
   else if(arguments.length){
     stackArguments = arguments;
@@ -151,6 +151,9 @@ Runtime.prototype.stack = function(stack){
       stack.onHandle.apply(stack, stack.args);
       stack.onHandleCall.apply(stack, stack.args);
       result = next.handle.apply(stack.context, stack.args);
+      /* TODO: check and throw if next wasn't used
+        if(!result){ }
+      */
       if(next.wait){ return result; }
 
       if(stack.next){
