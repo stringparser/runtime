@@ -121,7 +121,7 @@ _returns_
 Runtime.prototype.stack = function(stack){
 
   var stackArguments;
-  var result, self = this;
+  var args, result, self = this;
 
   if(stack instanceof Stack){ tick(); }
   else if(arguments.length){
@@ -163,32 +163,29 @@ Runtime.prototype.stack = function(stack){
         throw new TypeError('argument should be `string` or `function`');
     }
 
-    if(next.handle.stack instanceof Stack){
-      next.match = next.handle.stack.path;
+    if(!stack.match){
+      stack.next = stack.argv[++stack.index] || false;
+    }
+
+    if(stem.stack instanceof Stack){
+      next.match = stem.stack.path;
       stack.args[0] = stack;
     } else {
       stack.args[0] = next;
     }
 
-    if(!stack.match){
-      stack.next = stack.argv[++stack.index] || false;
-    }
+    args = util.args(stack.args);
 
     util.asyncDone(function(){
-      stack.onHandle.apply(stack, stack.args);
-      stack.onHandleCall.apply(stack, stack.args);
-      result = next.handle.apply(stack.context, stack.args);
-      /* TODO: check and throw if next wasn't used
-        if(!result){ }
-      */
+      stack.onHandle.apply(stack, args);
+      stack.onHandleCall.apply(stack, args);
+      result = next.handle.apply(stack.context, args);
       if(next.wait){ return result; }
-
       if(stack.next){
         self.stack(stack);
       } else if(stack.host && stack.host.next){
         self.stack(stack.host);
       }
-
       return result;
     }, next);
   }
@@ -213,8 +210,8 @@ Runtime.prototype.stack = function(stack){
       that = that.host;
     }
 
-    stack.onHandle.apply(stack, stack.args);
-    stack.onHandleEnd.apply(stack, stack.args);
+    stack.onHandle.apply(stack, args);
+    stack.onHandleEnd.apply(stack, args);
 
     if(stack.next){
       self.stack(stack);
