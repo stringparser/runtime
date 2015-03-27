@@ -66,7 +66,6 @@ function Runtime(o){
     return new Runtime(o);
   }
 
-  console.log(o);
   o = util.type(o).plainObject || {};
   util.Manifold.call(this);
   o.log = o.log === void 0 || o.log;
@@ -137,23 +136,25 @@ Runtime.prototype.stack = function(stack){
     }
 
     if(!stack.match){
-      stack.next = stack.argv[++stack.index];
+      stack.next = stack.argv[++stack.index] || false;
     }
 
     args = util.args(stack.args);
-    stack.onHandle.apply(stack, args);
-    stack.onHandleCall.apply(stack, args);
 
     util.asyncDone(function(){
+      stack.onHandle.apply(stack, args);
+      stack.onHandleCall.apply(stack, args);
       result = next.handle.apply(stack.context, args);
       if(next.wait){ return result; }
+
       if(stack.next){
         self.stack(stack);
       } else if(stack.host && stack.host.next){
         self.stack(stack.host);
       }
+
       return result;
-    }, function(err){ next(err); });
+    }, next);
   }
 
   //
@@ -163,12 +164,11 @@ Runtime.prototype.stack = function(stack){
   function next(err){
     if(err){ stack.onHandleError(err, next); }
     if(next.end) { return result; }
-    if(arguments.length){
+    if(arguments.length > 1){
       util.args.map(stack.args, arguments);
     }
 
     next.end = true;
-    stack.wait = next.wait;
 
     var that = stack;
     stack.queue = stack.queue.replace(next.match, '').trim();
@@ -289,8 +289,6 @@ function Stack(args, app){
   opt.onHandle = app.store.log
     ? util.type(opt.onHandle).function || this.onHandle
     : function logginDisabled(){};
-
-  opt.wait = opt.wait === void 0 ? app.store.wait : opt.wait;
 
   this.context = opt.context || this;
   Object.keys(opt).forEach(function(prop){
