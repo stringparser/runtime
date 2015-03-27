@@ -11,15 +11,24 @@ module.exports = function(runtime){
       next();
     }
     function two(next){
-      next.wait = false; next();
+      next.wait = false;
+      setTimeout(next, Math.random()*10);
     }
 
     function three(next){
-      next.wait.should.be.eql(false);
-      done();
+      next.wait.should.be.eql(true);
+      next();
     }
 
-    app.stack(one, two, three, {wait: true})();
+    app.stack(one, two, three, {
+      wait: true,
+      onHandleEnd: function(next){
+        if(next.match === 'three'){
+          this.queue.should.match(/two/);
+          done();
+        }
+      }
+    })();
   });
 
   it('does not propagate between stacks', function(done){
