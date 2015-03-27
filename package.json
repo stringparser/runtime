@@ -1,7 +1,7 @@
 {
   "name": "runtime",
   "license": "MIT",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "a runtime interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
