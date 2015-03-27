@@ -33,7 +33,6 @@ _Inherits from_ the [Manifold][x-manifold] class making it a key-value store tha
 For more information see the [Runtime API](./runtime.md).
 
 ## create
-
 ```js
 function create([string name, object options])
 ```
@@ -81,6 +80,7 @@ For more details, read about the [stack API][t-stack].
 [t-runtime]: ./runtime.md
 
 [x-manifold]: http://github.com/stringparser/manifold
-[x-runtime-set]: http://github.com/stringparser/manifold
-[x-runtime-get]: http://github.com/stringparser/manifold#manifoldgetpath-options-mod
-[x-runtime-parse]: http://github.com/stringparser/manifold#manifoldparseprop-parser
+[t-runtime-set]: ./runtime.md#runtimeset
+[t-runtime-get]: ./runtime.md#runtimeget
+[t-runtime-parse]: ./runtime.md#runtimeparse
+[t-runtime-stack]: ./runtime.md#runtimestack

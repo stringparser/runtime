@@ -4,12 +4,67 @@
 
 Here is where all the interesting stuff starts to happen.
 
+* [runtime.stack](#runtimestack)
 * [runtime.set](#runtimeset)
 * [runtime.get](#runtimeget)
-* [runtime.stack](#runtimestack)
 * [runtime.parse](#runtimeparse)
 
 > Note: on all that follows, `node` refers to an object mapping from a  string (or path) via regular expressions. Being the `rootNode` that for which no path was given.
+
+## runtime.stack
+```js
+function stack(...arguments[, object props])
+```
+On first call constructs a consumable stack object which will be used to
+invoke and give context to its `...arguments`.
+
+_arguments_
+- `...arguments`, type string or function
+- `props`, type object, properties of stack of the [stack API][t-stack]. Look at its documentation for more details
+
+_when_
+ - an `...arguments` element is a string its handle will be obtained from the corresponding `node` set using [`runtime.get`][t-runtime-get]
+
+**_throws_**
+ - when no arguments are given
+
+_returns_
+- a `tick` callback, which, upon call will execute the stack arguments
+
+_sample_
+
+```js
+app.set(':handle(\\d+)', function handleNumbers(next){
+  console.log('number was', next.params.handle);
+  setTimeout(next, Math.random()*10);
+});
+
+app.get('1'); // =>
+{
+  notFound: false,
+  path: '1',
+  handle: [Function: handleNumbers]
+}
+
+function end(next){
+  console.log('end');
+  next();
+}
+
+app.stack('1', end, {wait: true})();
+// =>
+// number was 1
+// end
+
+app.stack('1 2', app.stack('3 4', end, {wait: true}), {wait: true})();
+// =>
+// number was 1
+// number was 2
+// number was 3
+// number was 4
+// end
+
+```
 
 ## runtime.set
 ```js
@@ -118,61 +173,6 @@ app.get('get /profile/page', /path/, {ref: true}) // =>
 ```
 > Note: `parent` and `children` properties are made non-enumerable by default so deep cloning is avoided.
 
-## runtime.stack
-```js
-function stack(...arguments[, object props])
-```
-On first call constructs a consumable stack object which will be used to
-invoke and give context to its `...arguments`.
-
-_arguments_
-- `...arguments`, type string or function
-- `props`, type object, properties of stack of the [stack API][t-stack]. Look at its documentation for more details
-
-_when_
- - an `...arguments` element is a string its handle will be obtained from the corresponding `node` set using [`runtime.get`][t-runtime-get]
-
-**_throws_**
- - when no arguments are given
-
-_returns_
-- a `tick` callback, which, upon call will execute the stack arguments
-
-_sample_
-
-```js
-app.set(':handle(\\d+)', function handleNumbers(next){
-  console.log('number was', next.params.handle);
-  setTimeout(next, Math.random()*10);
-});
-
-app.get('1'); // =>
-{
-  notFound: false,
-  path: '1',
-  handle: [Function: handleNumbers]
-}
-
-function end(next){
-  console.log('end');
-  next();
-}
-
-app.stack('1', end, {wait: true})();
-// =>
-// number was 1
-// end
-
-app.stack('1 2', app.stack('3 4', end, {wait: true}), {wait: true})();
-// =>
-// number was 1
-// number was 2
-// number was 3
-// number was 4
-// end
-
-```
-
 ## runtime.parse
 ```js
 function parse(string key|object props[, function parser])
@@ -240,6 +240,16 @@ The arguments are passed from [runtime.set][t-runtime-set]:
 
 There are [default property parsers defined](./lib/defaultParsers.js). One for `options.parent` and another one for `options.children`. Both work together to help and define inheritance when using [`manifold.get`](#manifoldgetpath-options-mod) _only_ if so specified.
 
+## runtime.repl
+```js
+function repl([object options])
+```
+
+Create a repl using the [readline][m-readline] node's module.
+
+_arguments_ options with non mandatory props below
+- `input`, type stream, defaults to process.stdin
+- `output`, type stream, defaults to process.stdout
 
 <br>
 ----
@@ -251,6 +261,7 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 -->
 
 [m-parth]: http://github.com/stringparser/parth
+[m-readline]: http://nodejs.org/api/readline.html
 [m-async-done]: http://github.com/phated/async-done
 [m-path-to-regex]: https://github.com/pillarjs/path-to-regexp
 
@@ -258,9 +269,9 @@ There are [default property parsers defined](./lib/defaultParsers.js). One for `
 [t-stack]: ./stack.md
 [t-module]: ./module.md
 [t-runtime]: ./runtime.md
-[t-runtime-set]: ./runtime.md#set
-[t-runtime-get]: ./runtime.md#get
-[t-runtime-parse]: ./runtime.md#parse
-[t-runtime-stack]: ./runtime.md#stack
+[t-runtime-set]: ./runtime.md#runtimeset
+[t-runtime-get]: ./runtime.md#runtimeget
+[t-runtime-parse]: ./runtime.md#runtimeparse
+[t-runtime-stack]: ./runtime.md#runtimestack
 
 [x-manifold]: http://github.com/stringparser/manifold

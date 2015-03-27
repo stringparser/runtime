@@ -169,7 +169,6 @@ app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 
 <!--
   b-: is for badges
-  p-: is for package
   t-: is for doc's toc
   x-: is for just a link
 -->
@@ -178,9 +177,7 @@ app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 [t-stack]: ./stack.md
 [t-module]: ./module.md
 [t-runtime]: ./runtime.md
-[t-runtime-set]: ./runtime.md#set
-[t-runtime-get]: ./runtime.md#get
-[t-runtime-parse]: ./runtime.md#parse
-[t-runtime-stack]: ./runtime.md#stack
-
-[p-async-done]: http://npmjs.org/package/async-done
+[t-runtime-set]: ./runtime.md#runtimeset
+[t-runtime-get]: ./runtime.md#runtimeget
+[t-runtime-parse]: ./runtime.md#runtimeparse
+[t-runtime-stack]: ./runtime.md#runtimestack
