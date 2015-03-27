@@ -18,6 +18,140 @@ The aim of the project is to provide an easy an non opinionated container to dev
 
 ## Samples
 
+_series and/or parallel_
+```js
+var app = require('runtime').create();
+
+function one(next){
+  setTimeout(next, Math.random()*10);
+}
+
+function two(next){
+  setTimeout(next, Math.random()*10);
+}
+
+var series = app.stack(one, two, {wait: true})
+var parallel = app.stack(one, two);
+
+series(); parallel();
+```
+
+_composition_
+```js
+var app = require('runtime').create();
+
+function one(next){
+  setTimeout(next, Math.random()*10);
+}
+
+function two(next){
+  setTimeout(next, Math.random()*10);
+}
+
+var series = app.stack(one, two, {wait: true})
+var composed = app.stack(one, two, series);
+
+composed();
+```
+
+_separated control_
+```js
+var app = require('runtime').create();
+
+function one(next){
+  next.wait = false;
+  setTimeout(next, Math.random()*10);
+  // so the next doesn't have for this to end to start
+}
+
+function two(next){
+  console.log(next.wait);
+  // => true (instead of false as it was changed before)
+  // each function is independent
+  // honors the stack props given
+  setTimeout(next, Math.random()*10);
+}
+
+var notEntirelySeries = app.stack(one, two, {wait: true})
+
+notEntirely();
+```
+
+_lifecylce API_
+```js
+var app = require('runtime').create();
+
+function one(next){
+  throw new Error('something broke!');
+}
+
+function two(next){
+  setTimeout(next, Math.random()*10);
+}
+
+var lifeCycle = app.stack(one, two, {
+  wait: true,
+  onHandleError: function(err, next){
+    if(next.match === 'one' && err){
+      // errors coming from function `one` are not relevant
+      next();
+    }
+  },
+  onHandleEnd: function(next){
+
+  }
+});
+
+lifeCycle();
+```
+
+_argument passing_
+
+arguments can be passed from one handle to another and are only shared within the same stack
+
+```js
+var app = require('runtime').create();
+
+function one(next, arg1, arg2){
+  console.log('%s %s', arg1, arg2); // => 1 2
+  next(null, 2, 3);
+}
+
+function two(next, arg1, arg2){
+  console.log('%s %s', arg1, arg2); // => 2 3
+}
+
+function three(next){
+  console.log('%s %s', arg1, arg2); // => 1 2
+}
+
+var passingArgs = app.stack(one, two, app.stack(three));
+
+passingArgs(1, 2);
+```
+
+_path to regexp support_
+```js
+var app = require('runtime').create();
+
+app.set(':method(get|post) /user/:page(\\d+)', function(next){
+  next();
+});
+
+app.get('post /user/10'); // =>
+{
+  notFound: false,
+  path: 'post /user/10',
+  url: '/user/10',
+  match: 'post /user/10',
+  params: {
+    _: ['method', 'page'],
+    method: 'get',
+    page: '10'
+  }
+}
+```
+
 _simple server using the `http` module_
 
 ```js
