@@ -2,10 +2,17 @@
 
 var util = require('./lib/util');
 
-/* ## top-level API
+/* ## module.exports
 
-- create: create a Runtime instance
-- Runtime: the runtime constructor
+The `module.exports` three properties
+
+- `Runtime`: class representing a runtime Interface
+- `create`: key-value store for `Runtime` instances
+- `Stack`: class for consumable stack instances
+
+> Note: on all that follows, `node` refers to an object mapping from a
+ string (or path) via regular expressions. Being the `rootNode` that
+for which no path was given.
 */
 
 exports = module.exports = {
@@ -15,20 +22,23 @@ exports = module.exports = {
 };
 
 /*
-## create([name, options])
+## create
+```js
+function create([string name, object options])
+```
 
 Key-value store for `Runtime` instances.
 
 _arguments_
+- `name` type string, name of the `Runtime` instance
 - `options` type object, options to be passed to the `Runtime` constructor
 
 _defaults_
- - `options.name`
+ - `name` to random string
  - `options.log` defaults to `true`
 
 _returns_
- - a new `Runtime` instance if wasn't there stored
- - a previous instance `name` if it did
+ - a `Runtime` instance
 */
 
 function create(name, o){
@@ -45,19 +55,30 @@ function create(name, o){
 }
 create.cache = {};
 
-/* ## Runtime([options])
+/* ## Runtime
 
-_inherits from_ [Manifold][x-manifold]
+```js
+function Runtime([object options])
+```
 
-_argument_ `options`, type object, are
-the properties be set at `runtime.store` on instantiation
+Class representing a `runtime` Interface.
 
-_returns_ a runtime instance
+_arguments_
+ - `options` type object, properties to set for the `rootNode` of that instance
 
-_options_ properties default to
- - `options.log = true`, type boolean, wheter to log or not by default
- - `options.name = #root`, type string, label for the instance if cached
+_returns_
+ - a runtime instance
 
+_defaults_
+- `options.log = true`, type boolean, flags whether to log or not
+- `options.name = #root`, type string, label for the instance
+
+_Inherits from_ the [Manifold][x-manifold] class making it a key-value
+store that can map strings to objects via regular expressions. The
+store starts with a `rootNode` object at `instance.store` and builds
+up all its children at `instance.store.children` in a flat manner.
+
+For more information see the [Runtime API](./runtime.md).
 */
 
 function Runtime(o){
@@ -74,21 +95,27 @@ function Runtime(o){
 util.inherits(Runtime, util.Manifold);
 
 /*
-## Runtime.stack(...arguments[, props])
-> constructs a consumable stack object which will be used to
-call and give context to the registered handlers with runtime.set or
-invoke functions given as an argument.
+## runtime.stack
+```js
+function stack(...arguments[, object props])
+```
+On first call constructs a consumable stack object which will be used to
+invoke and give context to its `...arguments`.
 
-_...arguments_
-- string, handlers set with runtime.set(path, props)
-- function, to be invoke whe the time comes
+_arguments_
+- `...arguments`, type string or function
+- `props`, type object, properties of stack of the [stack API][t-stack].
+ Look at its documentation for more details
 
--[, props]_
-- properties to be added to the stack which may or may-not override methods
-of the stack
+_when_
+ - an `...arguments` element is a string its handle will be obtained
+from the corresponding `node` set using [`runtime.get`][t-runtime-get]
+
+**_throws_**
+ - when no arguments are given
 
 _returns_
- - a `tick` function, which, upon call will execute the stack arguments
+- a `tick` callback, which, upon call will execute the stack arguments
 */
 
 Runtime.prototype.stack = function(stack){
@@ -201,15 +228,16 @@ Runtime.prototype.stack = function(stack){
 };
 
 /*
-## Runtime.repl(options)
-> create a repl for the given runtime
+## runtime.repl
+```js
+function repl([object options])
+```
 
-arguments: options with non mandatory props below
-- input, repl's stream output, defaults to process.stdin
-- output, repl's stream output, defaults to process.stdout
+Create a repl using the [readline][p-readline] node's module.
 
-After its called, it will override the prototype
-and becomes a property with a readline instance
+_arguments_ options with non mandatory props below
+- `input`, type stream, defaults to process.stdin
+- `output`, type stream, defaults to process.stdout
 --
 PD: this was the very beginning of it all :)
 */
@@ -314,15 +342,33 @@ function Stack(args, app){
 }
 
 /*
-## stack.onHandle(next)
-> by default a logger
+### stack.onHandle
+```js
+function onHandle(function next, ...stackArguments)
+```
 
-arguments
-- next, callback function from the runtime.stack method
+Called just before `onHandleCall` and before `onHandleEnd`.
 
---
-api.public
---
+_arguments_
+ - `next` type function, callback passed to any of the functions of the stack
+ - `stackArguments` type unknown, arguments passed down the stack
+
+_defaults_
+ - to a logger if the `rootNode` has a property `log` set to true
+
+## Stack properties
+
+The only thing that is shared between stacks are their arguments,
+so properties can be safely attached to them and used without side effects.
+
+Special properties are
+ - `wait`: makes the next handle to wait for this to finish.
+
+## Stack entry points
+
+There are two entry points for the Stack API:
+- through [runtime.set][t-runtime-set]
+- through [runtime.stack][t-runtime-stack]
 */
 Stack.prototype.onHandle = function(next){
   var path = next.match || next.path;
@@ -353,66 +399,85 @@ Stack.prototype.onHandle = function(next){
 };
 
 /*
-## stack.onHandleError(err, next)
-> stack-wise error handler
+### stack.onHandleError
+```js
+function onHandleError(Error error, function next)
+```
 
-arguments
-- err, an Error instance
-- next, callback function from the runtime.stack method
+Called when:
+ - whenever an error occurs
+ - the first argument of the function returned by `runtime.stack` is an error
+ - the `next` callback passed to each element of the stack
+ is called with a 1st argument that is not null
 
-throws error
+_arguments_
+ - `error` type Error, passed to the stack
+ - `next` type function, callback passed to any of the functions of the stack
 
---
-api.public
---
+_defaults_
+ - to a function that throws the error
 */
 Stack.prototype.onHandleError = function(err){
   if(err){ throw err; }
 };
 
 /*
-## stack.onHandleCall(next)
-> before handle
+### stack.onHandleCall
+```js
+function onHandleCall(function next, ...stackArguments)
+```
 
-arguments
-- next, callback function from the runtime.stack method
+Called just before a handle is run. The arguments are the same
+passed to the corresponding handle afterwards.
 
-returns `undefined`
+_arguments_
+ - `next` type function, callback passed to any of the functions of the stack
+ - `stackArguments` type unknown, arguments passed down the stack
 
---
-api.public
---
+_defaults_
+ - to an empty function
 */
 Stack.prototype.onHandleCall = function(){};
 
 /*
-## stack.onHandleEnd(next)
-> for stack start, before handle and after handle call
+### stack.onHandleEnd
+```js
+function onHandleEnd(function next, ...stackArguments)
+```
 
-arguments
-- next, callback function from the runtime.stack method
+Called when `next` was called from the previous function of the stack.
+ Or when the a stream, promise, observable is done
+ (see [async-done][m-async-done]). The arguments are the same
+ passed to the corresponding handle afterwards.
 
-returns `undefined`
+_arguments_
+ - `next` type function, callback passed to any of the functions of the stack
+ - `stackArguments` type unknown, arguments passed down the stack
 
---
-api.public
---
+_defaults_
+ - to an empty function
 */
 Stack.prototype.onHandleEnd = function(){};
 
 /*
-## stack.onHandleNotFound(err, next)
-> no handle was found
+### stack.onHandleNotFound
+```js
+function onHandleNotFound(next, ...stackArguments)
+```
 
-arguments
-- err, an Error instance
-- next, callback function from the runtime.stack method
+Mainly used for missing function associated with a string to object
+ mappings when [`runtime.get`][t-runtime-get] is called.
 
-throws error
+Called when:
+- whenever the handle wasn't found
 
---
-api.public
---
+_arguments_
+- `next` type function, callback passed to any of the functions of the stack
+- `stackArguments` type unknown, arguments passed down the stack
+
+_defaults_
+- to a function throwing an error if `runtime.repl` is not active
+- to a function that prints a warning when `runtime.repl` is active
 */
 Stack.prototype.onHandleNotFound = function(next){
   var path = next.match || next.path;
