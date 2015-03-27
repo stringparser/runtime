@@ -9,12 +9,13 @@ module.exports = function(runtime){
     app.set('1', function(next){
       next.match.should.be.eql('1');
       next.path.should.be.eql('1');
+      next();
     });
 
     app.set('2', function(next){
       next.match.should.be.eql('2');
       next.path.should.be.eql('2');
-      done();
+      done(); next();
     });
 
     app.stack('1', '2')();
@@ -26,12 +27,13 @@ module.exports = function(runtime){
     app.set('1', function(next){
       next.match.should.be.eql('1');
       next.path.should.be.eql('1 2');
+      next();
     });
 
     app.set('2', function(next){
       next.match.should.be.eql('2');
       next.path.should.be.eql('2');
-      done();
+      next(); done();
     });
 
     app.stack('1 2')();
@@ -42,11 +44,12 @@ module.exports = function(runtime){
 
     function one(next){
       next.match.should.be.eql('one');
+      next();
     }
 
     function two(next){
       next.match.should.be.eql('two');
-      done();
+      next(); done();
     }
 
     app.stack(one, two)();
@@ -57,11 +60,12 @@ module.exports = function(runtime){
 
     app.set('a :string', function(next){
       next.match.should.be.eql('a word');
+      next();
     });
 
     function two(next){
       next.match.should.be.eql('two');
-      done();
+      next(); done();
     }
 
     app.stack('a word', two)();
@@ -115,7 +119,7 @@ module.exports = function(runtime){
       foo.should.be.eql(5);
       bar.should.be.eql(6);
       baz.should.be.eql(7);
-      done();
+      next(); done();
     }
 
     app.stack(one, two, three, {wait: true})(1, 2, 3);
@@ -128,21 +132,21 @@ module.exports = function(runtime){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      next(null);
+      next();
     }
 
     function two(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      next(null);
+      next();
     }
 
     function three(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      done();
+      next(); done();
     }
 
     app.stack(one, two, three)(1, 2, 3);
@@ -155,19 +159,21 @@ module.exports = function(runtime){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
+      next();
     }
 
     function two(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
+      next();
     }
 
     function three(next, foo, bar, baz){
       foo.should.be.eql(1);
       bar.should.be.eql(2);
       baz.should.be.eql(3);
-      done();
+      next(); done();
     }
 
     app.stack(
@@ -201,7 +207,7 @@ module.exports = function(runtime){
       foo.should.be.eql(3);
       bar.should.be.eql(4);
       baz.should.be.eql(5);
-      done();
+      next(); done();
     }
 
     app.stack(

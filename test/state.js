@@ -17,15 +17,14 @@ module.exports = function(runtime){
 
     function three(next){
       next.wait.should.be.eql(true);
-      next();
+      next(); done();
     }
 
     app.stack(one, two, three, {
       wait: true,
-      onHandleEnd: function(next){
+      onHandleCall: function(next){
         if(next.match === 'three'){
           this.queue.should.match(/two/);
-          done();
         }
       }
     })();
@@ -36,11 +35,12 @@ module.exports = function(runtime){
 
     function foo(next){
       next.wait = false;
+      next();
     }
 
     function bar(next){
       next.wait.should.be.eql(true);
-      done();
+      next(); done();
     }
 
     app.stack(app.stack(foo), bar, {wait: true})();
