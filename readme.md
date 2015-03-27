@@ -260,8 +260,8 @@ I'll be using it everywhere so the first user involved here is me.
 
 [t-docs]: ./docs
 [t-module]: ./docs/module.md
-[t-stack-api]: ./docs/stack-api.md
-[t-runtime-api]: ./docs/runtime-api.md
+[t-stack-api]: ./docs/stack.md
+[t-runtime-api]: ./docs/runtime.md
 
 [x-gitter]: https://gitter.im/stringparser/runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime/builds
