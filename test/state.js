@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(runtime){
-  var app = runtime.create({log: false});
+  var app = runtime.create('state', {log: false});
 
   it('can be changed on demand but does not overwrite', function(done){
     app.set({onHandleError: done});
