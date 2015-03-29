@@ -222,7 +222,7 @@ Runtime.prototype.stack = function(stack){
 };
 
 /*
-## runtime.repl
+## runtime.readline
 ```js
 function repl([object options])
 ```
@@ -235,7 +235,9 @@ _arguments_ options with non mandatory props below
 --
 PD: this was the very beginning of it all :)
 */
-Runtime.prototype.repl = function(o){
+Runtime.prototype.readline = function(o){
+  if(this.repl){ return this.repl; }
+
   var self = this; o = o || { };
   this.repl = require('readline').createInterface({
     input: util.type(o.input).stream && o.input || process.stdin,
@@ -247,8 +249,6 @@ Runtime.prototype.repl = function(o){
   }).on('line', function(line){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
-  }).once('close', function(){
-    self.repl = Runtime.prototype.repl; // undo override
   }).once('SIGINT', function(){
     if(!this._sawReturn){
       this.output.write('\n');
@@ -326,13 +326,12 @@ function Stack(args, app){
 
   // invariants
   util.defineFrozenProp(this, 'path', path);
+  util.defineFrozenProp(this, 'argv', argv);
   this.queue = path;
-  this.argv = argv;
   this.match = null;
   this.index = 0;
   this.next = argv[0];
-  this.app = app;
-  this.repl = !util.type(app.repl).function && app.repl;
+  this.repl = app.repl;
 }
 
 /*

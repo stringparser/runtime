@@ -4,7 +4,7 @@ module.exports = function(runtime, util){
   var app = runtime.create('repl', {log: false});
 
   function createREPL(input, output){
-    app.repl({
+    app.readline({
       input: input || util.through.obj(),
       output: output || util.through.obj()
     });
@@ -45,11 +45,6 @@ module.exports = function(runtime, util){
     });
 
     writeStream.write('\n\r');
-  });
-
-  it('should restore itself on close', function(){
-    app.repl.close();
-    app.repl.should.be.eql(runtime.Runtime.prototype.repl);
   });
 
 };

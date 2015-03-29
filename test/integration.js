@@ -35,7 +35,7 @@ module.exports = function(runtime, util){
 
   it('async-done enables waiting to through streams', function(done){
     app.set({onHandleError: done});
-    app.repl({input: util.through.obj()});
+    app.readline({input: util.through.obj()});
 
     function wait(next){
       next.wait = true;
