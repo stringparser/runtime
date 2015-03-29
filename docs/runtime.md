@@ -251,7 +251,7 @@ _arguments_ options with non mandatory props below
 - `input`, type stream, defaults to process.stdin
 - `output`, type stream, defaults to process.stdout
 
-After this method call there will be a `repl` property on the instance being a readline interface.
+After this method call there will be a `repl` property that is a [readline interface][m-readline-interface].
 
 <br>
 ----
@@ -266,6 +266,7 @@ After this method call there will be a `repl` property on the instance being a r
 [m-readline]: http://nodejs.org/api/readline.html
 [m-async-done]: http://github.com/phated/async-done
 [m-path-to-regex]: https://github.com/pillarjs/path-to-regexp
+[m-readline-interface]: http://nodejs.org/api/readline.html#readline_class_interface
 
 [t-docs]: ./readme.md
 [t-stack]: ./stack.md
