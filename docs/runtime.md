@@ -240,9 +240,9 @@ The arguments are passed from [runtime.set][t-runtime-set]:
 
 There are [default property parsers defined](./lib/defaultParsers.js). One for `options.parent` and another one for `options.children`. Both work together to help and define inheritance when using [`manifold.get`](#manifoldgetpath-options-mod) _only_ if so specified.
 
-## runtime.repl
+## runtime.readline
 ```js
-function repl([object options])
+function readline([object options])
 ```
 
 Create a repl using the [readline][m-readline] node's module.
@@ -250,6 +250,8 @@ Create a repl using the [readline][m-readline] node's module.
 _arguments_ options with non mandatory props below
 - `input`, type stream, defaults to process.stdin
 - `output`, type stream, defaults to process.stdout
+
+After this method call there will be a `repl` property on the instance being a readline interface.
 
 <br>
 ----
