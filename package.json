@@ -23,13 +23,14 @@
     "local"
   ],
   "dependencies": {
-    "browser-process-hrtime": "^0.1.1",
-    "readline-browserify": "0.0.4",
-    "pretty-hrtime": "0.2.x",
     "async-done": "^1.0.0",
-    "utils-type": "^0.x.x",
+    "browser-process-hrtime": "^0.1.1",
     "inherits": "^2.0.1",
-    "manifold": "^3.x.x"
+    "lodash.isarray": "^3.0.1",
+    "manifold": "^3.x.x",
+    "pretty-hrtime": "0.2.x",
+    "readline-browserify": "0.0.4",
+    "utils-type": "^0.x.x"
   },
   "devDependencies": {
     "jshint-stylish": "*",
