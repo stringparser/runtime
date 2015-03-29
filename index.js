@@ -42,15 +42,12 @@ _returns_
 */
 
 function create(name, o){
-  o = o || name;
-  name = typeof name === 'string' && name;
-  if(name && create.cache[name]){
+  if(create.cache[name]){
     return create.cache[name];
   }
 
-  name = name || Math.random().toString(32);
-  create.cache[name] = new Runtime(o);
-
+  name = (typeof name === 'string' && name) || '#root';
+  create.cache[name] = new Runtime(o || name);
   return create.cache[name];
 }
 create.cache = {};
