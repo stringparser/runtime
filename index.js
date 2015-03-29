@@ -236,7 +236,7 @@ _arguments_ options with non mandatory props below
 PD: this was the very beginning of it all :)
 */
 Runtime.prototype.readline = function(o){
-  if(this.repl){ return this.repl; }
+  if(this.repl){ return this; }
 
   var self = this; o = o || { };
   this.repl = require('readline').createInterface({
