@@ -6,8 +6,8 @@ var util = require('./lib/util');
 
 The `module.exports` three properties
 
-- `Runtime`: class representing a runtime Interface
-- `create`: key-value store for `Runtime` instances
+- `Tornado`: class representing a tornado Interface
+- `create`: key-value store for `Tornado` instances
 - `Stack`: class for consumable stack instances
 
 > Note: on all that follows, `node` refers to an object mapping from a
@@ -16,7 +16,7 @@ for which no path was given.
 */
 
 exports = module.exports = {
-  Runtime: Runtime,
+  Tornado: Tornado,
   create: create,
   Stack: Stack
 };
@@ -27,18 +27,18 @@ exports = module.exports = {
 function create([string name, object options])
 ```
 
-Key-value store for `Runtime` instances.
+Key-value store for `Tornado` instances.
 
 _arguments_
-- `name` type string, name of the `Runtime` instance
-- `options` type object, options to be passed to the `Runtime` constructor
+- `name` type string, name of the `Tornado` instance
+- `options` type object, options to be passed to the `Tornado` constructor
 
 _defaults_
  - `name` to random string
  - `options.log` defaults to `true`
 
 _returns_
- - a `Runtime` instance
+ - a `Tornado` instance
 */
 
 function create(name, o){
@@ -47,24 +47,24 @@ function create(name, o){
   }
 
   name = (typeof name === 'string' && name) || '#root';
-  create.cache[name] = new Runtime(o || name);
+  create.cache[name] = new Tornado(o || name);
   return create.cache[name];
 }
 create.cache = {};
 
-/* ## Runtime
+/* ## Tornado
 
 ```js
-function Runtime([object options])
+function Tornado([object options])
 ```
 
-Class representing a `runtime` Interface.
+Class representing a `tornado` Interface.
 
 _arguments_
  - `options` type object, properties to set for the `rootNode` of that instance
 
 _returns_
- - a runtime instance
+ - a tornado instance
 
 _defaults_
 - `options.log = true`, type boolean, flags whether to log or not
@@ -75,13 +75,13 @@ store that can map strings to objects via regular expressions. The
 store starts with a `rootNode` object at `instance.store` and builds
 up all its children at `instance.store.children` in a flat manner.
 
-For more information see the [Runtime API](./runtime.md).
+For more information see the [Tornado API](./tornado.md).
 */
 
-function Runtime(o){
+function Tornado(o){
 
-  if( !(this instanceof Runtime) ){
-    return new Runtime(o);
+  if( !(this instanceof Tornado) ){
+    return new Tornado(o);
   }
 
   o = util.type(o).plainObject || {};
@@ -89,10 +89,10 @@ function Runtime(o){
   o.log = o.log === void 0 || o.log;
   this.set(o);
 }
-util.inherits(Runtime, util.Manifold);
+util.inherits(Tornado, util.Manifold);
 
 /*
-## runtime.stack
+## tornado.stack
 ```js
 function stack(...arguments[, object props])
 ```
@@ -106,7 +106,7 @@ _arguments_
 
 _when_
  - an `...arguments` element is a string its handle will be obtained
-from the corresponding `node` set using [`runtime.get`][t-runtime-get]
+from the corresponding `node` set using [`tornado.get`][t-tornado-get]
 
 **_throws_**
  - when no arguments are given
@@ -115,7 +115,7 @@ _returns_
 - a `tick` callback, which, upon call will execute the stack arguments
 */
 
-Runtime.prototype.stack = function(stack){
+Tornado.prototype.stack = function(stack){
 
   var stackArguments;
   var args, result, self = this;
@@ -152,9 +152,10 @@ Runtime.prototype.stack = function(stack){
         if(typeof stem.path === 'string'){
           self.get(self.path, next);
           next.match = next.match || next.path;
+        } else {
+          next.match = stem.path || stem.name || stem.displayName;
         }
         next.handle = stem;
-        next.match = next.match || stem.name || stem.displayName;
       break;
       default:
         throw new TypeError('argument should be `string` or `function`');
@@ -222,20 +223,24 @@ Runtime.prototype.stack = function(stack){
 };
 
 /*
-## runtime.readline
+## tornado.readline
 ```js
-function repl([object options])
+function readline([object options])
 ```
 
-Create a repl using the [readline][p-readline] node's module.
+Create a repl using the [readline][m-readline] node's module.
 
 _arguments_ options with non mandatory props below
 - `input`, type stream, defaults to process.stdin
 - `output`, type stream, defaults to process.stdout
+
+After this method call there will be a `repl` property that is a
+[readline interface][m-readline-interface].
+
 --
 PD: this was the very beginning of it all :)
 */
-Runtime.prototype.readline = function(o){
+Tornado.prototype.readline = function(o){
   if(this.repl){ return this; }
 
   var self = this; o = o || { };
@@ -250,9 +255,7 @@ Runtime.prototype.readline = function(o){
     if(!line.trim()){ return this.prompt(); }
     self.stack(line)();
   }).once('SIGINT', function(){
-    if(!this._sawReturn){
-      this.output.write('\n');
-    }
+    if(!this._sawReturn){ this.output.write('\n'); }
     this.output.write(new Date().toString() + '\n');
     process.exit(0);
   });
@@ -266,7 +269,7 @@ Runtime.prototype.readline = function(o){
 > construct a consumable `stack` object
 
 arguments
-- app, a `runtime` instance
+- app, a `tornado` instance
 - args, an `arguments` or `array` object
 
 return
@@ -360,26 +363,25 @@ Special properties are
 ## Stack entry points
 
 There are two entry points for the Stack API:
-- through [runtime.set][t-runtime-set]
-- through [runtime.stack][t-runtime-stack]
+- through [tornado.set][t-tornado-set]
+- through [tornado.stack][t-tornado-stack]
 */
 Stack.prototype.onHandle = function(next){
-  var path = next.match || next.path;
+  var path = next.match, time = next.time;
   var mode = this.wait ? 'series' : 'parallel';
-  var time, status = next.time ? 'Finished' : 'Wait for';
+  var status = time ? 'Finished' : 'Wait for';
 
   if(!this.time){
     var host = this.host ? 'from `'+this.host.path+'`' : '';
     console.log('Started `%s` in %s %s', this.path, mode, host);
     this.time = util.hrtime();
-  } else {
-    time = next.time ? 'in ' + util.prettyTime(process.hrtime(next.time)) : '';
+  } else if(time && path){
+    time = util.prettyTime(process.hrtime(next.time));
     console.log('- %s `%s` %s', status, path, time);
   }
 
-  if(!next.time){
-    next.time = util.hrtime();
-  }
+  if(!this.time){ this.time = util.hrtime(); }
+  if(!next.time){ next.time = util.hrtime(); }
 
   var self = this;
   while(self && !self.queue){
@@ -399,7 +401,7 @@ function onHandleError(Error error, function next)
 
 Called when:
  - whenever an error occurs
- - the first argument of the function returned by `runtime.stack` is an error
+ - the first argument of the function returned by `tornado.stack` is an error
  - the `next` callback passed to each element of the stack
  is called with a 1st argument that is not null
 
@@ -459,7 +461,7 @@ function onHandleNotFound(next, ...stackArguments)
 ```
 
 Mainly used for missing function associated with a string to object
- mappings when [`runtime.get`][t-runtime-get] is called.
+ mappings when [`tornado.get`][t-tornado-get] is called.
 
 Called when:
 - whenever the handle wasn't found
@@ -469,13 +471,13 @@ _arguments_
 - `stackArguments` type unknown, arguments passed down the stack
 
 _defaults_
-- to a function throwing an error if `runtime.repl` is not active
-- to a function that prints a warning when `runtime.repl` is active
+- to a function throwing an error if `tornado.repl` is not active
+- to a function that prints a warning when `tornado.repl` is active
 */
 Stack.prototype.onHandleNotFound = function(next){
   var path = next.match || next.path;
   var message = 'no handle found for '+path+'`.\n'+
-    'Set one with `runtime.set('+ (path ? '\'' + path + '\', ' : path) +
+    'Set one with `tornado.set('+ (path ? '\'' + path + '\', ' : path) +
     '[Function])`';
 
   if(!this.repl){ throw new Error(message); }

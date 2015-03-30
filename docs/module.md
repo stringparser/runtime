@@ -1,10 +1,10 @@
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime] - [Stack API][t-stack]
+##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-tornado] - [Stack API][t-stack]
 
 ## module.exports
 
 The `module.exports` three properties
 
-- `Runtime`: class representing a runtime Interface
+- `Runtime`: class representing a tornado Interface
 - `create`: key-value store for `Runtime` instances
 - `Stack`: class for consumable stack instances
 
@@ -16,13 +16,13 @@ The `module.exports` three properties
 function Runtime([object options])
 ```
 
-Class representing a `runtime` Interface.
+Class representing a `tornado` Interface.
 
 _arguments_
  - `options` type object, properties to set for the `rootNode` of that instance
 
 _returns_
- - a runtime instance
+ - a tornado instance
 
 _defaults_
 - `options.log = true`, type boolean, flags whether to log or not
@@ -30,7 +30,7 @@ _defaults_
 
 _Inherits from_ the [Manifold][x-manifold] class making it a key-value store that can map strings to objects via regular expressions. The store starts with a `rootNode` object at `instance.store` and builds up all its children at `instance.store.children` in a flat manner.
 
-For more information see the [Runtime API](./runtime.md).
+For more information see the [Runtime API](./tornado.md).
 
 ## create
 ```js
@@ -57,7 +57,7 @@ function Stack(array|arguments args [, Runtime app])
 Class for consumable stack instances
 
 _arguments_
-- `app` a runtime instance
+- `app` a tornado instance
 - `args` type arguments or array, each element should be a string or function
 
 _returns_
@@ -67,7 +67,7 @@ For more details, read about the [stack API][t-stack].
 
 <br>
 ---
-##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-runtime] - [Stack API][t-stack]
+##### [Documentation][t-docs] - `module.exports` - [Runtime API][t-tornado] - [Stack API][t-stack]
 
 <!--
   x-: is for just a link
@@ -77,10 +77,10 @@ For more details, read about the [stack API][t-stack].
 [t-docs]: ./readme.md
 [t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-runtime]: ./runtime.md
+[t-tornado]: ./tornado.md
 
 [x-manifold]: http://github.com/stringparser/manifold
-[t-runtime-set]: ./runtime.md#runtimeset
-[t-runtime-get]: ./runtime.md#runtimeget
-[t-runtime-parse]: ./runtime.md#runtimeparse
-[t-runtime-stack]: ./runtime.md#runtimestack
+[t-tornado-set]: ./tornado.md#tornadoset
+[t-tornado-get]: ./tornado.md#tornadoget
+[t-tornado-parse]: ./tornado.md#tornadoparse
+[t-tornado-stack]: ./tornado.md#tornadostack

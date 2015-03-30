@@ -1,6 +1,6 @@
-##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - Tornado API - [Stack API][t-stack]
 
-### Runtime API
+### Tornado API
 
 Here is where all the interesting stuff starts to happen.
 
@@ -255,7 +255,7 @@ After this method call there will be a `repl` property that is a [readline inter
 
 <br>
 ----
-##### [Documentation][t-docs] - [`module.exports`][t-module] - Runtime API - [Stack API][t-stack]
+##### [Documentation][t-docs] - [`module.exports`][t-module] - Tornado API - [Stack API][t-stack]
 
 <!--
   x-: is for just a link

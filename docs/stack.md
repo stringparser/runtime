@@ -1,4 +1,4 @@
-##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime] - Stack API
+##### [Documentation][t-docs] - [`module.exports`][t-module] - [Tornado API][t-tornado] - Stack API
 
 ### Stack API
 
@@ -7,9 +7,9 @@
 * [Stack entry points](#stack-entry-points)
 * [Stacks composition](#composing-stacks)
 
-Stack istances are created internally when [`runtime.stack`][t-runtime-stack] is used. Each instance gives context the elements of the stack and is accessible in any of them at `this`.
+Stack istances are created internally when [`tornado.stack`][t-tornado-stack] is used. Each instance gives context the elements of the stack and is accessible in any of them at `this`.
 
-The first instance created in [`runtime.stack`][t-runtime-stack] is attached to function returned by it with only one string property: `path`. This property is mainly used logging. Full stack instances are created when the function is invoked for the first time.
+The first instance created in [`tornado.stack`][t-tornado-stack] is attached to function returned by it with only one string property: `path`. This property is mainly used logging. Full stack instances are created when the function is invoked for the first time.
 
 > Note: on all that follows, `node` refers to an object mapping from a  string (or path) via regular expressions. Being the `rootNode` that for which no path was given.
 
@@ -22,7 +22,7 @@ function onHandleError(Error error, function next)
 
 Called when:
  - whenever an error occurs
- - the first argument of the function returned by `runtime.stack` is an error
+ - the first argument of the function returned by `tornado.stack` is an error
  - the `next` callback passed to each element of the stack is called with a 1st argument that is not null
 
 _arguments_
@@ -37,7 +37,7 @@ _defaults_
 function onHandleNotFound(next, ...stackArguments)
 ```
 
-Mainly used for missing function associated with a string to object mappings when [`runtime.get`][t-runtime-get] is called.
+Mainly used for missing function associated with a string to object mappings when [`tornado.get`][t-tornado-get] is called.
 
 Called when:
 - whenever the handle wasn't found
@@ -47,8 +47,8 @@ _arguments_
 - `stackArguments` type unknown, arguments passed down the stack
 
 _defaults_
-- to a function throwing an error if `runtime.repl` is not active
-- to a function that prints a warning when `runtime.repl` is active
+- to a function throwing an error if `tornado.repl` is not active
+- to a function that prints a warning when `tornado.repl` is active
 
 ### stack.onHandleCall
 ```js
@@ -102,10 +102,10 @@ Special properties are
 ## Stack entry points
 
 There are two entry points for the Stack API:
-- through [runtime.set][t-runtime-set]
-- through [runtime.stack][t-runtime-stack]
+- through [tornado.set][t-tornado-set]
+- through [tornado.stack][t-tornado-stack]
 
-### Through runtime.stack
+### Through tornado.stack
 ```js
 function stack(...arguments[, object props])
 ```
@@ -128,14 +128,14 @@ app.stack(one, two, three, {
  }
 });
 ```
-### Through runtime.set
+### Through tornado.set
 ```js
 function set(path[, object props])
 ```
-When returned function from `runtime.stack` is called for the first time, if the first argument is string or the first function has a property `path` that is a string an object `node` is obtained and its properties are attached to the stack `instance`
+When returned function from `tornado.stack` is called for the first time, if the first argument is string or the first function has a property `path` that is a string an object `node` is obtained and its properties are attached to the stack `instance`
 
 ```js
-var app = require('runtime').create();
+var app = require('tornado').create();
 
 app.set('get /profile/:url', function(next){
 
@@ -153,10 +153,10 @@ app.stack('get /profile/page', end)()
 
 ## Stack composition
 
-[`runtime.stack`][t-runtime-stack] returns a function so its possible to compose one stack with another. As is was said earlier in this same document, each stack only shares the arguments passed with another.
+[`tornado.stack`][t-tornado-stack] returns a function so its possible to compose one stack with another. As is was said earlier in this same document, each stack only shares the arguments passed with another.
 
 ```js
-var app = require('runtime').create();
+var app = require('tornado').create();
 
 app.set(':handle(\\d+)', function(next){
   setTimeout(next, Math.random());
@@ -165,7 +165,7 @@ app.set(':handle(\\d+)', function(next){
 app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 ```
 
-##### [Documentation][t-docs] - [`module.exports`][t-module] - [Runtime API][t-runtime] - Stack API
+##### [Documentation][t-docs] - [`module.exports`][t-module] - [Tornado API][t-tornado] - Stack API
 
 <!--
   b-: is for badges
@@ -176,8 +176,8 @@ app.stack('1 2 3', app.stack('4 5 6', app.stack('7 8 9')))();
 [t-docs]: ./readme.md
 [t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-runtime]: ./runtime.md
-[t-runtime-set]: ./runtime.md#runtimeset
-[t-runtime-get]: ./runtime.md#runtimeget
-[t-runtime-parse]: ./runtime.md#runtimeparse
-[t-runtime-stack]: ./runtime.md#runtimestack
+[t-tornado]: ./tornado.md
+[t-tornado-set]: ./tornado.md#tornadoset
+[t-tornado-get]: ./tornado.md#tornadoget
+[t-tornado-parse]: ./tornado.md#tornadoparse
+[t-tornado-stack]: ./tornado.md#tornadostack

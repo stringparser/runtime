@@ -1,17 +1,17 @@
-##### Documentation - [`module.exports`][t-module] - [Runtime API][t-runtime] - [Stack API][t-stack]
+##### Documentation - [`module.exports`][t-module] - [Tornado API][t-tornado] - [Stack API][t-stack]
 
-## runtime documentation
+## tornado documentation
 
 ### Getting started
 
-Install `runtime` using [npm][x-npm]
+Install `tornado` using [npm][x-npm]
 
-    npm install runtime
+    npm install tornado
 
 and then require it into any module
 
 ```js
-var app = require('runtime').create();
+var app = require('tornado').create();
 
 app.set(':handle', function(next){
   setTimeout(next, Math.random()*10);
@@ -36,4 +36,4 @@ At the moment is not tested in browsers but it should work. Use it at your own r
 [t-docs]: ./readme.md
 [t-stack]: ./stack.md
 [t-module]: ./module.md
-[t-runtime]: ./runtime.md
+[t-tornado]: ./tornado.md

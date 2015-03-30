@@ -1,12 +1,12 @@
 {
-  "name": "runtime",
+  "name": "tornado",
   "license": "MIT",
   "version": "0.9.10",
-  "description": "a runtime interface",
+  "description": "a tornado interface",
   "author": "Javier Carrillo <stringparser@gmail.com> (http://www.stringparser.com)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stringparser/runtime"
+    "url": "https://github.com/stringparser/tornado"
   },
   "scripts": {
     "lint": "jshint lib index.js --reporter node_modules/jshint-stylish/stylish.js --exclude node_modules",
