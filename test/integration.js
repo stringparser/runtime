@@ -3,8 +3,8 @@
 var fs = require('fs');
 var path = require('path');
 
-module.exports = function(runtime, util){
-  var app = runtime.create('integration', {log: false});
+module.exports = function(tornado, util){
+  var app = tornado.create('integration', {log: false});
 
   before(function(done){
     app.set({onHandleError: done});

@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = function(runtime){
-  var app = runtime.create('stack', {log: false});
+module.exports = function(tornado){
+  var app = tornado.create('stack', {log: false});
 
   it('should accept (separated, strings)', function(done){
     app.set({onHandleError: done});

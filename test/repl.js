@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = function(runtime, util){
-  var app = runtime.create('repl', {log: false});
+module.exports = function(tornado, util){
+  var app = tornado.create('repl', {log: false});
 
   function createREPL(input, output){
     app.readline({
