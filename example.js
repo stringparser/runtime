@@ -1,17 +1,21 @@
 'use strict';
 
-var Runtime = require('./.');
+var runtime = require('./.').create();
 
-function one(stack){
+function one(next){
+  var stack = this;
+  console.log('one start\n', stack);
   setTimeout(function(){
-    console.log('one');
-    stack.next(null, 3, 4);
+    console.log('one end\n', stack);
+    next(null, 3, 4);
   }, 1000);
 }
 
-function two(stack){
-  console.log('two');
-  stack.next();
+function two(next){
+  console.log('two start', this);
+  next();
+  console.log('two end', this);
 }
 
-Runtime.compose(one, two, Runtime.compose(one, two, {wait: true}))(1, 2, 3);
+runtime.compose(one, two, function(next){ next(); },
+  runtime.compose(one, two, {wait: true}))(1, 2, 3);
