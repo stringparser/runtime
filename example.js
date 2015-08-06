@@ -18,4 +18,7 @@ function two(next){
 }
 
 runtime.compose(one, two, function(next){ next(); },
-  runtime.compose(one, two, {wait: true}))(1, 2, 3);
+  runtime.compose(one, two, {wait: true}))(1, 2, function end(){
+    console.log('ended!');
+    console.log(arguments);
+  });
