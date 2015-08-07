@@ -4,9 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint lib/*.js *.js",
+    "test": "npm run lint && mocha test/index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "simple",
+    "async",
+    "compose",
+    "reuse",
+    "promises",
+    "streams",
+    "callbacks",
+    "promise",
+    "stream",
+    "callback"
+  ],
   "author": "Javier Carrillo Milla <stringparser@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -14,5 +26,10 @@
     "inherits": "^2.0.1",
     "lodash.merge": "^3.3.2",
     "utils-type": "^0.13.0"
+  },
+  "devDependencies": {
+    "eslint": "^1.0.0",
+    "mocha": "^2.2.5",
+    "should": "^7.0.2"
   }
 }
