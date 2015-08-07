@@ -1,15 +1,21 @@
 'use strict';
 
 var util = require('./lib/util');
+var Runtime = require('./lib/Runtime');
 
-var store = {};
-
-exports = module.exports = {
-  Stack: require('./lib/Stack'),
-  Runtime: require('./lib/Runtime'),
-  create: function(name){
-    if(store[name]){ return store[name]; }
-    if(typeof name !== 'string'){ name = util.stringID(); }
-    return (store[name] = new this.Runtime());
+exports = module.exports = util.merge(
+  Runtime.prototype.compose.bind(new Runtime()), {
+    Stack: require('./lib/Stack'),
+    create: create,
+    Runtime: Runtime,
   }
-};
+);
+
+function create(name, mixin){
+  if(create.store[name]){ return create.store[name]; }
+
+  mixin = mixin || name;
+  if(typeof name !== 'string'){ name = util.stringID(); }
+  return create.store[name] = new Runtime(mixin);
+}
+create.store = Object.create(null);
