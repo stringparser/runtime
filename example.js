@@ -1,6 +1,6 @@
 'use strict';
 
-var runtime = require('./.').create();
+var runtime = require('./.');
 
 function one(next){
   var stack = this;
@@ -17,8 +17,8 @@ function two(next){
   console.log('two end', this);
 }
 
-runtime.compose(one, two, function(next){ next(); },
-  runtime.compose(one, two, {wait: true}))(1, 2, function end(){
+runtime(one, two, function(next){ next(); },
+  runtime(one, two, {wait: true}))(1, 2, function end(){
     console.log('ended!');
     console.log(arguments);
   });
