@@ -10,7 +10,6 @@ rules:
   eol-last: 2
   no-undef: 2
   no-shadow: 2
-  valid-jsdoc: 2
   valid-typeof: 2
   no-dupe-args: 2
   no-dupe-keys: 2
