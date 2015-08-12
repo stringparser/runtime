@@ -3,19 +3,29 @@
 var util = require('./lib/util');
 var Runtime = require('./lib/Runtime');
 
-exports = module.exports = util.merge(
-  Runtime.prototype.stack.bind(new Runtime()), {
-    Stack: require('./lib/Stack'),
-    create: create,
-    Runtime: Runtime,
+/*
+ Missing docs
+*/
+exports = module.exports = Runtime;
+
+/*
+ Missing docs
+*/
+exports.create = function create(props){
+  return new Runtime(props);
+};
+
+/*
+ Missing docs
+*/
+exports.extend = exports.createClass = function createClass(mixin){
+  function RuntimeConstructor(props){
+    if(!(this instanceof RuntimeConstructor)){
+      return new Runtime(props);
+    }
+    Runtime.apply(this, arguments);
   }
-);
-
-function create(name, props){
-  if(create.store[name]){ return create.store[name]; }
-
-  props = props || name;
-  if(typeof name !== 'string'){ name = util.stringID(); }
-  return create.store[name] = new Runtime(props);
-}
-create.store = {};
+  util.inherits(RuntimeConstructor, Runtime);
+  util.merge(RuntimeConstructor.prototype, util.type(mixin).plainObject);
+  return RuntimeConstructor;
+};
