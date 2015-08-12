@@ -2,6 +2,30 @@
 
 var Runtime = require('../');
 
+it('uses the callback when a fn throws', function(done){
+  var error = Error('on no!');
+  var runtime = Runtime.create({});
+
+  function one(){ throw error; }
+
+  runtime.stack(one)(function(err){
+    err.should.be.eql(error);
+    done();
+  });
+});
+
+it('uses the callback when passes the error', function(done){
+  var error = Error('on no!');
+  var runtime = Runtime.create({});
+
+  function one(next){ next(error); }
+
+  runtime.stack(one)(function(err){
+    err.should.be.eql(error);
+    done();
+  });
+});
+
 it('runs the callback on completion', function(done){
   var runtime = Runtime.create({onHandleError: done});
 
@@ -13,13 +37,13 @@ it('runs the callback on completion', function(done){
     ++count; next();
   }
 
-  runtime.compose(one, two)(function(){
+  runtime.stack(one, two)(function(){
     count.should.be.eql(2);
     done();
   });
 });
 
-it('runs functions in parallel by default', function(done){
+it('runs fns in parallel by default', function(done){
   var runtime = Runtime.create({onHandleError: done});
 
   var stack = '';
@@ -34,7 +58,7 @@ it('runs functions in parallel by default', function(done){
     next();
   }
 
-  runtime.compose(one, two)(function(){
+  runtime.stack(one, two)(function(){
     stack.should.be.eql('twoone');
     done();
   });
@@ -55,7 +79,7 @@ it('{wait: true} runs functions in series', function(done){
     next();
   }
 
-  runtime.compose(one, two, {wait: true})(function(){
+  runtime.stack(one, two, {wait: true})(function(){
     stack.should.be.eql('onetwo');
     done();
   });
