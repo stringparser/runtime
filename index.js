@@ -18,7 +18,7 @@ exports.create = function create(props){
 /*
  Missing docs
 */
-exports.extend = exports.createClass = function createClass(mixin){
+exports.createClass = exports.extend = function createClass(mixin){
   function RuntimeConstructor(props){
     if(!(this instanceof RuntimeConstructor)){
       return new Runtime(props);
