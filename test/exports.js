@@ -13,13 +13,13 @@ it('createClass() should return a new constructor', function(){
   (new Ctor()).constructor.should.be.eql(Ctor);
 });
 
-it('create([Object]) should give the instance properties', function(){
+it('create(object props) should give the instance properties', function(){
   var props = {name : 'name'};
   var runtime = Runtime.create(props);
   runtime.should.have.properties(props);
 });
 
-it('createClass(mixin) should give the new constructor these props', function(){
+it('createClass(object mixin) mixin with new constructor', function(){
   var mixin = {method: function(){}};
   var Ctor = Runtime.createClass(mixin);
   Ctor.prototype.should.have.property('method', mixin.method);
