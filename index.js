@@ -65,8 +65,9 @@ Runtime.prototype.stack = function(/* functions... */){
 
     var next;
     util.asyncDone(function onNext(done){
-      args = [next = done].concat(args);
-      next.wait = Boolean(stack.wait);
+      next = done;
+      args = [next].concat(args);
+      next.wait = Boolean(stack.wait) || !stack.next;
       self.onHandle(next, handle, stack);
       var result = handle.apply(stack.context, args);
       if(next.wait){ return result; }
