@@ -135,8 +135,5 @@ it('does NOT pass arguments when fns does NOT wait', function(done){
     next();
   }
 
-  runtime.stack(one, two)(1, 2, function(err){
-    if(err){ done(err); }
-    done();
-  });
+  runtime.stack(one, two)(1, 2, done);
 });
