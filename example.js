@@ -1,25 +1,47 @@
 'use strict';
 
-var runtime = require('./.').create({
-  onHandle: function(){
-    console.log('onHandle');
-    console.log(arguments);
-    console.log('--');
+var Runtime = require('./.');
+var through = require('through2');
+var Promise = require('es6-promise').Promise;
+
+var runtime = Runtime.create({
+  onHandleError: function(error){
+    console.log('ups something broke');
+    throw error;
   }
 });
 
-function one(next){
+function asyncFoo(next, value){
+  next.wait = true;
+  console.log(value);
   setTimeout(function(){
-    next(null, 3, 4);
-  }, 1000);
+    next(null, 'Foo');
+  }, Math.random()*10);
 }
 
-function two(next){
-  next();
-}
-
-runtime.stack(one, two, function(next){ console.log('anonymous'); next(); },
-  runtime.stack(one, two, {wait: true}))(1, 2, function end(){
-    console.log('ended!');
-    console.log(arguments);
+function asyncBar(next, value){
+  return new Promise(function(resolve){
+    setTimeout(function(){
+      resolve(value + 'Promise');
+    }, Math.random()*10);
   });
+}
+
+function asyncBaz(next, value){
+  var stream = through();
+
+  setTimeout(function(){
+    stream.end();
+  }, Math.random()*10);
+
+  return stream.once('end', function(){
+    next(null, value + 'Stream');
+  });
+}
+
+var asyncBarBaz = runtime.stack(asyncBar, asyncBaz, {wait: true});
+
+runtime.stack(asyncFoo, asyncBarBaz)('insert args here', function(err, result){
+  if(err){ this.onHandleError(err); }
+  console.log(result);
+});
