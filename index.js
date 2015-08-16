@@ -91,7 +91,6 @@ Runtime.prototype.stack = function(/* functions... */){
       else if(stack.host.next){ tick(stack.host); }
       else if(!stack.length){
         stack.callback.apply(self, [null].concat(stack.args));
-        if(!stack.host){ stack = null; }
       }
     });
   }
