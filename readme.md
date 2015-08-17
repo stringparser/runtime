@@ -9,9 +9,11 @@
 
 [![build][badge-build]][x-travis]
 
-Runtime is a library to operate with async composition as low-level and simpler as possible. Is for people that hates so many choices around the same problem: avoid deep indention and be able to reuse something of that mess.
+Runtime is a library to compose asynchronous functions. For people who hates so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand.
 
-Every function is taken asynchronous, and it should be resolved. For that you can use callbacks, promises and streams.
+Every function is made asynchronous. Every function should be resolved either with a callback, returning a stream or a promise.
+
+Once these asynchronous functions are composed, they are not executed right away. Instead of executing them right away another function is returned, leaving execution/composition to the writer. This function can be called multiple times without mutating by itself and can be passed around.
 
 ```js
 var Runtime = require('runtime');
@@ -61,7 +63,7 @@ runtime.stack(asyncFoo, asyncBarBaz)('insert args here', function(err, result){
 });
 ```
 
-
+each `stack` is kept separately and will only receive the previous stack arguments when the `stack` before it was waiting and
 
 
 ## documentation
