@@ -27,15 +27,14 @@ var runtime = Runtime.create({
   }
 });
 
-function asyncFoo(next, value){
-  next.wait = true;
+function foo(next, value){
   console.log(value);
   setTimeout(function(){
     next(null, 'Foo');
   }, Math.random()*10);
 }
 
-function asyncBar(next, value){
+function bar(next, value){
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -43,7 +42,7 @@ function asyncBar(next, value){
   });
 }
 
-function asyncBaz(next, value){
+function baz(next, value){
   var stream = through();
 
   setTimeout(function(){
@@ -55,12 +54,14 @@ function asyncBaz(next, value){
   });
 }
 
-var asyncBarBaz = runtime.stack(asyncBar, asyncBaz, {wait: true});
+var barBaz = runtime.stack(bar, baz, {wait: true});
 
-runtime.stack(asyncFoo, asyncBarBaz)('insert args here', function(err, result){
-  if(err){ this.onHandleError(err); }
-  console.log(result);
-});
+runtime.stack(foo, barBaz, {wait: true})('insert args here',
+  function (err, result){
+    if(err){ return this.onHandleError(err); }
+    console.log(result);
+  }
+);
 ```
 
 each `stack` is kept separately and will only receive the previous stack arguments when the `stack` before it was waiting and
