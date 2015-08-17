@@ -60,21 +60,22 @@ Runtime.prototype.stack = function(/* functions... */){
   // runs each handle
   function tick(stack){
     var handle = stack[stack.index];
-    var args = handle.stack instanceof Stack ? [handle, stack] : stack.args;
     stack.next = ++stack.index < stack.length;
+    var args = [next].concat(handle.stack instanceof Stack
+      ? [handle, stack] : stack.args
+    );
 
-    var next;
-    util.asyncDone(function onNext(done){
-      next = done;
-      args = [next].concat(args);
-      next.wait = Boolean(stack.wait) || !stack.next;
+    util.asyncDone(function onNext(){
+      next.wait = Boolean(stack.wait);
       self.onHandle(next, handle, stack);
       var result = handle.apply(stack.context, args);
       if(next.wait){ return result; }
       if(stack.next){ tick(stack); }
       if(stack.host.next){ tick(stack.host); }
       return result;
-    }, function onDone(err){
+    }, next);
+
+    function next(err){
       if(err instanceof Error){
         return stack.callback.call(self, err, handle, stack);
       } else if(next.wait && arguments.length){
@@ -93,7 +94,7 @@ Runtime.prototype.stack = function(/* functions... */){
       if(!stack.length){
         stack.callback.apply(self, [null].concat(stack.args));
       }
-    });
+    }
   }
 
   return composer;
