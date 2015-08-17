@@ -12,7 +12,6 @@ var runtime = Runtime.create({
 });
 
 function asyncFoo(next, value){
-  next.wait = true;
   console.log(value);
   setTimeout(function(){
     next(null, 'Foo');
@@ -41,7 +40,7 @@ function asyncBaz(next, value){
 
 var asyncBarBaz = runtime.stack(asyncBar, asyncBaz, {wait: true});
 
-runtime.stack(asyncFoo, asyncBarBaz)('insert args here', function(err, result){
-  if(err){ this.onHandleError(err); }
+runtime.stack(asyncFoo, asyncBarBaz, {wait: true})('insert args here', function(err, result){
+  if(err){ return this.onHandleError(err); }
   console.log(result);
 });
