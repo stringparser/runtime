@@ -87,8 +87,9 @@ it('{wait: true} should run stacks in series', function(done){
     next();
   }
 
-  runtime.stack(runtime.stack(one), runtime.stack(two), {wait: true})(
-    function(err){
+  runtime.stack(
+    runtime.stack(one, {wait: true}),
+    runtime.stack(two), {wait: true})(function(err){
       if(err){ return done(err); }
       stack.should.be.eql('onetwo');
       done();
