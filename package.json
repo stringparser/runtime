@@ -25,6 +25,7 @@
     "async-done": "^1.1.0",
     "inherits": "^2.0.1",
     "lodash.merge": "^3.3.2",
+    "lodash.reduce": "^3.1.2",
     "utils-type": "^0.13.0"
   },
   "devDependencies": {
