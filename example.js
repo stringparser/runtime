@@ -40,7 +40,7 @@ function baz(next, value){
 
 var barBaz = runtime.stack(bar, baz, {wait: true});
 
-var composed = runtime.stack(foo, barBaz, {wait: true})
+var composed = runtime.stack(foo, barBaz, {wait: true});
 
 composed('insert args here',
   function (err, result){
