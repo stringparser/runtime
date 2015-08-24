@@ -40,9 +40,13 @@ function baz(next, value){
 
 var barBaz = runtime.stack(bar, baz, {wait: true});
 
-runtime.stack(foo, barBaz, {wait: true})('insert args here',
+var composed = runtime.stack(foo, barBaz, {wait: true})
+
+composed('insert args here',
   function (err, result){
     if(err){ return this.onHandleError(err); }
     console.log(result);
   }
 );
+
+console.log(composed.stack.tree());
