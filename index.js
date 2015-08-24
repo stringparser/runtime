@@ -1,6 +1,7 @@
 'use strict';
 
 var util = require('./lib/util');
+var Stack = require('./lib/Stack');
 var Runtime = require('./lib/Runtime');
 
 exports = module.exports = Runtime;
@@ -8,7 +9,8 @@ exports = module.exports = Runtime;
 /**
  Missing docs
 **/
-exports.Stack = require('./lib/Stack');
+exports.Stack = Stack;
+exports.Stack.createClass = util.classFactory(Stack);
 
 /**
  Missing docs
