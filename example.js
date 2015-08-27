@@ -49,4 +49,4 @@ composed('insert args here',
   }
 );
 
-console.log(composed.stack.tree());
+console.log(require('archy')(composed.stack.tree()));
