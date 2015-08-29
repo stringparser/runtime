@@ -1,6 +1,5 @@
 # runtime [![NPM version][badge-version]][x-npm] [![downloads][badge-downloads]][x-npm]
 
-[breaking changes](#breaking-changes) -
 [documentation](#documentation) -
 [examples](#examples) -
 [install](#install) -
@@ -9,11 +8,11 @@
 
 [![build][badge-build]][x-travis]
 
-Runtime is a library to compose asynchronous functions. For people who hates so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand.
+The aim of the project is to compose asynchronous functions and provide basic tools to create an interface. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.).
 
-Every function is made asynchronous. Every function should be resolved either with a callback, returning a stream or a promise.
+Once these asynchronous functions are composed, they are not executed right away. Instead another function is returned, leaving execution to the writer. This function can be used multiple times.
 
-Once these asynchronous functions are composed, they are not executed right away. Instead of executing them right away another function is returned, leaving execution/composition to the writer. This function can be called multiple times without mutating by itself and can be passed around.
+Note that every function is made asynchronous and should be resolved either with a callback, returning a stream or a promise.
 
 ```js
 var Runtime = require('runtime');
@@ -57,14 +56,12 @@ function baz(next, value){
 var barBaz = runtime.stack(bar, baz, {wait: true});
 
 runtime.stack(foo, barBaz, {wait: true})('insert args here',
-  function (err, result){
+  function done(err, result){
     if(err){ return this.onHandleError(err); }
     console.log(result);
   }
 );
 ```
-
-each `stack` is kept separately and will only receive the previous stack arguments when the `stack` before it was waiting and
 
 
 ## documentation
