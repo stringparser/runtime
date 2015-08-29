@@ -18,7 +18,6 @@ rules:
   no-unused-vars: [2, args: none]
   no-func-assign: 2
   no-unreachable: 2
-  no-extra-parens: 2
   no-multi-spaces: 2
   space-infix-ops: 0
   no-unused-expressions: 2
