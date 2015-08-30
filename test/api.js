@@ -64,7 +64,7 @@ it('can be reused with no side-effects', function(done){
   }, {context: {param: 0}});
 
   runtime.stack(stack, stack)(function(err){
-    if(err){ done(err); }
+    if(err){ return done(err); }
     count.should.be.eql(2);
     done();
   });
