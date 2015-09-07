@@ -64,10 +64,22 @@ it('runs stacks in parallel by default', function(done){
     stack += 'two';
     next();
   }
+  function three(next){
+    stack += 'three';
+    next();
+  }
+  function four(next){
+    stack += 'four';
+    next();
+  }
 
-  runtime.stack(runtime.stack(one), runtime.stack(two))(function(err){
+  runtime.stack(
+    one,
+    runtime.stack(two),
+    runtime.stack(three, four)
+  )(function(err){
     if(err){ return done(err); }
-    stack.should.be.eql('twoone');
+    stack.should.not.be.eql('onetwothreefour');
     done();
   });
 });
@@ -87,11 +99,66 @@ it('{wait: true} should run stacks in series', function(done){
     next();
   }
 
+  function three(next){
+    setTimeout(function(){
+      stack += 'three';
+      next();
+    }, Math.random()*10);
+  }
+  function four(next){
+    stack += 'four';
+    next();
+  }
+
   runtime.stack(
-    runtime.stack(one, {wait: true}),
-    runtime.stack(two, {wait: true}), {wait: true})(function(err){
+    one,
+    runtime.stack(one, two, {wait: true}),
+    runtime.stack(one, two, three, four, {wait: true}),
+    four,
+    {wait: true})(function(err){
       if(err){ return done(err); }
-      stack.should.be.eql('onetwo');
+      stack.should.be.eql('oneonetwoonetwothreefourfour');
+      done();
+    }
+  );
+});
+
+it('series: callback is run after all stacks are finished', function(done){
+  var runtime = Runtime.create();
+
+  var count = -1;
+  var stack = [];
+  function one(next){
+    var pos = ++count;
+    setTimeout(function(){
+      stack.push(pos);
+      next();
+    }, Math.random()*10);
+  }
+
+  runtime.stack(
+      runtime.stack(one,
+        runtime.stack(one,
+          runtime.stack(one,
+            runtime.stack(one,
+              runtime.stack(one,
+                runtime.stack(one,
+                  runtime.stack(one,
+                    runtime.stack(one,
+                      runtime.stack(one,
+                        runtime.stack(one, {wait: true}),
+                      {wait: true}),
+                    {wait: true}),
+                  {wait: true}),
+                {wait: true}),
+              {wait: true}),
+            {wait: true}),
+          {wait: true}),
+        {wait: true}),
+      {wait: true}),
+    {wait: true})(function(err){
+      if(err){ return done(err); }
+      stack.should.be.eql([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
       done();
     }
   );
