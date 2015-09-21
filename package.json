@@ -22,7 +22,7 @@
   "author": "Javier Carrillo Milla <stringparser@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "async-done": "^1.1.0",
+    "async-done": "^1.1.1",
     "inherits": "^2.0.1",
     "lodash.clone": "^3.0.3",
     "lodash.merge": "^3.3.2",
