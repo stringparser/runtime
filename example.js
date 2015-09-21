@@ -1,10 +1,25 @@
 'use strict';
 
+var fs = require('fs');
+
 var Runtime = require('./.');
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
+  onHandle: function(next, handle, stack){
+    if(!next.time){
+      console.log('`%s` started', handle.name);
+    } else {
+      var diff = process.hrtime(next.time);
+      console.log('`%s` ended after %s ms',
+        handle.name || 'anonymous',
+        (diff[0]*1e3 + diff[1]*1e-6).toString().match(/\d+\.\d{0,3}/)[0]
+      );
+    }
+
+    next.time = process.hrtime();
+  },
   onHandleError: function(error){
     console.log('ups something broke');
     throw error;
@@ -12,7 +27,7 @@ var runtime = Runtime.create({
 });
 
 function foo(next, value){
-  console.log(value);
+  console.log('received `%s`', value);
   setTimeout(function(){
     next(null, 'Foo');
   }, Math.random()*10);
@@ -27,26 +42,30 @@ function bar(next, value){
 }
 
 function baz(next, value){
-  var stream = through();
+  var stream = fs.createReadStream(__filename).pipe(
+    through(
+      function write(chunk, enc, cb){
+        this.push(chunk);
+        cb();
+      },
+      function end(cb){
+        this.emit('end', value + 'Stream');
+        cb();
+      }
+    )
+  );
 
-  setTimeout(function(){
-    stream.end();
-  }, Math.random()*10);
-
-  return stream.once('end', function(){
-    next(null, value + 'Stream');
-  });
+  return stream;
 }
 
-var barBaz = runtime.stack(bar, baz, {wait: true});
+var composed = runtime.stack(foo, bar, baz, {wait: true});
 
-var composed = runtime.stack(foo, barBaz, {wait: true});
+composed('insert args here', function done(err, result){
+  if(err){ return this.onHandleError(err); }
+  console.log('result: `%s`', result);
+});
 
-composed('insert args here',
-  function (err, result){
-    if(err){ return this.onHandleError(err); }
-    console.log(result);
-  }
+// how does it look like?
+console.log(
+  require('archy')(composed.stack.tree())
 );
-
-console.log(require('archy')(composed.stack.tree()));
