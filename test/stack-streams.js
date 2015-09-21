@@ -137,9 +137,9 @@ it('runs in parallel by default', function(done){
     return stream;
   }
 
-  runtime.stack(one, two)(function(err){
+  runtime.stack(one, two, one, two)(function(err){
     if(err){ return done(err); }
-    stack.should.be.eql('twoone');
+    stack.should.not.be.eql('onetwoonetwo');
     done();
   });
 });
