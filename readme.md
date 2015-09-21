@@ -19,7 +19,6 @@ Note that every function is made asynchronous and should be resolved either with
 ```js
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
-var Runtime = require('Runtime');
 
 // lets write some async functions
 function foo(next, value){
@@ -53,6 +52,8 @@ function baz(next, value){
 All right we have 3 functions, lets setup an interface around them. For the sake of simplicity let's make a logger with error handling.
 
 ```js
+var Runtime = require('runtime');
+
 var runtime = Runtime.create({
   onHandle: function(next, handle, stack){
     var name = handle.name || 'anonymous';
