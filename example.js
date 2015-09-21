@@ -1,7 +1,5 @@
 'use strict';
 
-var fs = require('fs');
-
 var Runtime = require('./.');
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
@@ -41,6 +39,8 @@ function bar(next, value){
   });
 }
 
+var fs = require('fs');
+
 function baz(next, value){
   var stream = fs.createReadStream(__filename).pipe(
     through(
@@ -67,5 +67,6 @@ composed('insert args here', function done(err, result){
 
 // how does it look like?
 console.log(
+  'Stack tree -> %s',
   require('archy')(composed.stack.tree())
 );
