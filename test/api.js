@@ -98,22 +98,22 @@ it('create({wait: true}) makes all stacks wait', function(done){
   })
 });
 
-it('next.repeat reruns the handle', function(done){
-  var stack = [];
-  var runtime = Runtime.create();
-
-  function whilst(next, count){
-    if(++count < 10){
-      stack.push(count);
-      next.repeat = true;
-    }
-    next(null, count);
-  }
-
-  runtime.stack(whilst)(-1, function(err, result){
-    if(err){ return done(err); }
-    result.should.be.eql(9);
-    stack.should.be.eql([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    done();
-  });
-});
+// it('next.repeat reruns the handle', function(done){
+//   var stack = [];
+//   var runtime = Runtime.create();
+//
+//   function whilst(next, count){
+//     if(++count < 10){
+//       stack.push(count);
+//       next.repeat = true;
+//     }
+//     next(null, count);
+//   }
+//
+//   runtime.stack(whilst)(-1, function(err, result){
+//     if(err){ return done(err); }
+//     result.should.be.eql(9);
+//     stack.should.be.eql([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+//     done();
+//   });
+// });
