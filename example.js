@@ -6,13 +6,14 @@ var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
   onHandle: function(next, handle, stack){
+    var name = handle.name || 'anonymous';
+
     if(!next.time){
-      console.log('`%s` started', handle.name);
+      console.log('`%s` started', name);
     } else {
       var diff = process.hrtime(next.time);
       console.log('`%s` ended after %s ms',
-        handle.name || 'anonymous',
-        (diff[0]*1e3 + diff[1]*1e-6).toString().match(/\d+\.\d{0,3}/)[0]
+        name, diff[1]*1e-6
       );
     }
 
@@ -32,9 +33,6 @@ function foo(next, value){
 }
 
 function bar(next, value){
-  next.wait = false;
-  // so the others doesn't have to wait
-  // that is: the function wrapper doesn't need to know everything
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -43,23 +41,12 @@ function bar(next, value){
 }
 
 var fs = require('fs');
-
 function baz(next, value){
+  var stream = fs.createReadStream(__filename);
 
-  var stream = fs.createReadStream(__filename).pipe(
-    through(
-      function write(chunk, enc, cb){
-        this.push(chunk);
-        cb();
-      },
-      function end(cb){
-        this.emit('end', value + 'Stream');
-        cb();
-      }
-    )
-  );
-
-  return stream;
+  return stream.once('end', function(){
+    next(null, value + 'Stream');
+  });
 }
 
 var composed = runtime.stack(foo, bar, baz, {wait: true});

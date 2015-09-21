@@ -1,10 +1,11 @@
 # runtime [![NPM version][badge-version]][x-npm][![downloads][badge-downloads]][x-npm]
 
+[breakin changes](#breaking-changes) -
 [documentation](#documentation) -
 [examples](#examples) -
 [install](#install) -
 [todo](#todo) -
-[why](#why)
+[why](#why) -
 
 [![Build status][badge-build]][x-travis]
 [![Gitter][badge-gitter]][x-gitter]
@@ -41,20 +42,11 @@ function bar(next, value){
 
 var fs = require('fs');
 function baz(next, value){
-  var stream = fs.createReadStream(__filename).pipe(
-    through(
-      function write(chunk, enc, cb){
-        this.push(chunk);
-        cb();
-      },
-      function end(cb){
-        this.emit('end', value + 'Stream');
-        cb();
-      }
-    )
-  );
+  var stream = fs.createReadStream(__filename);
 
-  return stream;
+  return stream.once('end', function(){
+    next(null, value + 'Stream');
+  });
 }
 ```
 
@@ -63,13 +55,14 @@ All right we have 3 functions, lets setup an interface around them. For the sake
 ```js
 var runtime = Runtime.create({
   onHandle: function(next, handle, stack){
+    var name = handle.name || 'anonymous';
+
     if(!next.time){
-      console.log('`%s` started', handle.name);
+      console.log('`%s` started', name);
     } else {
       var diff = process.hrtime(next.time);
       console.log('`%s` ended after %s ms',
-        handle.name || 'anonymous',
-        (diff[0]*1e3 + diff[1]*1e-6).toString().match(/\d+\.\d{0,3}/)[0]
+        name, diff[1]*1e-6
       );
     }
 
@@ -111,12 +104,12 @@ Stack tree -> series:(foo bar baz)
 
 `foo` started
 received `insert args here`
-`foo` ended after 7.431 ms
+`foo` ended after 4.599773 ms
 `bar` started
+`bar` ended after 2.532619 ms
 `baz` started
-`bar` ended after 11.067 ms
-`baz` ended after 11.581 ms
-result: `Foo`
+`baz` ended after 4.395017 ms
+result: `FooPromiseStream`
 ```
 
 ## documentation
@@ -171,7 +164,7 @@ var Registry = Runtime.createClass({
     if(typeof site === 'string' && typeof this.task[site] === 'function'){
       stack.push(this.task[site]);
     } else if(typeof site === 'function'){
-      stack.push(this.task[site]);
+      stack.push(site);
     }
 
     return stack;
