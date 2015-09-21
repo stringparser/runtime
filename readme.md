@@ -18,7 +18,49 @@ Note that every function is made asynchronous and should be resolved either with
 ```js
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
+var Runtime = require('Runtime');
 
+// lets write some async functions
+function foo(next, value){
+  console.log('received `%s`', value);
+  setTimeout(function(){
+    next(null, 'Foo');
+  }, Math.random()*10);
+}
+
+function bar(next, value){
+  next.wait = false;
+  // so the others doesn't have to wait for this one
+
+  return new Promise(function(resolve){
+    setTimeout(function(){
+      resolve(value + 'Promise');
+    }, Math.random()*10);
+  });
+}
+
+var fs = require('fs');
+function baz(next, value){
+  var stream = fs.createReadStream(__filename).pipe(
+    through(
+      function write(chunk, enc, cb){
+        this.push(chunk);
+        cb();
+      },
+      function end(cb){
+        this.emit('end', value + 'Stream');
+        cb();
+      }
+    )
+  );
+
+  return stream;
+}
+```
+
+All right we have 3 functions, lets setup an interface around them. For the sake of simplicity let's make a logger with error handling.
+
+```js
 var runtime = Runtime.create({
   onHandle: function(next, handle, stack){
     if(!next.time){
@@ -38,41 +80,14 @@ var runtime = Runtime.create({
     throw error;
   }
 });
+```
 
-function foo(next, value){
-  console.log('received `%s`', value);
-  setTimeout(function(){
-    next(null, 'Foo');
-  }, Math.random()*10);
-}
+Now let's compose those into one asynchronous function using
+this brand new `runtime` instance we have created.
 
-function bar(next, value){
-  return new Promise(function(resolve){
-    setTimeout(function(){
-      resolve(value + 'Promise');
-    }, Math.random()*10);
-  });
-}
+How does it look like? Like this: last argument is for options, all the others for functions.
 
-var fs = require('fs');
-
-function baz(next, value){
-  var stream = fs.createReadStream(__filename).pipe(
-    through(
-      function write(chunk, enc, cb){
-        this.push(chunk);
-        cb();
-      },
-      function end(cb){
-        this.emit('end', value + 'Stream');
-        cb();
-      }
-    )
-  );
-
-  return stream;
-}
-
+```js
 var composed = runtime.stack(foo, bar, baz, {wait: true});
 
 composed('insert args here', function done(err, result){
@@ -80,13 +95,29 @@ composed('insert args here', function done(err, result){
   console.log('result: `%s`', result);
 });
 
-// how does it look like?
-console.log(
-  'Stack tree -> %s',
+// Let's make it pretty
+console.log('Stack tree -> %s',
   require('archy')(composed.stack.tree())
 );
 ```
 
+Here we go. This is the output logged.
+
+```sh
+Stack tree -> series:(foo bar baz)
+├── foo
+├── bar
+└── baz
+
+`foo` started
+received `insert args here`
+`foo` ended after 7.431 ms
+`bar` started
+`baz` started
+`bar` ended after 11.067 ms
+`baz` ended after 11.581 ms
+result: `Foo`
+```
 
 ## documentation
 

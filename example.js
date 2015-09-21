@@ -32,6 +32,9 @@ function foo(next, value){
 }
 
 function bar(next, value){
+  next.wait = false;
+  // so the others doesn't have to wait
+  // that is: the function wrapper doesn't need to know everything
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -42,6 +45,7 @@ function bar(next, value){
 var fs = require('fs');
 
 function baz(next, value){
+
   var stream = fs.createReadStream(__filename).pipe(
     through(
       function write(chunk, enc, cb){
