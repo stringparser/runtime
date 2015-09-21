@@ -16,11 +16,14 @@ Once these asynchronous functions are composed, they are not executed right away
 
 Note that every function is made asynchronous and should be resolved either with a callback, returning a stream, a promise or with a [RxJS observable][RxJS-observable].
 
+## usage
+
+As an example let's make 3 async functions. One using a callback, other returning a promise and another a stream.
+
 ```js
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
-// lets write some async functions
 function foo(next, value){
   console.log('received `%s`', value);
   setTimeout(function(){
@@ -29,9 +32,6 @@ function foo(next, value){
 }
 
 function bar(next, value){
-  next.wait = false;
-  // so the others doesn't have to wait for this one
-
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -49,7 +49,7 @@ function baz(next, value){
 }
 ```
 
-All right we have 3 functions, lets setup an interface around them. For the sake of simplicity let's make a logger with error handling.
+All right we have 3 functions, now we can setup an interface around them. For the sake of simplicity let's make a logger with error handling.
 
 ```js
 var Runtime = require('runtime');
@@ -76,10 +76,12 @@ var runtime = Runtime.create({
 });
 ```
 
-Now let's compose those into one asynchronous function using
+Now let's compose those into one asynchronous functions using
 this brand new `runtime` instance we have created.
 
-How does it look like? Like this: last argument is for options, all the others for functions.
+How does it look like?
+
+The default goes like this: last argument is for options, all the others for functions.
 
 ```js
 var composed = runtime.stack(foo, bar, baz, {wait: true});
@@ -115,14 +117,14 @@ result: `FooPromiseStream`
 
 ## documentation
 
-I've jut finished a mayor cleanup, the docs will come up in a couple weeks. In any case, there [always is gitter][x-gitter].
+I've jut finished a mayor cleanup, the docs will come up in a couple weeks. In any case, there [is always gitter][x-gitter].
 
 ## why
 
-There are several ways to manage complexity of asynchronous functions,
-ones are better than other for some use-cases and sometimes with callbacks
+There are several ways to manage complexity for asynchronous functions,
+ones are better than others for some use-cases and sometimes with callbacks
 is more than enough. But we all want to avoid callback hell and reuse as much
-as possible. Thats the main aim of this library.
+as possible.
 
 ## install
 
@@ -138,7 +140,7 @@ Now `runtime.stack` composes only functions **by default**. If you want to
 give strings that then are mapped to a function that is, you want to write
 
 ```js
-runtime.stack('foo', 'bar');
+var composed = runtime.stack('foo', 'bar');
 ```
 you will have to use the following approach
 
@@ -202,9 +204,9 @@ stack('myArg', function onStackEnd(err, result){
 
 ### test
 
-    npm test
-
 ```
+ ➜  runtime (master) ✔ npm test
+
 runtime
     api
       ✓ onHandle is called before and after each site
