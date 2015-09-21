@@ -1,7 +1,6 @@
 'use strict';
 
 var Runtime = require('./.');
-var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
