@@ -1,7 +1,7 @@
 {
   "name": "runtime",
-  "version": "0.10.0",
-  "description": "",
+  "version": "0.10.1",
+  "description": "a runtime interface",
   "main": "index.js",
   "scripts": {
     "lint": "eslint lib/*.js *.js",
