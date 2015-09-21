@@ -121,7 +121,7 @@ result: `Foo`
 
 ## documentation
 
-For the API docs and more examples you can go to the [docs folder](./docs)
+I've jut finished a mayor cleanup, the docs will come up in a couple weeks. In any case, there [always is gitter][x-gitter].
 
 ## why
 
