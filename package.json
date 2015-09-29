@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.10.7",
+  "version": "0.10.8",
   "homepage": "http://github.com/stringparser/runtime",
   "description": "a runtime interface",
   "main": "index.js",
