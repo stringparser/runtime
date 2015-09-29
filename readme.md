@@ -1,4 +1,6 @@
-# runtime [![NPM version][badge-version]][x-npm][![downloads][badge-downloads]][x-npm]
+# runtime [![NPM version][badge-version]][x-npm]
+[![Build status][badge-build]][x-travis]
+[![Gitter][badge-gitter]][x-gitter]
 
 [breakin changes](#breaking-changes) -
 [documentation](#documentation) -
@@ -6,9 +8,6 @@
 [install](#install) -
 [todo](#todo) -
 [why](#why) -
-
-[![Build status][badge-build]][x-travis]
-[![Gitter][badge-gitter]][x-gitter]
 
 The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.).
 
@@ -272,9 +271,8 @@ runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime
 [x-gitter]: https://gitter.im/stringparser/runtime
 
-[badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
-[badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
+[badge-build]: https://travis-ci.org/stringparser/runtime.svg
+[badge-version]: https://badge.fury.io/js/runtime.svg
 [badge-gitter]: https://badges.gitter.im/Join%20Chat.svg
-[badge-downloads]: http://img.shields.io/npm/dm/runtime.svg?style=flat-square
 
 [RxJS-observable]: https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md
