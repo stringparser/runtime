@@ -50,9 +50,5 @@ _arguments_
  - `mixin`, type object that extends the Runtime prototype
 
 _returns_ a constructor function that inherits from `Runtime`
-
-## Runtime.extend
-
-Same as `Runtime.createClass`. Its just an alias.
 **/
-exports.createClass = exports.extend = util.classFactory(Runtime);
+exports.createClass = util.classFactory(Runtime);
