@@ -2,12 +2,12 @@
 [![Build status][badge-build]][x-travis]
 [![Gitter][badge-gitter]][x-gitter]
 
-[breakin changes](#breaking-changes) -
+[breaking changes](#breaking-changes) -
 [documentation](#documentation) -
 [examples](#examples) -
 [install](#install) -
 [todo](#todo) -
-[why](#why) -
+[why](#why)
 
 The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.).
 
@@ -256,10 +256,6 @@ runtime
 
   39 passing (273ms)
 ```
-
-### todo
-
-- [ ] make possible to rewind and repeat functions within the stack
 
 ### license
 
