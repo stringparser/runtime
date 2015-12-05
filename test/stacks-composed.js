@@ -137,31 +137,20 @@ it('series: callback is run after all stacks are finished', function(done){
   }
 
   runtime.stack(
+    runtime.stack(one,
       runtime.stack(one,
         runtime.stack(one,
           runtime.stack(one,
-            runtime.stack(one,
-              runtime.stack(one,
-                runtime.stack(one,
-                  runtime.stack(one,
-                    runtime.stack(one,
-                      runtime.stack(one,
-                        runtime.stack(one, {wait: true}),
-                      {wait: true}),
-                    {wait: true}),
-                  {wait: true}),
-                {wait: true}),
-              {wait: true}),
-            {wait: true}),
+            runtime.stack(one, {wait: true}),
           {wait: true}),
         {wait: true}),
       {wait: true}),
-    {wait: true})(function(err){
-      if(err){ return done(err); }
-      stack.should.be.eql([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-      done();
-    }
-  );
+    {wait: true}),
+  {wait: true})(function(err){
+    if(err){ return done(err); }
+    stack.should.be.eql([0, 1, 2, 3, 4]);
+    done();
+  });
 });
 
 it('passes arguments when host and completed stack waits', function(done){
