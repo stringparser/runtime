@@ -3,12 +3,17 @@
 var Runtime = require('../.');
 
 var Tor = Runtime.createClass({
-  constructor: function(){
-    this.constructor.super_.apply(this, arguments);
+  create: function(){
     this.isTor = true;
   }
 });
 
+var Tur = Tor.createClass({
+  create: function(){
+    this.thing = true;
+  }
+});
+
 console.log(
-  Tor.create({something: 'else'})
-);
+  Tur.create()
+)
