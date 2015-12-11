@@ -8,13 +8,13 @@ it('create() should return a new instance', function(){
 });
 
 it('createClass() should return a new constructor', function(){
-  var Ctor = Runtime.createClass();
-  Ctor.super_.should.be.eql(Runtime);
-  (new Ctor()).constructor.should.be.eql(Ctor);
+  var Tor = Runtime.createClass();
+  Tor.super_.should.be.eql(Runtime);
+  (new Tor()).constructor.should.be.eql(Tor);
 });
 
 it('create(object props) should give the instance properties', function(){
-  var props = {name : 'name'};
+  var props = {name: 'name'};
   var runtime = Runtime.create(props);
   runtime.should.have.properties(props);
 });
