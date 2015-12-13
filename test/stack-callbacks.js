@@ -112,11 +112,11 @@ it('passes arguments when fns wait', function(done){
 
   function one(next, foo, bar){
     next.wait = true;
-    [foo, bar].should.be.eql([1,2]);
-    next(3,4);
+    [foo, bar].should.be.eql([1, 2]);
+    next(3, 4);
   }
   function two(next, foo, bar){
-    [foo, bar].should.be.eql([3,4]);
+    [foo, bar].should.be.eql([3, 4]);
     next();
   }
 
@@ -127,11 +127,11 @@ it('does NOT pass arguments when fns does NOT wait', function(done){
   var runtime = Runtime.create();
 
   function one(next, foo, bar){
-    [foo, bar].should.be.eql([1,2]);
-    next(3,4);
+    [foo, bar].should.be.eql([1, 2]);
+    next(3, 4);
   }
   function two(next, foo, bar){
-    [foo, bar].should.be.eql([1,2]);
+    [foo, bar].should.be.eql([1, 2]);
     next();
   }
 

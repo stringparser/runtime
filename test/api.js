@@ -95,7 +95,7 @@ it('create({wait: true}) makes all stacks wait', function(done){
     if(err){ return done(err); }
     stack.should.be.eql([0, 1, 2, 3, 4]);
     done();
-  })
+  });
 });
 
 // it('next.repeat reruns the handle', function(done){
