@@ -13,10 +13,10 @@ it('createClass() should return a new constructor', function(){
   (new Tor()).constructor.should.be.eql(Tor);
 });
 
-it('create(object mixin) should mixin in with Stack prototype', function(){
+it('create(object mixin) should add to the instance properties', function(){
   var props = {name: 'name'};
   var runtime = Runtime.create(props);
-  (runtime.Stack.prototype).should.have.properties(props);
+  (runtime).should.have.properties(props);
 });
 
 it('createClass(object mixin) mixin with new constructor', function(){
