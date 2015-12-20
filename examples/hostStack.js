@@ -3,8 +3,7 @@
 var Runtime = require('../.');
 
 var runtime = Runtime.create({
-  wait: true,
-  onHandle: function(site, index, next){
+  onHandle: function(site, index, stack){
     var props = this.props[index];
 
     if(!this.time && !props.host){
@@ -43,18 +42,18 @@ var runtime = Runtime.create({
 });
 
 function one(next){
-  setTimeout(next, 10*Math.random());
+  setTimeout(next, 1000*Math.random());
 }
 
 function two(next){
-  setTimeout(next, 10*Math.random());
+  setTimeout(next, 2000*Math.random());
 }
 
 function three(next){
-  setTimeout(next, 10*Math.random());
+  setTimeout(next, 3000*Math.random());
 }
 
-var taskOne = runtime.stack(one, two);
+var taskOne = runtime.stack(one, two, {wait: true});
 var taskTwo = runtime.stack(three);
 
 runtime.stack(taskOne, taskTwo)();
