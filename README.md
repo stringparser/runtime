@@ -54,23 +54,31 @@ All right we have 3 functions, now we can setup an interface around them. For th
 var Runtime = require('runtime');
 
 var runtime = Runtime.create({
-  onHandle: function(next, handle, stack){
-    var name = handle.name || 'anonymous';
+  onHandle: function(site, index, stack){
+    var name = site.name || 'anonymous';
+    var props = stack.props[index];
 
-    if(!next.time){
+    if(!props.time){
       console.log('`%s` started', name);
+      props.time = process.hrtime();
     } else {
-      var diff = process.hrtime(next.time);
+      var diff = process.hrtime(props.time);
       console.log('`%s` ended after %s ms',
         name, diff[1]*1e-6
       );
     }
-
-    next.time = process.hrtime();
   },
   onHandleError: function(error){
     console.log('ups something broke');
     throw error;
+  },
+  reduceStack: function(stack, site){
+    stack.props = stack.props || [];
+    if(typeof site === 'function'){
+      stack.push(site);
+      stack.props.push({});
+    }
+    return stack;
   }
 });
 ```
@@ -116,7 +124,7 @@ result: `FooPromiseStream`
 
 ## documentation
 
-I've jut finished a mayor cleanup, the docs will come up in a couple weeks. In any case, there [is always gitter][x-gitter].
+Work in progress.
 
 ## why
 
@@ -147,7 +155,7 @@ you will have to use the following approach
 var Runtime = require('runtime');
 
 // create your class
-var Registry = Runtime.createClass({
+var RuntimeClass = Runtime.createClass({
   task: function(name, handle){
     if(typeof name !== 'string'){
       throw new TypeError('`name` should be a string');
@@ -174,10 +182,10 @@ var Registry = Runtime.createClass({
 });
 
 // instantiate
-var myRuntime = new Registry();
+var runtime = new RuntimeClass();
 
 // now you can use string and functions
-myRuntime.task('one', function handleOne(next, myArg){
+runtime.task('one', function handleOne(next, myArg){
   // do async things
   next();
   // ^ or return a  promise, stream or RxJS observable
@@ -191,11 +199,11 @@ function two(next, myArg){
 
 // now you can `stack` functions and string together
 //
-var stack = myRuntime.stack('one', two);
+var composer = runtime.stack('one', two);
 
 // run the `stack` function returned
 //
-stack('myArg', function onStackEnd(err, result){
+composer('myArg', function onStackEnd(err, result){
   if(err){ throw err; }
   console.log(result);
 });
