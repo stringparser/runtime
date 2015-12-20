@@ -4,30 +4,39 @@ var Runtime = require('../.');
 var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
-  onHandle: function(next, handle, stack){
-    var name = handle.name || 'anonymous';
+  onHandle: function(site, index, stack){
+    var props = stack.props[index];
+    var name = props.name || 'anonymous';
 
-    if(!next.time){
+    if(!props.time){
       console.log('`%s` started', name);
+      props.time = process.hrtime();
     } else {
-      var diff = process.hrtime(next.time);
+      var diff = process.hrtime(props.time);
       console.log('`%s` ended after %s ms',
         name, diff[1]*1e-6
       );
     }
-
-    next.time = process.hrtime();
   },
   onHandleError: function(error){
     console.log('ups something broke');
     throw error;
+  },
+  reduceStack: function(stack, site){
+    if(typeof site === 'function'){
+      stack.push(site);
+      stack.props = stack.props || [];
+      stack.props.push({name: site.name});
+    }
+
+    return stack;
   }
 });
 
 function foo(next, value){
   console.log('received `%s`', value);
   setTimeout(function(){
-    next(null, 'Foo');
+    next(null, 'Callback');
   }, Math.random()*10);
 }
 
