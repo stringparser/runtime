@@ -4,39 +4,30 @@ var Runtime = require('../.');
 
 var runtime = Runtime.create({
   onHandle: function(site, index, stack){
-    var props = this.props[index];
+    var props = stack.props[index];
 
-    if(!this.time && !props.host){
-      console.log(' start ->', this.tree().label);
-      this.time = process.hrtime();
-    } else if(!props.time && props.host){
-      console.log('start ->', props.host.tree().label);
+    if(!stack.time){
+      console.log('start ->', stack.tree().label);
+      stack.time = process.hrtime();
+    } else if(!stack.time && stack.host){
+      console.log('start ->', stack.host.tree().label);
     }
 
-    if(props.site){
-      console.log(props.time ? ' ended' : ' start',
-        props.site.name
-      );
-    }
+    console.log(props.time ? ' ended' : ' start', site.name);
 
-    if(props.host && props.host.end){
-      console.log('ended ->', props.host.tree().label);
-    } else if(this.end && !props.host){
-      console.log(' ended ->', this.tree().label);
+    if(stack.host && stack.host.end){
+      console.log('ended ->', stack.host.tree().label);
+    } else if(stack.end && !stack.host){
+      console.log(' ended ->', stack.tree().label);
     }
     props.time = process.hrtime();
   },
   reduceStack: function(stack, site){
-    if(typeof site !== 'function'){ return stack; }
-
-    stack.push(site);
-    stack.props = stack.props || [];
-    if(site.stack instanceof this.Stack){
-      stack.props.push({host: stack});
-    } else {
-      stack.props.push({site: site});
+    if(typeof site === 'function'){
+      stack.push(site);
+      stack.props = stack.props || [];
+      stack.props.push({});
     }
-
     return stack;
   }
 });
