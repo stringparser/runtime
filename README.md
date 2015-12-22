@@ -1,6 +1,5 @@
 # runtime [![NPM version][badge-version]][x-npm]
 [![Build status][badge-build]][x-travis]
-[![Gitter][badge-gitter]][x-gitter]
 
 [breaking changes](#breaking-changes) -
 [documentation](#documentation) -
@@ -273,10 +272,8 @@ runtime
 
 [x-npm]: https://npmjs.org/package/runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime
-[x-gitter]: https://gitter.im/stringparser/runtime
 
 [badge-build]: https://travis-ci.org/stringparser/runtime.svg
 [badge-version]: https://badge.fury.io/js/runtime.svg
-[badge-gitter]: https://badges.gitter.im/Join%20Chat.svg
 
 [RxJS-observable]: https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md
