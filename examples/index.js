@@ -4,32 +4,31 @@ var Runtime = require('../.');
 var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
-  onHandle: function(site, index, stack){
-    var props = stack.props[index];
-    var name = props.name || 'anonymous';
+  reduceStack: function(stack, site){
+    if(typeof site !== 'function'){
+      stack.push({
+        fn: site,
+        label: site.stack instanceof this.Stack
+          ? site.stack.tree().label
+          : site.name
+      });
+    }
+  },
+  onHandle: function(site, stack){
 
-    if(!props.time){
-      console.log('`%s` started', name);
-      props.time = process.hrtime();
+    if(!site.time){
+      console.log('`%s` started', site.label);
+      site.time = process.hrtime();
     } else {
-      var diff = process.hrtime(props.time);
+      var diff = process.hrtime(site.time);
       console.log('`%s` ended after %s ms',
-        name, diff[1]*1e-6
+        site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
       );
     }
   },
   onHandleError: function(error){
     console.log('ups something broke');
     throw error;
-  },
-  reduceStack: function(stack, site){
-    if(typeof site === 'function'){
-      stack.push(site);
-      stack.props = stack.props || [];
-      stack.props.push({name: site.name});
-    }
-
-    return stack;
   }
 });
 

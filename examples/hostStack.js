@@ -3,32 +3,28 @@
 var Runtime = require('../.');
 
 var runtime = Runtime.create({
-  onHandle: function(site, index, stack){
-    var props = stack.props[index];
+  wait: true,
+  onHandle: function(site, stack){
 
-    if(!stack.time){
-      console.log('start ->', stack.tree().label);
-      stack.time = process.hrtime();
-    } else if(!stack.time && stack.host){
-      console.log('start ->', stack.host.tree().label);
+    if(!(site.fn.stack instanceof this.Stack)){
+      console.log(site.time ? ' ended' : ' start', site.label);
+    } else {
+      console.log(site.time ? 'ended ->' : 'starting ->',
+        site.fn.stack.tree().label
+      );
     }
 
-    console.log(props.time ? ' ended' : ' start', site.name);
-
-    if(stack.host && stack.host.end){
-      console.log('ended ->', stack.host.tree().label);
-    } else if(stack.end && !stack.host){
-      console.log(' ended ->', stack.tree().label);
-    }
-    props.time = process.hrtime();
+    site.time = process.hrtime();
   },
   reduceStack: function(stack, site){
     if(typeof site === 'function'){
-      stack.push(site);
-      stack.props = stack.props || [];
-      stack.props.push({});
+      stack.push({
+        fn: site,
+        label: site.stack instanceof this.Stack
+          ? site.stack.tree().label
+          : site.name
+      });
     }
-    return stack;
   }
 });
 
