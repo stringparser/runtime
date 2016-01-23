@@ -65,7 +65,6 @@ composed('insert args here', function done(err, result){
 });
 
 // how does it look like?
-console.log(
-  'Stack tree -> %s',
+console.log('Stack tree -> %s',
   require('archy')(composed.stack.tree())
 );
