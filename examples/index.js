@@ -5,7 +5,7 @@ var Promise = require('es6-promise').Promise;
 
 var runtime = Runtime.create({
   reduceStack: function(stack, site){
-    if(typeof site !== 'function'){
+    if(typeof site === 'function'){
       stack.push({
         fn: site,
         label: site.stack instanceof this.Stack
@@ -15,7 +15,6 @@ var runtime = Runtime.create({
     }
   },
   onHandle: function(site, stack){
-
     if(!site.time){
       console.log('`%s` started', site.label);
       site.time = process.hrtime();
