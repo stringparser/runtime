@@ -134,12 +134,12 @@ it('runs in series with {wait: true}', function(done){
 it('passes arguments when it waits', function(done){
   var runtime = Runtime.create();
 
-  function one(next, value){
+  function one(value, next){
     next.wait = true;
     value.should.be.eql(1);
     return Promise.resolve(2);
   }
-  function two(next, value){
+  function two(value, next){
     value.should.be.eql(2);
     next();
   }
@@ -150,11 +150,11 @@ it('passes arguments when it waits', function(done){
 it('does NOT pass arguments when fns does NOT wait', function(done){
   var runtime = Runtime.create();
 
-  function one(next, value){
+  function one(value, next){
     value.should.be.eql(1);
     return Promise.resolve(2);
   }
-  function two(next, value){
+  function two(value, next){
     value.should.be.eql(1);
     next();
   }
