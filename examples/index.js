@@ -8,7 +8,7 @@ var runtime = Runtime.create({
     if(typeof site === 'function'){
       stack.push({
         fn: site,
-        label: site.stack instanceof this.Stack
+        label: site.stack instanceof Runtime
           ? site.stack.tree().label
           : site.name
       });
@@ -31,14 +31,14 @@ var runtime = Runtime.create({
   }
 });
 
-function foo(next, value){
+function foo(value, next){
   console.log('received `%s`', value);
   setTimeout(function(){
     next(null, 'Callback');
   }, Math.random()*10);
 }
 
-function bar(next, value){
+function bar(value, next){
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -47,7 +47,7 @@ function bar(next, value){
 }
 
 var fs = require('fs');
-function baz(next, value){
+function baz(value, next){
   var stream = fs.createReadStream(__filename);
 
   return stream.once('end', function(){
