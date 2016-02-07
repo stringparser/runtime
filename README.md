@@ -1,4 +1,4 @@
-# runtime [![NPM version][badge-version]][x-npm]
+# runtime [![NPM version][badge-version]][x-npm][![downloads][badge-downloads]][x-npm]
 [![Build status][badge-build]][x-travis]
 
 [breaking changes](#breaking-changes) -
@@ -133,9 +133,12 @@ With [npm](http://npmjs.org)
 
 ## breaking changes
 
-If you where using a previous version the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse.
+If you where using a previous version the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse. There are two changes:
 
-Now `runtime.stack` composes only functions **by default**. If you want map strings to functions as in the following line
+  1. the callback is always passed as the last argument
+  2. `runtime.stack` composes only functions **by default**.
+
+If you want map strings to functions,
 
 ```js
 var composed = runtime.stack('foo', 'bar');
@@ -184,12 +187,10 @@ function two(myArg, next){
   next(); // or return a  promise, stream or RxJS observable
 }
 
-// now you can `stack` functions and string together
-//
+// now you can `stack` functions and strings together
 var composer = runtime.stack('one', two);
 
 // run the `stack` function returned
-//
 composer('myArg', function onStackEnd(err, result){
   if(err){ throw err; }
   console.log(result);
@@ -252,6 +253,9 @@ runtime
 39 passing (244ms)
 ```
 
+### todo
+ - [ ] be able to redo or rewind within the same stack
+
 ### license
 
 ![LICENSE](http://img.shields.io/npm/l/runtime.svg?style=flat-square)
@@ -261,7 +265,8 @@ runtime
 [x-npm]: https://npmjs.org/package/runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime
 
-[badge-build]: https://travis-ci.org/stringparser/runtime.svg
-[badge-version]: https://badge.fury.io/js/runtime.svg
+[badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
+[badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
+[badge-downloads]: http://img.shields.io/npm/dm/runtime.svg?style=flat-square
 
 [RxJS-observable]: https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md
