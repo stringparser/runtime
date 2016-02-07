@@ -5,35 +5,33 @@
   "description": "a runtime interface",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint lib/*.js *.js",
+    "lint": "./node_modules/.bin/eslint lib/*.js *.js",
     "test": "npm run lint && mocha test/index.js"
   },
   "repository": "stringparser/runtime",
   "keywords": [
-    "simple",
-    "async",
-    "compose",
     "reuse",
-    "promises",
+    "async",
+    "simple",
     "streams",
+    "promises",
     "callbacks",
-    "promise",
-    "stream",
-    "callback"
+    "composition"
   ],
   "author": "Javier Carrillo Milla <stringparser@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "async-done": "^1.1.1",
+    "once": "^1.3.3",
     "inherits": "^2.0.1",
+    "async-done": "^1.1.1",
+    "utils-type": "^0.16.0",
     "lodash.clone": "^3.0.3",
-    "lodash.merge": "^3.3.2",
-    "lodash.reduce": "^3.1.2",
-    "utils-type": "^0.16.0"
+    "lodash.merge": "^3.3.2"
   },
   "devDependencies": {
+    "archy": "^1.0.0",
     "es6-promise": "^3.0.2",
-    "eslint": "^1.0.0",
+    "eslint": "^1.10.3",
     "mocha": "^2.2.5",
     "should": "^7.0.2",
     "through2": "^2.0.0"
