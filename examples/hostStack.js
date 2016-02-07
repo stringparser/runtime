@@ -6,12 +6,10 @@ var runtime = Runtime.create({
   wait: true,
   onHandle: function(site, stack){
 
-    if(!(site.fn.stack instanceof this.Stack)){
-      console.log(site.time ? ' ended' : ' start', site.label);
+    if(site.fn.stack instanceof Runtime){
+      console.log(site.time ? 'ended ->' : 'starting ->', site.label);
     } else {
-      console.log(site.time ? 'ended ->' : 'starting ->',
-        site.fn.stack.tree().label
-      );
+      console.log(site.time ? ' ended' : ' start', site.label);
     }
 
     site.time = process.hrtime();
@@ -20,7 +18,7 @@ var runtime = Runtime.create({
     if(typeof site === 'function'){
       stack.push({
         fn: site,
-        label: site.stack instanceof this.Stack
+        label: site.stack instanceof Runtime
           ? site.stack.tree().label
           : site.name
       });

@@ -3,7 +3,8 @@
 var Runtime = require('../.');
 
 var Tor = Runtime.createClass({
-  create: function(){
+  create: function(props, SuperTor){
+    SuperTor.call(this, props);
     this.tor = true;
   }
 });
