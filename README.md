@@ -8,9 +8,9 @@
 [todo](#todo) -
 [why](#why)
 
-The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.).
+The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.)
 
-Once these asynchronous functions are composed, they are not executed right away. Instead another function is returned leaving execution of this `stack` to the writer. This function can be used multiple times and does not maintain state.
+Once these asynchronous functions are composed, they are not executed right away. Instead another function is returned leaving execution of this `stack` to the writer. This function can be used multiple times.
 
 Note that every function is made asynchronous and should be resolved either with a callback, returning a stream, a promise or with a [RxJS observable][RxJS-observable].
 
@@ -21,6 +21,36 @@ As an example let's make 3 async functions. One using a callback, other returnin
 ```js
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
+
+function foo(value, next){
+  console.log('received `%s`', value);
+  setTimeout(function(){
+    next(null, 'Callback');
+  }, Math.random()*10);
+}
+
+function bar(value, next){
+  return new Promise(function(resolve){
+    setTimeout(function(){
+      resolve(value + 'Promise');
+    }, Math.random()*10);
+  });
+}
+
+var fs = require('fs');
+function baz(value, next){
+  var stream = fs.createReadStream(__filename);
+
+  return stream.once('end', function(){
+    next(null, value + 'Stream');
+  });
+}
+```
+
+All right we have 3 functions. Lets setup an interface around them. For the sake of simplicity lets make a logger with error handling.
+
+```js
+var Runtime = require('runtime');
 
 var runtime = Runtime.create({
   reduceStack: function(stack, site){
@@ -49,38 +79,14 @@ var runtime = Runtime.create({
     throw error;
   }
 });
-
-function foo(value, next){
-  console.log('received `%s`', value);
-  setTimeout(function(){
-    next(null, 'Callback');
-  }, Math.random()*10);
-}
-
-function bar(value, next){
-  return new Promise(function(resolve){
-    setTimeout(function(){
-      resolve(value + 'Promise');
-    }, Math.random()*10);
-  });
-}
-
-var fs = require('fs');
-function baz(value, next){
-  var stream = fs.createReadStream(__filename);
-
-  return stream.once('end', function(){
-    next(null, value + 'Stream');
-  });
-}
 ```
 
-Now let's compose those into one asynchronous function using
+Now let's compose those into _one_ asynchronous function using
 this brand new `runtime` instance we have created.
 
 How does it look like?
 
-The default goes like this: last argument is for options, all the others for functions.
+The default goes like this: last argument for options, all the others for functions.
 
 ```js
 var composed = runtime.stack(foo, bar, baz, {wait: true});
