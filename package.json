@@ -21,7 +21,6 @@
   "author": "Javier Carrillo Milla <stringparser@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "once": "^1.3.3",
     "inherits": "^2.0.1",
     "async-done": "^1.1.1",
     "utils-type": "^0.16.0",
