@@ -156,11 +156,11 @@ it('series: callback is run after all stacks are finished', function(done){
 it('passes arguments when host and completed stack waits', function(done){
   var runtime = Runtime.create();
 
-  function one(foo, next){
+  function one(next, foo){
     foo.should.be.eql(1);
     next(null, 2);
   }
-  function two(foo, next){
+  function two(next, foo){
     foo.should.be.eql(2);
     next();
   }
@@ -175,11 +175,11 @@ it('passes arguments when host and completed stack waits', function(done){
 it('does NOT pass arguments when stacks does NOT wait', function(done){
   var runtime = Runtime.create();
 
-  function one(foo, next){
+  function one(next, foo){
     foo.should.be.eql(1);
     next(null, 2);
   }
-  function two(foo, next){
+  function two(next, foo){
     foo.should.be.eql(1);
     next();
   }

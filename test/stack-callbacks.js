@@ -110,12 +110,12 @@ it('{wait: true} should run functions in series', function(done){
 it('passes arguments when fns wait', function(done){
   var runtime = Runtime.create();
 
-  function one(foo, bar, next){
+  function one(next, foo, bar){
     next.wait = true;
     [foo, bar].should.be.eql([1, 2]);
     next(null, 3, 4);
   }
-  function two(foo, bar, next){
+  function two(next, foo, bar){
     [foo, bar].should.be.eql([3, 4]);
     next();
   }
@@ -126,11 +126,11 @@ it('passes arguments when fns wait', function(done){
 it('does NOT pass arguments when fns does NOT wait', function(done){
   var runtime = Runtime.create();
 
-  function one(foo, bar, next){
+  function one(next, foo, bar){
     [foo, bar].should.be.eql([1, 2]);
     next(null, 3, 4);
   }
-  function two(foo, bar, next){
+  function two(next, foo, bar){
     [foo, bar].should.be.eql([1, 2]);
     next();
   }
