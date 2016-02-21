@@ -22,14 +22,14 @@ As an example let's make 3 async functions. One using a callback, other returnin
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
-function foo(value, next){
+function foo(next, value){
   console.log('received `%s`', value);
   setTimeout(function(){
     next(null, 'Callback');
   }, Math.random()*10);
 }
 
-function bar(value, next){
+function bar(next, value){
   return new Promise(function(resolve){
     setTimeout(function(){
       resolve(value + 'Promise');
@@ -38,7 +38,7 @@ function bar(value, next){
 }
 
 var fs = require('fs');
-function baz(value, next){
+function baz(next, value){
   var stream = fs.createReadStream(__filename);
 
   return stream.once('end', function(){
@@ -156,23 +156,24 @@ var Runtime = require('runtime');
 
 // create your class
 var RuntimeClass = Runtime.createClass({
+  create: function(){
+    this.tasks = {};
+  },
   task: function(name, handle){
     if(typeof name !== 'string'){
       throw new TypeError('`name` should be a string');
     } else if(typeof handle !== 'function'){
       throw new TypeError('`handle` should be a function');
-    } else if(!this.tasks){
-      this.tasks = {};
     }
 
-    this.task[name] = handle;
+    this.tasks[name] = handle;
     return this;
   },
   // similar to Array.prototype.reduce with an empty array
   // given for the for the previous argument (stack = [] on first call)
   reduceStack: function(stack, site){
-    if(typeof site === 'string' && typeof this.task[site] === 'function'){
-      stack.push(this.task[site]);
+    if(typeof site === 'string' && typeof this.tasks[site] === 'function'){
+      stack.push(this.tasks[site]);
     } else if(typeof site === 'function'){
       stack.push(site);
     }
@@ -182,14 +183,14 @@ var RuntimeClass = Runtime.createClass({
 });
 
 // instantiate
-var runtime = new RuntimeClass();
+var runtime = RuntimeClass.create();
 
 // now you can use strings and function
-runtime.task('one', function handleOne(myArg, next){
+runtime.task('one', function handleOne(next, myArg){
   next(); // do async things or return a  promise, stream or RxJS observable
 });
 
-function two(myArg, next){
+function two(next, myArg){
   next(); // or return a  promise, stream or RxJS observable
 }
 
