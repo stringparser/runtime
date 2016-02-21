@@ -113,7 +113,7 @@ it('passes arguments when fns wait', function(done){
   function one(next, foo, bar){
     next.wait = true;
     [foo, bar].should.be.eql([1, 2]);
-    next(null, 3, 4);
+    next(3, 4);
   }
   function two(next, foo, bar){
     [foo, bar].should.be.eql([3, 4]);
@@ -128,7 +128,7 @@ it('does NOT pass arguments when fns does NOT wait', function(done){
 
   function one(next, foo, bar){
     [foo, bar].should.be.eql([1, 2]);
-    next(null, 3, 4);
+    next(3, 4);
   }
   function two(next, foo, bar){
     [foo, bar].should.be.eql([1, 2]);
