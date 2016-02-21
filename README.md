@@ -54,14 +54,13 @@ var Runtime = require('runtime');
 
 var runtime = Runtime.create({
   reduceStack: function(stack, site){
-    if(typeof site === 'function'){
-      stack.push({
-        fn: site,
-        label: site.stack instanceof Runtime
-          ? site.stack.tree().label
-          : site.name
-      });
-    }
+    if(typeof site !== 'function'){ return; }
+    stack.push({
+      fn: site,
+      label: site.stack instanceof Runtime
+        ? site.stack.tree().label
+        : site.label || site.name || 'anonymous'
+    });
   },
   onHandle: function(site, stack){
     if(!site.time){
@@ -74,9 +73,10 @@ var runtime = Runtime.create({
       );
     }
   },
-  onHandleError: function(error){
-    console.log('ups something broke');
-    throw error;
+  onHandleError: function(error, site){
+    var file = error.stack.match(/\/[^)]+/).pop();
+    console.log('`%s` errored at', site.label, file);
+    console.log(error.stack);
   }
 });
 ```
@@ -92,7 +92,7 @@ The default goes like this: last argument for options, all the others for functi
 var composed = runtime.stack(foo, bar, baz, {wait: true});
 
 composed('insert args here', function done(err, result){
-  if(err){ return this.onHandleError(err); }
+  if(err){ throw error; }
   console.log('result: `%s`', result);
 });
 
