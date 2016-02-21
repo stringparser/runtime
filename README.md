@@ -139,12 +139,10 @@ With [npm](http://npmjs.org)
 
 ## breaking changes
 
-If you where using a previous version the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse. There are two changes:
+If you where using the previous version, the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse.
 
-  1. the callback is always passed as the last argument
-  2. `runtime.stack` composes only functions **by default**.
-
-If you want map strings to functions,
+Now `runtime.stack` composes only functions **by default**. If you want to
+give strings that then are mapped to a function that is, you want to write
 
 ```js
 var composed = runtime.stack('foo', 'bar');
@@ -177,8 +175,6 @@ var RuntimeClass = Runtime.createClass({
     } else if(typeof site === 'function'){
       stack.push(site);
     }
-
-    return stack; // this is optional
   }
 });
 
