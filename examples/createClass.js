@@ -3,15 +3,15 @@
 var Runtime = require('../.');
 
 var Tor = Runtime.createClass({
-  create: function(props, SuperTor){
-    SuperTor.call(this, props);
+  create: function Tor(props){
+    Tor.super_.call(this, props);
     this.tor = true;
   }
 });
 
 var Tur = Tor.createClass({
-  create: function(props, SuperTor){
-    SuperTor.call(this, props);
+  create: function Gulp(props){
+    Gulp.super_.call(this, props);
     this.tur = true;
   }
 });
