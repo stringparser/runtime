@@ -2,11 +2,11 @@
 
 var Runtime = require('../.');
 
-it('onHandle is called before and after each site', function(done){
+it('onHandleStart is called before each site', function(done){
   var count = 0;
 
   var runtime = Runtime.create({
-    onHandle: function(){
+    onHandleStart: function(){
       ++count;
     }
   });
@@ -16,16 +16,35 @@ it('onHandle is called before and after each site', function(done){
 
   runtime.stack(one, two)(function(err){
     if(err){ return done(err); }
-    count.should.be.eql(4);
+    count.should.be.eql(2);
     done();
   });
 });
 
-it('nested: onHandle is called before and after each site', function(done){
+it('onHandleEnd is called before each site', function(done){
   var count = 0;
 
   var runtime = Runtime.create({
-    onHandle: function(){
+    onHandleEnd: function(){
+      ++count;
+    }
+  });
+
+  function one(next){ next(); }
+  function two(next){ next(); }
+
+  runtime.stack(one, two)(function(err){
+    if(err){ return done(err); }
+    count.should.be.eql(2);
+    done();
+  });
+});
+
+it('nested: onHandleStart is called before and after each site', function(done){
+  var count = 0;
+
+  var runtime = Runtime.create({
+    onHandleStart: function(){
       ++count;
     }
   });
@@ -35,7 +54,26 @@ it('nested: onHandle is called before and after each site', function(done){
 
   runtime.stack(one, runtime.stack(two))(function(err){
     if(err){ return done(err); }
-    count.should.be.eql(6);
+    count.should.be.eql(3);
+    done();
+  });
+});
+
+it('nested: onHandleEnd is called before and after each site', function(done){
+  var count = 0;
+
+  var runtime = Runtime.create({
+    onHandleEnd: function(){
+      ++count;
+    }
+  });
+
+  function one(next){ next(); }
+  function two(next){ next(); }
+
+  runtime.stack(one, runtime.stack(two))(function(err){
+    if(err){ return done(err); }
+    count.should.be.eql(3);
     done();
   });
 });
