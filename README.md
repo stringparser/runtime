@@ -112,6 +112,11 @@ composed('insert args here', function done(err, result){
 Here we go. This is the output logged.
 
 ```sh
+Stack tree -> foo, bar, baz
+├── foo
+├── bar
+└── baz
+
 `foo` started
 received `insert args here`
 `foo` ended after 8 ms
