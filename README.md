@@ -147,7 +147,7 @@ you will have to use the following approach
 ```js
 var Runtime = require('runtime');
 
-// create your a class
+// create a class
 var RuntimeClass = Runtime.createClass({
   create: function(){
     this.tasks = {};
