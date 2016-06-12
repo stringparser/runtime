@@ -1,7 +1,10 @@
 'use strict';
 
-var Runtime = require('../.');
+var fs = require('fs');
+var through = require('through2');
 var Promise = require('es6-promise').Promise;
+
+var Runtime = require('../.');
 
 var runtime = Runtime.create({
   reduceStack: function(stack, site){
@@ -13,16 +16,15 @@ var runtime = Runtime.create({
         : site.label || site.name || 'anonymous'
     });
   },
-  onHandle: function(site, stack){
-    if(!site.time){
-      console.log('`%s` started', site.label);
-      site.time = process.hrtime();
-    } else {
-      var diff = process.hrtime(site.time);
-      console.log('`%s` ended after %s ms',
-        site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
-      );
-    }
+  onHandleStart: function(site, stack){
+    console.log('`%s` started', site.label);
+    site.time = process.hrtime();
+  },
+  onHandleEnd: function(site, stack){
+    var diff = process.hrtime(site.time);
+    console.log('`%s` ended after %s ms',
+      site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
+    );
   },
   onHandleError: function(error, site){
     var file = error.stack.match(/\/[^)]+/).pop();
@@ -54,9 +56,6 @@ function bar(next, value){
   });
 }
 
-var fs = require('fs');
-var through = require('through2');
-
 function baz(next, value){
   var stream = through.obj(
     function write(chunk, enc, cb){
@@ -76,12 +75,15 @@ function baz(next, value){
 
 var composed = runtime.stack(foo, bar, baz, {wait: true});
 
-composed('insert args here', function onStackEnd(err, result){
-  if(err){ throw err; }
-  console.log('result: `%s`', result);
-});
-
-// how does it look like?
+// lets make it pretty
 console.log('Stack tree -> %s',
   require('archy')(composed.stack.tree())
 );
+
+composed('insert args here', function onStackEnd(err, result){
+  if(err){
+    console.log(err.stack);
+  } else {
+    console.log('result: `%s`', result);
+  }
+});
