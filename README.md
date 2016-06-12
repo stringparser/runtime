@@ -8,17 +8,18 @@
 [todo](#todo) -
 [why](#why)
 
-The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem while wanting to pick and choose the right/prefered tool for the job at hand (i.e. callbacks, promises, streams, etc.)
+The aim of the project is to compose asynchronous functions and provide a basic api to create an interface around them. It is for people who hate so many choices around the same problem (i.e. callbacks, promises, streams, ...)
 
 Once these asynchronous functions are composed, they are not executed right away. Instead another function is returned leaving execution of this `stack` to the writer. This function can be used multiple times.
 
-Note that every function is made asynchronous and should be resolved either with a callback, returning a stream, a promise or with a [RxJS observable][RxJS-observable].
+Note that every function is made asynchronous and should be resolved either with a callback, returning a stream, a promise or a [RxJS observable][RxJS-observable].
 
 ## usage
 
 As an example let's make 3 async functions. One using a callback, other returning a promise and another a stream.
 
 ```js
+var fs = require('fs');
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
@@ -37,7 +38,6 @@ function bar(next, value){
   });
 }
 
-var fs = require('fs');
 function baz(next, value){
   var stream = fs.createReadStream(__filename);
 
@@ -54,24 +54,24 @@ var Runtime = require('runtime');
 
 var runtime = Runtime.create({
   reduceStack: function(stack, site){
-    if(typeof site !== 'function'){ return; }
-    stack.push({
-      fn: site,
-      label: site.stack instanceof Runtime
-        ? site.stack.tree().label
-        : site.label || site.name || 'anonymous'
-    });
-  },
-  onHandle: function(site, stack){
-    if(!site.time){
-      console.log('`%s` started', site.label);
-      site.time = process.hrtime();
-    } else {
-      var diff = process.hrtime(site.time);
-      console.log('`%s` ended after %s ms',
-        site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
-      );
+    if(typeof site === 'function'){
+      stack.push({
+        fn: site,
+        label: site.stack instanceof Runtime.Stack
+          ? site.stack.tree().label
+          : site.label || site.name || 'anonymous'
+      });
     }
+  },
+  onHandleStart: function(site, stack){
+    console.log('`%s` started', site.label);
+    site.time = process.hrtime();
+  },
+  onHandleEnd: function(site, stack){
+    var diff = process.hrtime(site.time);
+    console.log('`%s` ended after %s ms',
+      site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
+    );
   },
   onHandleError: function(error, site){
     var file = error.stack.match(/\/[^)]+/).pop();
@@ -88,28 +88,30 @@ How does it look like?
 
 The default goes like this: last argument for options, all the others for functions.
 
-```js
-var composed = runtime.stack(foo, bar, baz, {wait: true});
 
-composed('insert args here', function done(err, result){
-  if(err){ throw error; }
-  console.log('result: `%s`', result);
-});
+
+```js
+// runtime.stack will run each site in parallel by default
+// to change it pass `{ wait: true }` and each site will run in series
+var composed = runtime.stack(foo, bar, baz, {wait: true});
 
 // lets make it pretty
 console.log('Stack tree -> %s',
   require('archy')(composed.stack.tree())
 );
+
+composed('insert args here', function done(err, result){
+  if(err){
+    console.log(err.stack);
+  } else {
+    console.log('result: `%s`', result);
+  }
+});
 ```
 
 Here we go. This is the output logged.
 
 ```sh
-Stack tree -> foo, bar, baz
-├── foo
-├── bar
-└── baz
-
 `foo` started
 received `insert args here`
 `foo` ended after 8 ms
@@ -124,13 +126,6 @@ result: `CallbackPromiseStream`
 
 Work in progress.
 
-## why
-
-There are several ways to manage complexity for asynchronous functions,
-ones are better than others for some use-cases and sometimes with callbacks
-is more than enough. But we all want to avoid callback hell and reuse as much
-as possible.
-
 ## install
 
 With [npm](http://npmjs.org)
@@ -139,10 +134,10 @@ With [npm](http://npmjs.org)
 
 ## breaking changes
 
-If you where using the previous version, the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse.
+If you where using a previous version, the internals have been cleaned and simplified a lot to offer the same idea with less opinions and more reuse.
 
 Now `runtime.stack` composes only functions **by default**. If you want to
-give strings that then are mapped to a function that is, you want to write
+give strings that then are mapped to a function, that is, you want to write
 
 ```js
 var composed = runtime.stack('foo', 'bar');
@@ -152,7 +147,7 @@ you will have to use the following approach
 ```js
 var Runtime = require('runtime');
 
-// create your class
+// create your a class
 var RuntimeClass = Runtime.createClass({
   create: function(){
     this.tasks = {};
@@ -181,12 +176,14 @@ var RuntimeClass = Runtime.createClass({
 // instantiate
 var runtime = RuntimeClass.create();
 
-// now you can use strings and function
+// register your mapping from string to function
 runtime.task('one', function handleOne(next, myArg){
-  next(); // do async things or return a  promise, stream or RxJS observable
+  // do async things
+  next(); // or return a  promise, stream or RxJS observable
 });
 
 function two(next, myArg){
+  // do async things
   next(); // or return a  promise, stream or RxJS observable
 }
 
@@ -203,58 +200,72 @@ composer('myArg', function onStackEnd(err, result){
 ### test
 
 ```
- ➜  runtime (master) ✔ npm test
+➜  runtime (master) ✔ npm test
 
-runtime
-   api
-     ✓ onHandle is called before and after each site
-     ✓ nested: onHandle is called before and after each site
-     ✓ context for each stack can be given {context: [Object]}
-     ✓ can be reused with no side-effects
-     ✓ create({wait: true}) makes all stacks wait
-   exports
-     ✓ create() should return a new instance
-     ✓ createClass() should return a new constructor
-     ✓ create(object mixin) should add to the instance properties
-     ✓ createClass(object mixin) mixin with new constructor
-   stack-callbacks
-     ✓ uses the callback when a fn throws
-     ✓ uses the callback when passes the error
-     ✓ passes error to onHandleError when no callback given
-     ✓ runs the callback on completion
-     ✓ runs fns in parallel by default
-     ✓ {wait: true} should run functions in series
-     ✓ passes arguments when fns wait
-     ✓ does NOT pass arguments when fns does NOT wait
-   stack-promises
-     ✓ uses the callback when a promise throws
-     ✓ uses the callback when promises rejects
-     ✓ passes error to onHandleError if no callback was given
-     ✓ runs the callback after completion of all promises
-     ✓ runs in parallel by default
-     ✓ runs in series with {wait: true}
-     ✓ passes arguments when it waits
-     ✓ does NOT pass arguments when fns does NOT wait
-   stack-streams
-     ✓ uses the callback when a stream throws an error
-     ✓ uses the callback when a stream emits an error
-     ✓ passes error to onHandleError if no callback was given
-     ✓ runs the callback after completion of all streams
-     ✓ runs in parallel by default
-     ✓ runs in series with {wait: true}
-   stacks-composed
-     ✓ runs callback if fn throws from other stack
-     ✓ runs callback if error given to next from other stack
-     ✓ runs the callback on completion of all stacks
-     ✓ runs stacks in parallel by default
-     ✓ {wait: true} should run stacks in series
-     ✓ series: callback is run after all stacks are finished
-     ✓ passes arguments when host and completed stack waits
-     ✓ does NOT pass arguments when stacks does NOT wait
+api
+  ✓ onHandleStart is called before each site
+  ✓ onHandleEnd is called before each site
+  ✓ nested: onHandleStart is called before and after each site
+  ✓ nested: onHandleEnd is called before and after each site
+  ✓ context for each stack can be given {context: [Object]}
+  ✓ can be reused with no side-effects
+  ✓ create({wait: true}) makes all stacks wait
+
+exports
+  ✓ create() should return a new instance
+  ✓ create(object mixin) should add to the instance properties
+  ✓ createClass() should return a new constructor
+  ✓ createClass(object mixin) mixin with new constructor
+  ✓ createClass({create: [Function]}) should be used as ctor
+
+stack-callbacks
+  ✓ uses the callback when a fn throws
+  ✓ uses the callback when passes the error
+  ✓ passes error to onHandleError when no callback given
+  ✓ runs the callback on completion
+  ✓ runs fns in parallel by default
+  ✓ {wait: true} should run functions in series
+  ✓ passes arguments when fns wait
+  ✓ does NOT pass arguments when fns does NOT wait
+
+stack-promises
+  ✓ uses the callback when a promise throws
+  ✓ uses the callback when promises rejects
+  ✓ passes error to onHandleError if no callback was given
+  ✓ runs the callback after completion of all promises
+  ✓ runs in parallel by default
+  ✓ runs in series with {wait: true}
+  ✓ passes arguments when it waits
+  ✓ does NOT pass arguments when fns does NOT wait
+
+stack-streams
+  ✓ uses the callback when a stream throws an error
+  ✓ uses the callback when a stream emits an error
+  ✓ passes error to onHandleError if no callback was given
+  ✓ runs the callback after completion of all streams
+  ✓ runs in parallel by default
+  ✓ runs in series with {wait: true}
+
+stacks-composed
+  ✓ runs callback if fn throws from other stack
+  ✓ runs callback if error given to next from other stack
+  ✓ runs the callback on completion of all stacks
+  ✓ runs stacks in parallel by default
+  ✓ {wait: true} should run stacks in series
+  ✓ series: callback is run after all stacks are finished
+  ✓ passes arguments when host and completed stack waits
+  ✓ does NOT pass arguments when stacks does NOT wait
 
 
-39 passing (244ms)
+42 passing (229ms)
 ```
+
+## why
+
+There are several ways to manage complexity for asynchronous functions,
+ones are better than others for some use-cases and sometimes with callbacks
+is more than enough. But we all want to avoid callback hell and reuse as much
+as possible.
 
 ### todo
  - [ ] be able to redo or rewind within the same stack
@@ -267,6 +278,7 @@ runtime
 
 [x-npm]: https://npmjs.org/package/runtime
 [x-travis]: https://travis-ci.org/stringparser/runtime
+[async-done]: https://github.com/gulpjs/async-done
 
 [badge-build]: http://img.shields.io/travis/stringparser/runtime/master.svg?style=flat-square
 [badge-version]: http://img.shields.io/npm/v/runtime.svg?style=flat-square
