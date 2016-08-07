@@ -1,6 +1,6 @@
 {
   "name": "runtime",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "homepage": "http://github.com/stringparser/runtime",
   "description": "a runtime interface",
   "main": "index.js",
@@ -21,7 +21,7 @@
   "author": "Javier Carrillo Milla <stringparser@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "async-done": "^1.1.1",
+    "async-done": "^1.2.x",
     "inherits": "^2.0.1",
     "lodash.clone": "^3.0.3",
     "lodash.merge": "^3.3.2",
