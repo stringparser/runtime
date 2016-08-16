@@ -22,7 +22,6 @@
   "license": "MIT",
   "dependencies": {
     "async-done": "^1.2.x",
-    "inherits": "^2.0.1",
     "lodash.clone": "^3.0.3",
     "lodash.merge": "^3.3.2",
     "once": "^1.3.3",
