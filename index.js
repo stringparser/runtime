@@ -34,7 +34,7 @@ _arguments_
 
 _returns_ a `Runtime` instance
 **/
-exports.create = function create(props){
+exports.create = function create (props) {
   return new Runtime(props);
 };
 
