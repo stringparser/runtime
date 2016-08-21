@@ -1,6 +1,10 @@
 {
   "name": "runtime",
+<<<<<<< HEAD
   "version": "0.12.3",
+=======
+  "version": "0.12.4",
+>>>>>>> next_release
   "homepage": "http://github.com/stringparser/runtime",
   "description": "a runtime interface",
   "main": "index.js",
@@ -22,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "async-done": "^1.2.x",
+    "createClass": "^1.0.1",
     "inherits": "^2.0.1",
     "lodash.clone": "^3.0.3",
     "lodash.merge": "^3.3.2",
@@ -31,7 +36,7 @@
   "devDependencies": {
     "archy": "^1.0.0",
     "es6-promise": "^3.0.2",
-    "eslint": "^1.10.3",
+    "eslint": "^3.3.x",
     "mocha": "^2.2.5",
     "should": "^7.0.2",
     "through2": "^2.0.0"
