@@ -4,17 +4,19 @@ var fs = require('fs');
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
-var Runtime = require('../.');
+var Runtime = require('./.');
 
 var runtime = Runtime.create({
   reduceStack: function (stack, site) {
-    if (typeof site !== 'function') { return; }
-    stack.push({
-      fn: site,
-      label: site.stack instanceof Runtime
-        ? site.stack.tree().label
-        : site.label || site.name || 'anonymous'
-    });
+    if (typeof site === 'function') { 
+      stack.push({
+        fn: site,
+        label: site.stack instanceof Runtime
+          ? site.stack.tree().label
+          : site.label || site.name || 'anonymous'
+      });
+    }
+    return stack;
   },
   onHandleStart: function (site, stack) {
     console.log('`%s` started', site.label);
