@@ -95,11 +95,6 @@ The default goes like this: last argument for options, all the others for functi
 // to change it pass `{ wait: true }` and each site will run in series
 var composed = runtime.stack(foo, bar, baz, {wait: true});
 
-// lets make it pretty
-console.log('Stack tree -> %s',
-  require('archy')(composed.stack.tree())
-);
-
 composed('insert args here', function done(err, result){
   if(err){
     console.log(err.stack);
@@ -112,11 +107,6 @@ composed('insert args here', function done(err, result){
 Here we go. This is the output logged.
 
 ```sh
-Stack tree -> foo, bar, baz
-├── foo
-├── bar
-└── baz
-
 `foo` started
 received `insert args here`
 `foo` ended after 8 ms
