@@ -8,7 +8,7 @@ var Runtime = require('./.');
 
 var runtime = Runtime.create({
   reduceStack: function (stack, site) {
-    if (typeof site === 'function') { 
+    if (typeof site === 'function') {
       stack.push({
         fn: site,
         label: site.stack instanceof Runtime
@@ -76,11 +76,6 @@ function baz (next, value) {
 }
 
 var composed = runtime.stack(foo, bar, baz, {wait: true});
-
-// lets make it pretty
-console.log('Stack tree -> %s',
-  require('archy')(composed.stack.tree())
-);
 
 composed('insert args here', function onStackEnd (err, result) {
   if (err) {
