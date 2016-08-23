@@ -12,7 +12,7 @@ var runtime = Runtime.create({
       stack.push({
         fn: site,
         label: site.stack instanceof Runtime
-          ? site.stack.tree().label
+          ? site.stack.tree(this).label
           : site.label || site.name || 'anonymous'
       });
     }
@@ -76,6 +76,11 @@ function baz (next, value) {
 }
 
 var composed = runtime.stack(foo, bar, baz, {wait: true});
+
+// lets make it pretty
+console.log('Stack tree -> %s',
+  require('archy')(composed.stack.tree(runtime))
+);
 
 composed('insert args here', function onStackEnd (err, result) {
   if (err) {
