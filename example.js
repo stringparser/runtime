@@ -11,8 +11,8 @@ var runtime = Runtime.create({
     if (typeof site === 'function') {
       stack.push({
         fn: site,
-        label: site.stack instanceof Runtime
-          ? site.stack.tree(this).label
+        label: site.stack instanceof Runtime.Stack
+          ? this.tree(site.stack).label
           : site.label || site.name || 'anonymous'
       });
     }
@@ -75,11 +75,12 @@ function baz (next, value) {
   return fs.createReadStream(__filename).pipe(stream);
 }
 
-var composed = runtime.stack(foo, bar, baz, {wait: true});
+var stack = runtime.stack(foo, bar);
+var composed = runtime.stack(foo, stack, bar, baz, {wait: true});
 
 // lets make it pretty
 console.log('Stack tree -> %s',
-  require('archy')(composed.stack.tree(runtime))
+  require('archy')(runtime.tree(composed.stack))
 );
 
 composed('insert args here', function onStackEnd (err, result) {
