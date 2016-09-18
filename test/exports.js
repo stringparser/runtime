@@ -10,5 +10,5 @@ it('create() should return a new instance', function () {
 it('create(object props) should add to the instance properties', function () {
   var props = {name: 'name'};
   var runtime = Runtime.create(props);
-  (runtime).should.have.properties({ props: props });
+  (runtime).should.have.properties(props);
 });
