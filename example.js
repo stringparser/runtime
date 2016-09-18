@@ -11,7 +11,9 @@ var runtime = Runtime.createClass({
     if (typeof site === 'function') {
       stack.push({
         fn: site,
-        label: site.displayName || site.name || 'anonymous'
+        label: Array.isArray(site.stack)
+          ? this.tree(site.stack).label
+          : site.displayName || site.name || 'anonymous'
       });
     }
     return stack;
@@ -77,7 +79,7 @@ var composed = runtime.stack(foo, bar, baz, {wait: true});
 
 // lets make it pretty
 console.log('Stack tree -> %s',
-  require('archy')(makeTree(runtime, composed.stack))
+  require('archy')(runtime.tree(composed.stack))
 );
 
 composed('insert args here', function onStackEnd (err, result) {
@@ -87,30 +89,3 @@ composed('insert args here', function onStackEnd (err, result) {
     console.log('result: `%s`', result);
   }
 });
-
-// sample function to create trees from a stack function
-function makeTree (self, sites) {
-  var tree = { label: '', nodes: []};
-
-  if (!Array.isArray(sites)) {
-    return null;
-  }
-
-  var tree = { label: '', nodes: [] };
-  var stack = sites.reduce(self.reduceStack.bind(self),
-    Object.assign([], { props: sites.props })
-  );
-
-  stack.forEach(function (site) {
-    if (!site || !site.fn) { return; }
-
-    var stem = makeTree(self, site.fn.stack) || {
-      label: site.label || site.fn.displayName || site.fn.name
-    };
-
-    tree.label += (tree.label && ', ' + stem.label) || stem.label;
-    tree.nodes.push(stem);
-  });
-
-  return tree;
-}
