@@ -23,25 +23,25 @@ var fs = require('fs');
 var through = require('through2');
 var Promise = require('es6-promise').Promise;
 
-function foo(next, value){
+function foo (next, value) {
   console.log('received `%s`', value);
-  setTimeout(function(){
+  setTimeout(function () {
     next(null, 'Callback');
-  }, Math.random()*10);
+  }, Math.random() * 10);
 }
 
-function bar(next, value){
-  return new Promise(function(resolve){
-    setTimeout(function(){
+function bar (next, value) {
+  return new Promise(function (resolve) {
+    setTimeout(function () {
       resolve(value + 'Promise');
-    }, Math.random()*10);
+    }, Math.random() * 10);
   });
 }
 
-function baz(next, value){
+function baz (next, value) {
   var stream = fs.createReadStream(__filename);
 
-  return stream.once('end', function(){
+  return stream.once('end', function () {
     next(null, value + 'Stream');
   });
 }
@@ -52,28 +52,29 @@ All right we have 3 functions. Lets setup an interface around them. For the sake
 ```js
 var Runtime = require('runtime');
 
-var runtime = Runtime.create({
-  reduceStack: function(stack, site){
+// create a composer class that will have what we need
+var Composer = Runtime.createClass({
+  reduceStack: function (stack, site) {
     if(typeof site === 'function'){
       stack.push({
         fn: site,
-        label: site.stack instanceof Runtime.Stack
-          ? site.stack.tree().label
+        label: Array.isArray(site.stack)
+          ? this.tree(site.stack).label
           : site.label || site.name || 'anonymous'
       });
     }
   },
-  onHandleStart: function(site, stack){
+  onHandleStart: function (site, stack) {
     console.log('`%s` started', site.label);
     site.time = process.hrtime();
   },
-  onHandleEnd: function(site, stack){
+  onHandleEnd: function (site, stack) {
     var diff = process.hrtime(site.time);
     console.log('`%s` ended after %s ms',
       site.label, diff[0]*1e+3 + Math.floor(diff[1]*1e-6)
     );
   },
-  onHandleError: function(error, site){
+  onHandleError: function (error, site) {
     var file = error.stack.match(/\/[^)]+/).pop();
     console.log('`%s` errored at', site.label, file);
     console.log(error.stack);
@@ -89,14 +90,22 @@ How does it look like?
 The default goes like this: last argument for options, all the others for functions.
 
 
-
 ```js
+// create a Composer instance
+var runtime = Composer.create();
+
+var composed = runtime.stack(foo, bar, baz, { wait: true });
 // runtime.stack will run each site in parallel by default
 // to change it pass `{ wait: true }` and each site will run in series
-var composed = runtime.stack(foo, bar, baz, {wait: true});
 
-composed('insert args here', function done(err, result){
-  if(err){
+// lets make it pretty
+console.log('Stack tree -> %s',
+  require('archy')(runtime.tree(composed.stack))
+);
+
+// use it just as normal async function
+composed('insert args here', function done(error, result){
+  if (error) {
     console.log(err.stack);
   } else {
     console.log('result: `%s`', result);
@@ -107,9 +116,14 @@ composed('insert args here', function done(err, result){
 Here we go. This is the output logged.
 
 ```sh
+Stack tree -> foo, bar, baz
+├── foo
+├── bar
+└── baz
+
 `foo` started
 received `insert args here`
-`foo` ended after 8 ms
+`foo` ended after 3 ms
 `bar` started
 `bar` ended after 3 ms
 `baz` started
@@ -144,13 +158,13 @@ var Runtime = require('runtime');
 
 // create a class
 var RuntimeClass = Runtime.createClass({
-  create: function(){
+  create: function () {
     this.tasks = {};
   },
-  task: function(name, handle){
-    if(typeof name !== 'string'){
+  task: function (name, handle) {
+    if (typeof name !== 'string') {
       throw new TypeError('`name` should be a string');
-    } else if(typeof handle !== 'function'){
+    } else if (typeof handle !== 'function') {
       throw new TypeError('`handle` should be a function');
     }
 
@@ -159,10 +173,10 @@ var RuntimeClass = Runtime.createClass({
   },
   // similar to Array.prototype.reduce with an empty array
   // given for the for the previous argument (stack = [] on first call)
-  reduceStack: function(stack, site){
-    if(typeof site === 'string' && typeof this.tasks[site] === 'function'){
+  reduceStack: function (stack, site) {
+    if (typeof site === 'string' && typeof this.tasks[site] === 'function') {
       stack.push(this.tasks[site]);
-    } else if(typeof site === 'function'){
+    } else if (typeof site === 'function') {
       stack.push(site);
     }
   }
@@ -172,12 +186,12 @@ var RuntimeClass = Runtime.createClass({
 var runtime = RuntimeClass.create();
 
 // register your mapping from string to function
-runtime.task('one', function handleOne(next, myArg){
+runtime.task('one', function handleOne (next, myArg) {
   // do async things
   next(); // or return a  promise, stream or RxJS observable
 });
 
-function two(next, myArg){
+function two (next, myArg) {
   // do async things
   next(); // or return a  promise, stream or RxJS observable
 }
@@ -186,8 +200,8 @@ function two(next, myArg){
 var composer = runtime.stack('one', two);
 
 // run the `stack` function returned
-composer('myArg', function onStackEnd(err, result){
-  if(err){ throw err; }
+composer('myArg', function onStackEnd (err, result) {
+  if (err) { throw err; }
   console.log(result);
 });
 ```
@@ -257,8 +271,8 @@ stacks-composed
 
 ## why
 
-There are several ways to manage complexity for asynchronous functions,
-ones are better than others for some use-cases and sometimes with callbacks
+There are several ways to manage complexity for asynchronous functions.
+Ones are better than others for some use-cases and sometimes with callbacks
 is more than enough. But we all want to avoid callback hell and reuse as much
 as possible.
 
