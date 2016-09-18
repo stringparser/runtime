@@ -6,14 +6,12 @@ var Promise = require('es6-promise').Promise;
 
 var Runtime = require('./.');
 
-var runtime = Runtime.create({
+var runtime = Runtime.createClass({
   reduceStack: function (stack, site) {
     if (typeof site === 'function') {
       stack.push({
         fn: site,
-        label: site.stack instanceof Runtime.Stack
-          ? this.tree(site.stack).label
-          : site.label || site.name || 'anonymous'
+        label: site.displayName || site.name || 'anonymous'
       });
     }
     return stack;
@@ -33,7 +31,7 @@ var runtime = Runtime.create({
     console.log('`%s` errored at', site.label, file);
     console.log(error.stack);
   }
-});
+}).create();
 
 function foo (next, value) {
   console.log('received `%s`', value);
@@ -75,12 +73,11 @@ function baz (next, value) {
   return fs.createReadStream(__filename).pipe(stream);
 }
 
-var stack = runtime.stack(foo, bar);
-var composed = runtime.stack(foo, stack, bar, baz, {wait: true});
+var composed = runtime.stack(foo, bar, baz, {wait: true});
 
 // lets make it pretty
 console.log('Stack tree -> %s',
-  require('archy')(runtime.tree(composed.stack))
+  require('archy')(makeTree(runtime, composed.stack))
 );
 
 composed('insert args here', function onStackEnd (err, result) {
@@ -90,3 +87,30 @@ composed('insert args here', function onStackEnd (err, result) {
     console.log('result: `%s`', result);
   }
 });
+
+// sample function to create trees from a stack function
+function makeTree (self, sites) {
+  var tree = { label: '', nodes: []};
+
+  if (!Array.isArray(sites)) {
+    return null;
+  }
+
+  var tree = { label: '', nodes: [] };
+  var stack = sites.reduce(self.reduceStack.bind(self),
+    Object.assign([], { props: sites.props })
+  );
+
+  stack.forEach(function (site) {
+    if (!site || !site.fn) { return; }
+
+    var stem = makeTree(self, site.fn.stack) || {
+      label: site.label || site.fn.displayName || site.fn.name
+    };
+
+    tree.label += (tree.label && ', ' + stem.label) || stem.label;
+    tree.nodes.push(stem);
+  });
+
+  return tree;
+}
