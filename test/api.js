@@ -5,11 +5,11 @@ var Runtime = require('../.');
 it('onHandleStart is called before each site', function (done) {
   var count = 0;
 
-  var runtime = Runtime.create({
+  var runtime = Runtime.createClass({
     onHandleStart: function () {
       ++count;
     }
-  });
+  }).create();
 
   function one (next) { next(); }
   function two (next) { next(); }
@@ -24,11 +24,11 @@ it('onHandleStart is called before each site', function (done) {
 it('onHandleEnd is called before each site', function (done) {
   var count = 0;
 
-  var runtime = Runtime.create({
+  var runtime = Runtime.createClass({
     onHandleEnd: function () {
       ++count;
     }
-  });
+  }).create();
 
   function one (next) { next(); }
   function two (next) { next(); }
@@ -43,11 +43,11 @@ it('onHandleEnd is called before each site', function (done) {
 it('nested: onHandleStart is called before and after a site', function (done) {
   var count = 0;
 
-  var runtime = Runtime.create({
+  var runtime = Runtime.createClass({
     onHandleStart: function () {
       ++count;
     }
-  });
+  }).create();
 
   function one (next) { next(); }
   function two (next) { next(); }
@@ -62,11 +62,11 @@ it('nested: onHandleStart is called before and after a site', function (done) {
 it('nested: onHandleEnd is called before and after each site', function (done) {
   var count = 0;
 
-  var runtime = Runtime.create({
+  var runtime = Runtime.createClass({
     onHandleEnd: function () {
       ++count;
     }
-  });
+  }).create();
 
   function one (next) { next(); }
   function two (next) { next(); }

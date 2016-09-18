@@ -38,7 +38,7 @@ it('uses the callback when promises rejects', function (done) {
 it('passes error to onHandleError if no callback was given', function (done) {
   var error = new Error('not again...');
 
-  var runtime = Runtime.create({
+  var runtime = Runtime.createClass({
     onHandleError: function (err) {
       if (!(err instanceof Error)) {
         return done(new Error('was\'t an instance of error'));
@@ -46,7 +46,7 @@ it('passes error to onHandleError if no callback was given', function (done) {
       err.should.be.eql(error);
       done();
     }
-  });
+  }).create();
 
   function one () {
     return new Promise(function (resolve, reject) {
